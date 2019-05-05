@@ -2,6 +2,8 @@
  
 ## UX
 
+A breakdown of the UX process can be found [here](https://github.com/ASquirrelsTail/cookbook/blob/master/preprod/ux.md).
+
 ## Features
  
 ### Existing Features
@@ -16,7 +18,7 @@
 - JavaScript
 - [Materialize 1.0.0](https://materializecss.com/)
 - [Cash](https://kenwheeler.github.io/cash/)
-	- Cash is used as an alternative to JQuery for DOM manipulation. It comes bundled with Materialize, and has a much smaller footprint than JQuery.
+	- Cash is used as an alternative to JQuery for DOM manipulation. It comes bundled with the latest version of Materialize, and has a much smaller footprint than JQuery.
 - Python3
 - [Flask 1.0.2](http://flask.pocoo.org/)
 
