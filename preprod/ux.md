@@ -75,7 +75,7 @@ Contributing users will be repeat visitors to the site, and will submit their ow
 
 Database relationship diagram:
 
-![alt text](https://raw.githubusercontent.com/ASquirrelsTail/cookbook/master/preprod/data-relations.jpg "Database relationship diagram")
+![alt text](https://raw.githubusercontent.com/ASquirrelsTail/cookbook/master/preprod/database-relations.jpg "Database relationship diagram")
 
 The data will be stored using MongoDB, so these relationships will be stored as nested documents with enough information to navigate between them on the frontend.
 
