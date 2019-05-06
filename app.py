@@ -1,7 +1,12 @@
 import os
 from flask import Flask, render_template
+from flask_pymongo import PyMongo
 
 app = Flask(__name__)
+app.config['MONGO_DBNAME'] = 'cookbook'
+app.config['MONGO_URI'] = os.getenv('MONGO_URI')
+
+mongo = PyMongo(app)
 
 
 @app.route('/')
