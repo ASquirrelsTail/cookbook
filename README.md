@@ -28,6 +28,7 @@ A breakdown of the UX process can be found [here](https://github.com/ASquirrelsT
 	- Sublime text was used to write the code for the dashboard.
 	- [Emmet](https://emmet.io/) package was used to speed up davelopment.
 	- [HTML-CSS-JS Prettify](https://packagecontrol.io/packages/HTML-CSS-JS%20Prettify) package was used to prettify code layout.
+	- [Anaconda](http://damnwidget.github.io/anaconda/) package was used as a PEP8 linter to write neater error free code
 - [GIMP 2.10.8](https://www.gimp.org/)
 - [Inkscape](https://inkscape.org/)
 

@@ -20,7 +20,9 @@ def flask_test_client():
 class TestApp(unittest.TestCase):
     def setUp(self):
         self.client, self.mongo = flask_test_client()
+        # Delete all records from the collections we will be testing
         self.mongo.db.logins.delete_many({})
+        self.mongo.db.recipes.delete_many({})
 
     def create_user(self, username):
         '''
@@ -35,6 +37,10 @@ class TestApp(unittest.TestCase):
         '''
         return self.client.post('/login', follow_redirects=True,
                                 data={'username': username})
+
+    def submit_recipe(self, title, ingredients, methods):
+        return self.client.post('/add-recipe', follow_redirects=True,
+                                data={'title': title, 'ingredients': ingredients, 'methods': methods})
 
     def test_home(self):
         '''
@@ -97,7 +103,7 @@ class TestApp(unittest.TestCase):
 
     def test_login_page(self):
         '''
-        The login page should return 200
+        The login page should return 200 for users that are not logged in
         '''
         response = self.client.get('/login')
         self.assertEqual(response.status_code, 200)
@@ -123,7 +129,7 @@ class TestApp(unittest.TestCase):
 
     def test_logged_in_user_cant_login(self):
         '''
-        A user that is logged in should redirected away from the login page
+        A user that is logged in should be redirected away from the login page
         '''
         username = 'TestUser'
         self.create_user(username)
@@ -148,7 +154,7 @@ class TestApp(unittest.TestCase):
         A user that is not logged in should not be able to access the logout page
         '''
         response = self.client.get('/logout', follow_redirects=False)
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 403)
 
     def test_logout_when_logged_in(self):
         '''
@@ -160,6 +166,111 @@ class TestApp(unittest.TestCase):
         self.client.get('/logout')
         with self.client.session_transaction() as session:
             self.assertEqual(session.get('username'), None)
+
+    def test_add_recipe_page(self):
+        '''
+        The recipe creation page should return 200 for logged in users
+        '''
+        username = 'TestUser'
+        self.create_user(username)
+        self.login_user(username)
+        response = self.client.get('/add-recipe', follow_redirects=False)
+        self.assertEqual(response.status_code, 200)
+
+    def test_add_recipe_not_logged_in(self):
+        '''
+        A user that is not logged in should not be able to access the add recipe page
+        '''
+        response = self.client.get('/logout', follow_redirects=False)
+        self.assertEqual(response.status_code, 403)
+
+    def test_add_recipe_submit_recipe(self):
+        '''
+        Submitted recipes should be added to the recipes collection
+        '''
+        username = 'TestUser'
+        recipe_title = 'Pancakes'
+        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
+        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.'
+                                    'Cook until golden.'])
+        self.create_user(username)
+        self.login_user(username)
+        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
+        self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}), None)
+
+    def test_add_recipe_submit_recipe_has_username(self):
+        '''
+        Submitted recipes added to the recipes collection should include the username of the author
+        '''
+        username = 'TestUser'
+        recipe_title = 'Pancakes'
+        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
+        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.'
+                                    'Cook until golden.'])
+        self.create_user(username)
+        self.login_user(username)
+        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
+        self.assertEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('username'), username)
+
+    def test_add_recipe_submit_recipe_missing_fields(self):
+        '''
+        Submitted recipes without a title, ingredients or methods should should not be added
+        '''
+        username = 'TestUser'
+        recipe_title = 'Pancakes'
+        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
+        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.'
+                                    'Cook until golden.'])
+        self.create_user(username)
+        self.login_user(username)
+        self.submit_recipe(None, recipe_ingredients, recipe_methods)
+        self.submit_recipe(recipe_title, None, recipe_methods)
+        self.submit_recipe(recipe_title, recipe_ingredients, None)
+        self.assertEqual(self.mongo.db.recipes.find_one({'title': recipe_title}), None)
+
+    def test_add_recipe_submit_recipe_has_urn(self):
+        '''
+        Submitted recipes should have a Unique Resource Name
+        '''
+        username = 'TestUser'
+        recipe_title = 'Pancakes'
+        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
+        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.'
+                                    'Cook until golden.'])
+        self.create_user(username)
+        self.login_user(username)
+        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
+        self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('urn'), None)
+
+    def test_add_recipe_submit_recipe_has_valid_urn(self):
+        '''
+        Submitted recipes should have a valid Unique Resource Name that only contains lowercase alphanumeric characters and dashes
+        '''
+        username = 'TestUser'
+        recipe_title = 'Mac & Cheese'
+        recipe_ingredients = '\n'.join(['Flour', 'Butter', 'Milk', 'Cheese', 'Macaroni'])
+        recipe_methods = '\n'.join(['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.'
+                                    'Once mixture thickens add boiled macaroni.'])
+        self.create_user(username)
+        self.login_user(username)
+        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
+        self.assertNotRegex(self.mongo.db.recipes.find_one({'title': recipe_title}).get('urn'), '[^a-z0-9_-]+')
+
+    def test_add_recipe_submit_recipe_has_unique_urn(self):
+        '''
+        Submitted recipes should have a unique URN, even though titles can be identical
+        '''
+        username = 'TestUser'
+        recipe_title = 'Mac & Cheese'
+        recipe_ingredients = '\n'.join(['Flour', 'Butter', 'Milk', 'Cheese', 'Macaroni'])
+        recipe_methods = '\n'.join(['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.'
+                                    'Once mixture thickens add boiled macaroni.'])
+        self.create_user(username)
+        self.login_user(username)
+        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
+        urn = self.mongo.db.recipes.find_one({'title': recipe_title}).get('urn')
+        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
+        self.assertEqual(self.mongo.db.recipes.count_documents({'urn': urn}), 1)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Add Recipe</h1>
+    <form action="" method="POST">
+        <div class="input-field col s12">
+        	<label for="title">Title</label><input type="text" name="title" maxlength="100" placeholder="Enter Recipe Title">
+        </div>
+        <div class="input-field col s12">
+        	<label for="ingredients">Ingredients</label><textarea name="ingredients" class="materialize-textarea"></textarea>
+        </div>
+        <div class="input-field col s12">
+        	<label for="method">Method</label><textarea name="ingredients" class="materialize-textarea"></textarea>
+        </div>
+        <input type="submit" value="Submit Recipe">
+    </form>
+{% endblock %}

@@ -1,6 +1,6 @@
 import os
-from re import match
-from flask import Flask, render_template, request, flash, session, redirect, url_for
+from re import match, findall
+from flask import Flask, render_template, request, flash, session, redirect, url_for, abort
 from flask_pymongo import PyMongo
 
 app = Flask(__name__)
@@ -55,7 +55,26 @@ def logout():
     if session.get('username') is not None:
         session['username'] = None
         flash("Successfully logged out.")
-    return redirect(url_for('index'))
+        return redirect(url_for('index'))
+    return abort(403)
+
+
+@app.route('/add-recipe', methods=['POST', 'GET'])
+def add_recipe():
+    if session.get('username') is None:
+        return abort(403)
+    elif request.method == 'POST':
+        if (request.form.get('title') is not None and
+                request.form.get('ingredients') is not None and
+                request.form.get('methods') is not None):
+            recipe_data = request.form.to_dict()
+            recipe_data['username'] = session.get('username')
+            recipe_data['urn'] = '-'.join(findall('[a-z0-9-]+', request.form.get('title').lower()))
+            count = mongo.db.recipes.count_documents({'urn': {'$regex': '^' + recipe_data['urn'] + '[0-9_]*'}})
+            if count != 0:
+                recipe_data['urn'] += '_{}'.format(count)
+            mongo.db.recipes.insert_one(recipe_data)
+    return render_template('add-recipe.html')
 
 
 if __name__ == '__main__':
