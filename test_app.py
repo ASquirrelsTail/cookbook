@@ -40,7 +40,7 @@ class TestApp(unittest.TestCase):
         '''
         The home page should return HTTP code 200 OK
         '''
-        response = self.client.get('/', follow_redirects=True)
+        response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
 
     def test_new_user_page(self):
@@ -99,7 +99,7 @@ class TestApp(unittest.TestCase):
         '''
         The login page should return 200
         '''
-        response = self.client.get('/login', follow_redirects=True)
+        response = self.client.get('/login')
         self.assertEqual(response.status_code, 200)
 
     def test_login_user(self):
@@ -123,25 +123,43 @@ class TestApp(unittest.TestCase):
 
     def test_logged_in_user_cant_login(self):
         '''
-        A user that is logged in should not be able to access the login page
+        A user that is logged in should redirected away from the login page
         '''
         username = 'TestUser'
         self.create_user(username)
         self.login_user(username)
 
         response = self.client.get('/login', follow_redirects=False)
-        self.assertNotEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
 
     def test_logged_in_user_cant_create_user(self):
         '''
-        A user that is logged in should not be able to access the create new user page
+        A user that is logged in should redirected away from the create new user page
         '''
         username = 'TestUser'
         self.create_user(username)
         self.login_user(username)
 
         response = self.client.get('/new-user', follow_redirects=False)
-        self.assertNotEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
+
+    def test_logout_not_logged_in(self):
+        '''
+        A user that is not logged in should not be able to access the logout page
+        '''
+        response = self.client.get('/logout', follow_redirects=False)
+        self.assertEqual(response.status_code, 302)
+
+    def test_logout_when_logged_in(self):
+        '''
+        A user that is logged in should be logged out by the logout page
+        '''
+        username = 'TestUser'
+        self.create_user(username)
+        self.login_user(username)
+        self.client.get('/logout')
+        with self.client.session_transaction() as session:
+            self.assertEqual(session.get('username'), None)
 
 
 if __name__ == '__main__':

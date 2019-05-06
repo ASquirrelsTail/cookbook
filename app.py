@@ -13,7 +13,7 @@ mongo = PyMongo(app)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', username=session.get('username'))
 
 
 @app.route('/new-user', methods=['POST', 'GET'])
@@ -29,6 +29,7 @@ def new_user():
             flash('Username "{}" is already taken, please choose another.'.format(username))
         else:
             mongo.db.logins.insert_one(request.form.to_dict())
+            return redirect(url_for('login'), code=307)
 
     return render_template('new-user.html')
 
@@ -47,6 +48,14 @@ def login():
             flash("Failed to log in, invalid username.")
 
     return render_template('login.html')
+
+
+@app.route('/logout')
+def logout():
+    if session.get('username') is not None:
+        session['username'] = None
+        flash("Successfully logged out.")
+    return redirect(url_for('index'))
 
 
 if __name__ == '__main__':

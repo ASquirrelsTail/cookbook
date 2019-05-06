@@ -9,17 +9,26 @@
 </head>
 
 <body>
+    <header>
+        <nav>
+            {% if username %}
+            Logged in as {{username}} - <a href="{{ url_for('logout')}}">Log Out</a>
+            {% else %}
+            <a href="{{ url_for('login')}}">Log In</a>
+            {% endif %}
+        </nav>
+    </header>
     {% block content %}
     {% endblock %}
     <script src="{{ url_for('static', filename='js/libs/materialize.min.js')}}"></script>
     {% with messages = get_flashed_messages() %}
-    	{% if messages %}
-	    <script>
-			{% for message in messages %}
-	        M.toast({html: '{{ message }}'});
-	        {% endfor %}
-	    </script>
-    	{% endif %}
+	    {% if messages %}
+		    <script>
+		    {% for message in messages %}
+		    	M.toast({ html: '{{ message }}' });
+		    {% endfor %}
+		    </script>
+	    {% endif %}
     {% endwith %}
 </body>
 
