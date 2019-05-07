@@ -11,11 +11,14 @@
 <body>
     <header>
         <nav>
-            {% if username %}
-            Logged in as {{username}} - <a href="{{ url_for('logout')}}">Log Out</a>
-            {% else %}
-            <a href="{{ url_for('login')}}">Log In</a>
-            {% endif %}
+            <ul>
+                {% if username %}
+                <li>Logged in as {{username}} - <a href="{{ url_for('logout')}}">Log Out</a></li>
+                <li><a href="{{ url_for('add_recipe') }}">Add New Recipe</a></li>
+                {% else %}
+                <a href="{{ url_for('login')}}">Log In</a>
+                {% endif %}
+            </ul>
         </nav>
     </header>
     {% block content %}

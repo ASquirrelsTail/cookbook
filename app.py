@@ -1,6 +1,6 @@
 import os
 from re import match, findall
-from flask import Flask, render_template, request, flash, session, redirect, url_for, abort
+from flask import Flask, render_template, request, flash, session, redirect, url_for, abort, escape
 from flask_pymongo import PyMongo
 
 app = Flask(__name__)
@@ -69,12 +69,27 @@ def add_recipe():
                 request.form.get('methods') is not None):
             recipe_data = request.form.to_dict()
             recipe_data['username'] = session.get('username')
-            recipe_data['urn'] = '-'.join(findall('[a-z0-9-]+', request.form.get('title').lower()))
+            recipe_data['urn'] = '-'.join(findall('[a-z0-9-]+', recipe_data['title'].lower()))
             count = mongo.db.recipes.count_documents({'urn': {'$regex': '^' + recipe_data['urn'] + '[0-9_]*'}})
             if count != 0:
                 recipe_data['urn'] += '_{}'.format(count)
             mongo.db.recipes.insert_one(recipe_data)
+            flash('Recipe "{}" successfully created.'.format(recipe_data['title']))
+            return redirect(url_for('recipe', urn = recipe_data['urn']))
+        else:
+            flash('Failed to add recipe!')
     return render_template('add-recipe.html')
+
+
+@app.route('/recipes/<urn>')
+def recipe(urn):
+    recipe = mongo.db.recipes.find_one({'urn': urn})
+    if recipe is None:
+        abort(404)
+    else:
+        recipe['ingredients'] = recipe['ingredients'].split('\n')
+        recipe['methods'] = recipe['methods'].split('\n')
+    return render_template('recipe.html', recipe=recipe)
 
 
 if __name__ == '__main__':

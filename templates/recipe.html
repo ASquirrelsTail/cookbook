@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>{{ recipe['title'] }}</h1>
+    By {{ recipe['username'] }}
+    <h2>Ingredients</h2>
+    <ul>
+    {% for ingredient in recipe['ingredients'] %}
+        <li>{{ ingredient }}</li>
+    {% endfor %}
+    </ul>
+    <h2>Method</h2>
+    <ol>
+    {% for method in recipe['methods'] %}
+        <li>{{ method }}</li>
+    {% endfor %}
+    </ol>
+{% endblock %}

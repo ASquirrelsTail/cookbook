@@ -191,12 +191,27 @@ class TestApp(unittest.TestCase):
         username = 'TestUser'
         recipe_title = 'Pancakes'
         recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
-        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.'
+        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
                                     'Cook until golden.'])
         self.create_user(username)
         self.login_user(username)
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
         self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}), None)
+
+    def test_add_recipe_submit_recipe_has_ingredients_and_methods(self):
+        '''
+        Submitted recipes should have ingredients and methods
+        '''
+        username = 'TestUser'
+        recipe_title = 'Pancakes'
+        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
+        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                                    'Cook until golden.'])
+        self.create_user(username)
+        self.login_user(username)
+        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
+        self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}.get('ingredients')), None)
+        self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}.get('methods')), None)
 
     def test_add_recipe_submit_recipe_has_username(self):
         '''
@@ -205,7 +220,7 @@ class TestApp(unittest.TestCase):
         username = 'TestUser'
         recipe_title = 'Pancakes'
         recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
-        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.'
+        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
                                     'Cook until golden.'])
         self.create_user(username)
         self.login_user(username)
@@ -219,7 +234,7 @@ class TestApp(unittest.TestCase):
         username = 'TestUser'
         recipe_title = 'Pancakes'
         recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
-        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.'
+        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
                                     'Cook until golden.'])
         self.create_user(username)
         self.login_user(username)
@@ -235,7 +250,7 @@ class TestApp(unittest.TestCase):
         username = 'TestUser'
         recipe_title = 'Pancakes'
         recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
-        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.'
+        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
                                     'Cook until golden.'])
         self.create_user(username)
         self.login_user(username)
@@ -244,17 +259,17 @@ class TestApp(unittest.TestCase):
 
     def test_add_recipe_submit_recipe_has_valid_urn(self):
         '''
-        Submitted recipes should have a valid Unique Resource Name that only contains lowercase alphanumeric characters and dashes
+        Submitted recipes should have a valid Unique Resource Name that only contains lowercase alphanumeric characters, underscores and dashes
         '''
         username = 'TestUser'
         recipe_title = 'Mac & Cheese'
         recipe_ingredients = '\n'.join(['Flour', 'Butter', 'Milk', 'Cheese', 'Macaroni'])
-        recipe_methods = '\n'.join(['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.'
+        recipe_methods = '\n'.join(['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.',
                                     'Once mixture thickens add boiled macaroni.'])
         self.create_user(username)
         self.login_user(username)
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
-        self.assertNotRegex(self.mongo.db.recipes.find_one({'title': recipe_title}).get('urn'), '[^a-z0-9_-]+')
+        self.assertNotRegex(self.mongo.db.recipes.find_one({}).get('urn'), '[^a-z0-9_-]+')
 
     def test_add_recipe_submit_recipe_has_unique_urn(self):
         '''
@@ -263,14 +278,89 @@ class TestApp(unittest.TestCase):
         username = 'TestUser'
         recipe_title = 'Mac & Cheese'
         recipe_ingredients = '\n'.join(['Flour', 'Butter', 'Milk', 'Cheese', 'Macaroni'])
-        recipe_methods = '\n'.join(['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.'
+        recipe_methods = '\n'.join(['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.',
                                     'Once mixture thickens add boiled macaroni.'])
         self.create_user(username)
         self.login_user(username)
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
-        urn = self.mongo.db.recipes.find_one({'title': recipe_title}).get('urn')
+        urn = self.mongo.db.recipes.find_one({}).get('urn')
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
         self.assertEqual(self.mongo.db.recipes.count_documents({'urn': urn}), 1)
+
+    # def test_add_recipe_submit_recipe_html_escape(self):
+    #     '''
+    #     Submitted recipes should not contain unescaped html characters - Redundant due to autoescaping during render_template()
+    #     '''
+    #     username = 'TestUser'
+    #     recipe_title = '<b>Mac & Cheese</b>'
+    #     recipe_ingredients = '\n'.join(['Flour', '4 \" Stick of Butter', 'Milk', 'Cheese', 'Macaroni'])
+    #     recipe_methods = '\n'.join(['<script>macaroni.boil(\'Pan\')</script>', 'Melt butter in a pan and whisk in flour before adding milk.',
+    #                                 'Once mixture thickens add boiled macaroni.'])
+    #     self.create_user(username)
+    #     self.login_user(username)
+    #     self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
+    #     self.assertNotRegex(self.mongo.db.recipes.find_one({}).get('title'), '[<>\'\"]+')
+    #     self.assertNotRegex(self.mongo.db.recipes.find_one({}).get('ingredients'), '[<>\'\"]+')
+    #     self.assertNotRegex(self.mongo.db.recipes.find_one({}).get('methods'), '[<>\'\"]+')
+
+    def test_add_recipe_success_redirects_to_recipe(self):
+        '''
+        After successfully submitting a recipe users should be redirected to its page
+        '''
+        username = 'TestUser'
+        recipe_title = 'Mac & Cheese'
+        recipe_ingredients = '\n'.join(['Flour', 'Butter', 'Milk', 'Cheese', 'Macaroni'])
+        recipe_methods = '\n'.join(['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.',
+                                    'Once mixture thickens add boiled macaroni.'])
+        self.create_user(username)
+        self.login_user(username)
+        response = self.client.post('/add-recipe', follow_redirects=False,
+                                    data={'title': recipe_title, 'ingredients': recipe_ingredients,
+                                          'methods': recipe_methods})
+        # urn = self.mongo.db.recipes.find_one({}).get('urn')
+        self.assertEqual(response.status_code, 302)
+
+    def test_recipe_page(self):
+        '''
+        The recipe page for a recipe should return 200
+        '''
+        username = 'TestUser'
+        recipe_title = 'Pancakes'
+        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
+        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                                    'Cook until golden.'])
+        self.create_user(username)
+        self.login_user(username)
+        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
+        urn = self.mongo.db.recipes.find_one({'title': recipe_title}).get('urn')
+        response = self.client.get('/recipes/{}'.format(urn))
+        self.assertEqual(response.status_code, 200)
+
+    def test_recipe_page_recipe_does_not_exist(self):
+        '''
+        None existent recipes should return 404
+        '''
+        urn = 'not-a-real-recipe'
+        response = self.client.get('/recipes/{}'.format(urn))
+        self.assertEqual(response.status_code, 404)
+
+    def test_recipe_page_contains_recipe(self):
+        '''
+        The recipe page for a recipe should return that recipe
+        '''
+        username = 'TestUser'
+        recipe_title = 'Pancakes'
+        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
+        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                                    'Cook until golden.'])
+        self.create_user(username)
+        self.login_user(username)
+        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
+        urn = self.mongo.db.recipes.find_one({'title': recipe_title}).get('urn')
+        response = self.client.get('/recipes/{}'.format(urn))
+        self.assertIn(b'Pancakes', response.data)
+        self.assertIn(b'Flour', response.data)
+        self.assertIn(b'Cook until golden.', response.data)
 
 
 if __name__ == '__main__':
