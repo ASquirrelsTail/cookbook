@@ -81,6 +81,34 @@ The data will be stored using MongoDB, so these relationships will be stored as 
 
 For example a document in the "users" collection, in addition to their username and display name, contain an array of their recipes, with just the name, date and URI of each recipe.
 
+A document in the recipes collection would be structured like so:
+
+'''json
+{
+	"_id": ObjectId("5cd03219ecec1501df537d4d")
+	"title": "American Style Pancakes"
+	"urn": "american-style-pancakes"
+	"author": "JaneM"
+	"date": "2019-05-08 12:15:03.223"
+	"ingredients": ["12 oz Flour", "2 Eggs", "1/2 pint Milk", "Drop of Oil"]
+	"methods": ["Whisk flour, eggs and milk into a smooth batter.", 
+			  "Heat oil in a non stick pan.", 
+			  "Add a ladle of batter and cook for two minutes.",
+			  "Flip pancake, and cook for a further minute.",
+			  "Serve with maple syrup."]
+	"tags": ["Vegetarian"]
+	"meal": ["Breakfast", "Snack"]
+	"prep-time": 5
+	"cooking-time": 5
+	"views": 3429
+	"favourites": 149
+	"forks": [{"title":"American Style Blueberry Pancakes", "urn": "american-style-blueberry-pancakes"},
+			  {"title":"Chocolate Chip Pancakes", "urn": "chocolate-chip-pancakes_2"}]
+}
+'''
+
+URNs, tags and meal entries would be indexed to quickly locate documents by the exact term, while title and ingredients would be text indexed for easier ingredient searches. A compound index of favourites and views would be used to sort results.
+
 ### Site Map
 
 ![alt text](https://raw.githubusercontent.com/ASquirrelsTail/cookbook/master/preprod/sitemap.jpg "Sitemap")
