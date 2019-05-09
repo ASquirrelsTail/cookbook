@@ -83,11 +83,7 @@ For example a document in the "users" collection, in addition to their username 
 
 A document in the recipes collection would be structured like so:
 
-<<<<<<< HEAD
 ```
-=======
-```json
->>>>>>> b7fda440414914312dde37ea02079ea0c2a6f7cb
 {
 	"_id": ObjectId("5cd03219ecec1501df537d4d")
 	"title": "American Style Pancakes"
@@ -96,10 +92,10 @@ A document in the recipes collection would be structured like so:
 	"date": "2019-05-08 12:15:03.223"
 	"ingredients": ["12 oz Flour", "2 Eggs", "1/2 pint Milk", "Drop of Oil"]
 	"methods": ["Whisk flour, eggs and milk into a smooth batter.", 
-			  "Heat oil in a non stick pan.", 
-			  "Add a ladle of batter and cook for two minutes.",
-			  "Flip pancake, and cook for a further minute.",
-			  "Serve with maple syrup."]
+		  "Heat oil in a non stick pan.", 
+		  "Add a ladle of batter and cook for two minutes.",
+		  "Flip pancake, and cook for a further minute.",
+		  "Serve with maple syrup."]
 	"tags": ["Vegetarian"]
 	"meal": ["Breakfast", "Snack"]
 	"prep-time": 5
@@ -107,7 +103,7 @@ A document in the recipes collection would be structured like so:
 	"views": 3429
 	"favourites": 149
 	"forks": [{"title":"American Style Blueberry Pancakes", "urn": "american-style-blueberry-pancakes"},
-			  {"title":"Chocolate Chip Pancakes", "urn": "chocolate-chip-pancakes_2"}]
+		  {"title":"Chocolate Chip Pancakes", "urn": "chocolate-chip-pancakes_2"}]
 }
 ```
 
