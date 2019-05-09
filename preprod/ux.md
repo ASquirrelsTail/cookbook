@@ -83,7 +83,7 @@ For example a document in the "users" collection, in addition to their username 
 
 A document in the recipes collection would be structured like so:
 
-'''json
+```
 {
 	"_id": ObjectId("5cd03219ecec1501df537d4d")
 	"title": "American Style Pancakes"
@@ -105,7 +105,7 @@ A document in the recipes collection would be structured like so:
 	"forks": [{"title":"American Style Blueberry Pancakes", "urn": "american-style-blueberry-pancakes"},
 			  {"title":"Chocolate Chip Pancakes", "urn": "chocolate-chip-pancakes_2"}]
 }
-'''
+```
 
 URNs, tags and meal entries would be indexed to quickly locate documents by the exact term, while title and ingredients would be text indexed for easier ingredient searches. A compound index of favourites and views would be used to sort results.
 
