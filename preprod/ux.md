@@ -83,7 +83,11 @@ For example a document in the "users" collection, in addition to their username 
 
 A document in the recipes collection would be structured like so:
 
+<<<<<<< HEAD
 ```
+=======
+```json
+>>>>>>> b7fda440414914312dde37ea02079ea0c2a6f7cb
 {
 	"_id": ObjectId("5cd03219ecec1501df537d4d")
 	"title": "American Style Pancakes"
