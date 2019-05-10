@@ -24,23 +24,24 @@ class TestApp(unittest.TestCase):
         self.mongo.db.logins.delete_many({})
         self.mongo.db.recipes.delete_many({})
 
-    def create_user(self, username):
+    def create_user(self, username='TestUser'):
         '''
         Helper function to create a new user by sending a POST request to /new-user
         '''
         return self.client.post('/new-user', follow_redirects=True,
                                 data={'username': username})
 
-    def login_user(self, username):
+    def login_user(self, username='TestUser'):
         '''
         Helper function to create a new user by sending a POST request to /new-user
         '''
         return self.client.post('/login', follow_redirects=True,
                                 data={'username': username})
 
-    def submit_recipe(self, title, ingredients, methods):
+    def submit_recipe(self, title='Test Recipe', ingredients='Test ingredient 1\nTest ingredient 2',
+                      methods='Add one to two.\nEnjoy', tags=[]):
         return self.client.post('/add-recipe', follow_redirects=True,
-                                data={'title': title, 'ingredients': ingredients, 'methods': methods})
+                                data={'title': title, 'ingredients': ingredients, 'methods': methods, 'tags': tags})
 
     def test_home(self):
         '''
@@ -361,6 +362,18 @@ class TestApp(unittest.TestCase):
         self.assertIn(b'Pancakes', response.data)
         self.assertIn(b'Flour', response.data)
         self.assertIn(b'Cook until golden.', response.data)
+
+    def test_recipe_page_increase_views(self):
+        '''
+        When a recipe page is viewed its number of views should increase.
+        '''
+        recipe_title = 'Test-recipe'
+        self.create_user()
+        self.login_user()
+        self.submit_recipe(title=recipe_title)
+        urn = self.mongo.db.recipes.find_one({'title': recipe_title}).get('urn')
+        self.client.get('/recipes/{}'.format(urn))
+        self.assertGreater(0, self.mongo.db.recipes.find_one({'urn': urn}).get('views', 0))
 
 
 if __name__ == '__main__':
