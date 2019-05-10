@@ -69,10 +69,10 @@ def add_recipe():
                 request.form.get('methods') is not None):
             recipe_data = request.form.to_dict()
             recipe_data['username'] = session.get('username')
-            recipe_data['urn'] = '-'.join(findall('[a-z0-9-]+', recipe_data['title'].lower()))
-            count = mongo.db.recipes.count_documents({'urn': {'$regex': '^' + recipe_data['urn'] + '[0-9_]*'}})
+            recipe_data['urn'] = '-'.join(findall('[a-z-]+', recipe_data['title'].lower()))
+            count = mongo.db.recipes.count_documents({'urn': {'$regex': '^' + recipe_data['urn'] + '[0-9]*'}})
             if count != 0:
-                recipe_data['urn'] += '_{}'.format(count)
+                recipe_data['urn'] += '{}'.format(count)
             mongo.db.recipes.insert_one(recipe_data)
             flash('Recipe "{}" successfully created.'.format(recipe_data['title']))
             return redirect(url_for('recipe', urn = recipe_data['urn']))
