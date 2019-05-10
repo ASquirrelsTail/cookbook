@@ -83,10 +83,12 @@ def add_recipe():
 
 @app.route('/recipes/<urn>')
 def recipe(urn):
-    recipe = mongo.db.recipes.find_one_and_update({'urn': urn}, {'$inc': {'views': 1}})
+    recipe = mongo.db.recipes.find_one({'urn': urn})
     if recipe is None:
         abort(404)
     else:
+        if recipe['username'] != session['username']:
+            mongo.db.recipes.update_one({'urn': urn}, {'$inc': {'views': 1}})
         recipe['ingredients'] = recipe['ingredients'].split('\n')
         recipe['methods'] = recipe['methods'].split('\n')
     return render_template('recipe.html', recipe=recipe)
