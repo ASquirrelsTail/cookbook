@@ -373,7 +373,7 @@ class TestApp(unittest.TestCase):
         self.submit_recipe(title=recipe_title)
         urn = self.mongo.db.recipes.find_one({'title': recipe_title}).get('urn')
         self.client.get('/recipes/{}'.format(urn))
-        self.assertGreater(0, self.mongo.db.recipes.find_one({'urn': urn}).get('views', 0))
+        self.assertLess(0, self.mongo.db.recipes.find_one({'urn': urn}).get('views', 0))
 
 
 if __name__ == '__main__':
