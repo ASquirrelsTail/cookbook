@@ -83,7 +83,7 @@ def add_recipe():
 
 @app.route('/recipes/<urn>')
 def recipe(urn):
-    recipe = mongo.db.recipes.find_one({'urn': urn})
+    recipe = mongo.db.recipes.find_one_and_update({'urn': urn}, {'$inc': {'views': 1}})
     if recipe is None:
         abort(404)
     else:
