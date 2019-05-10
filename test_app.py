@@ -38,6 +38,9 @@ class TestApp(unittest.TestCase):
         return self.client.post('/login', follow_redirects=True,
                                 data={'username': username})
 
+    def logout_user(self):
+        self.client.get('/logout', follow_redirects=True)
+
     def submit_recipe(self, title='Test Recipe', ingredients='Test ingredient 1\nTest ingredient 2',
                       methods='Add one to two.\nEnjoy', tags=[]):
         return self.client.post('/add-recipe', follow_redirects=True,
@@ -371,9 +374,22 @@ class TestApp(unittest.TestCase):
         self.create_user()
         self.login_user()
         self.submit_recipe(title=recipe_title)
+        self.logout_user()
         urn = self.mongo.db.recipes.find_one({'title': recipe_title}).get('urn')
         self.client.get('/recipes/{}'.format(urn))
         self.assertLess(0, self.mongo.db.recipes.find_one({'urn': urn}).get('views', 0))
+
+    def test_recipe_page_user_does_not_increase_views(self):
+        '''
+        When a recipe page is viewed by the user that created it the number of views should not increase
+        '''
+        recipe_title = 'Test-recipe'
+        self.create_user()
+        self.login_user()
+        self.submit_recipe(title=recipe_title)
+        urn = self.mongo.db.recipes.find_one({'title': recipe_title}).get('urn')
+        self.client.get('/recipes/{}'.format(urn))
+        self.assertEquals(0, self.mongo.db.recipes.find_one({'urn': urn}).get('views', 0))
 
 
 if __name__ == '__main__':
