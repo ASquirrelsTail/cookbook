@@ -23,8 +23,10 @@
             </ul>
         </nav>
     </header>
+    <section class="container">
     {% block content %}
     {% endblock %}
+    </section>
     <script src="{{ url_for('static', filename='js/libs/materialize.min.js')}}"></script>
     {% block javascript %}
     {% endblock %}

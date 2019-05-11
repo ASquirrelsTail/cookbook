@@ -1,5 +1,6 @@
 import os
 from re import match, findall
+from datetime import datetime
 from flask import Flask, render_template, request, flash, session, redirect, url_for, abort, escape
 from flask_pymongo import PyMongo
 
@@ -70,9 +71,12 @@ def add_recipe():
                 recipe_data.get('ingredients', '') != '' and
                 recipe_data.get('methods', '') != ''):
             recipe_data['username'] = session.get('username')
+            recipe_data['time'] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
             recipe_data['urn'] = '-'.join(findall('[a-z-]+', recipe_data['title'].lower()))
             if recipe_data.get('tags', '') != '':
                 recipe_data['tags'] = recipe_data['tags'].split('/')
+            if recipe_data.get('meals', '') != '':
+                recipe_data['meals'] = recipe_data['meals'].split('/')
             count = mongo.db.recipes.count_documents({'urn': {'$regex': '^' + recipe_data['urn'] + '[0-9]*'}})
             if count != 0:
                 recipe_data['urn'] += '{}'.format(count)
@@ -81,9 +85,12 @@ def add_recipe():
                 if parent_title == recipe_data['title']:
                     flash('Forked recipes must have a different title.')
                     all_tags = mongo.db.tags.find()
+                    all_meals = mongo.db.meals.find()
                     if recipe_data.get('tags', '') != '':
                         recipe_data['tags'] = '/'.join(recipe_data['tags'])
-                    return render_template('add-recipe.html', recipe=recipe_data, username=session.get('username'), tags=all_tags)
+                    if recipe_data.get('meals', '') != '':
+                        recipe_data['meals'] = '/'.join(recipe_data['meals'])
+                    return render_template('add-recipe.html', recipe=recipe_data, username=session.get('username'), tags=all_tags, meals=all_meals)
                 else:
                     mongo.db.recipes.update_one({'urn': recipe_data['parent']},
                                                 {'$addToSet': {'children': {'urn': recipe_data['urn'],
@@ -96,16 +103,21 @@ def add_recipe():
     elif request.args.get('fork') is not None:
         parent = request.args.get('fork')
         recipe_data = mongo.db.recipes.find_one({'urn': parent},
-                                                {'title': 1, 'ingredients': 1, 'methods': 1, 'tags': 1})
+                                                {'title': 1, 'ingredients': 1, 'methods': 1, 'tags': 1, 'meals': 1})
         if recipe_data is not None:
             recipe_data['parent'] = parent
             if recipe_data.get('tags', '') != '':
                 recipe_data['tags'] = '/'.join(recipe_data['tags'])
+            if recipe_data.get('meals', '') != '':
+                recipe_data['meals'] = '/'.join(recipe_data['meals'])
+        else:
+            flash('Could not fork recipe. Failed to find parent!')
     else:
         recipe_data = None
 
     all_tags = mongo.db.tags.find()
-    return render_template('add-recipe.html', recipe=recipe_data, username=session.get('username'), tags=all_tags)
+    all_meals = mongo.db.meals.find()
+    return render_template('add-recipe.html', recipe=recipe_data, username=session.get('username'), tags=all_tags, meals=all_meals)
 
 
 @app.route('/recipes/<urn>')

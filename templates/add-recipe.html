@@ -3,42 +3,98 @@
 <h1>Add Recipe</h1>
 <form action="" method="POST" id="create-recipe">
     <div class="input-field col s12">
-        <label for="title">Title</label><input type="text" name="title" maxlength="100" placeholder="Enter Recipe Title" value="{{ recipe['title'] }}">
+        <label for="title"><i class="material-icons left">title</i>Title</label><input type="text" name="title" maxlength="100" value="{{ recipe['title'] }}">
     </div>
     <div class="input-field col s12">
-        <label for="ingredients">Ingredients</label><textarea name="ingredients" class="materialize-textarea">{{ recipe['ingredients'] }}</textarea>
+        <label for="ingredients"><i class="material-icons left">list</i>Ingredients</label>
+        <textarea name="ingredients" class="materialize-textarea">{{ recipe['ingredients'] }}</textarea>
     </div>
     <div class="input-field col s12">
-        <label for="methods">Method</label><textarea name="methods" class="materialize-textarea">{{ recipe['methods'] }}</textarea>
+        <label for="methods"><i class="material-icons left">mode_edit</i>Method</label>
+        <textarea name="methods" class="materialize-textarea">{{ recipe['methods'] }}</textarea>
     </div>
+    <div class="row">
+        <div class="col s12">
+            <i class="material-icons left">access_time</i> Prep-Time
+        </div>
+        <div class="col s12">
+            <div class="row" id="prep-time">
+                <div class="input-field col xs5 s3 m2">
+                    <label>Hours</label><input type="number" class="hours" value="0" min="0" max="24">
+                </div>
+                <div class="input-field col xs5 s3 m2">
+                    <label>Minutes</label><input type="number" class="minutes"  value="0" min="-1" max="60">
+                </div>
+            </div>
+            <input type="hidden" name="prep-time" id="prep-time-input" value="00:00">
+        </div>
+        <div class="col s12">
+            <i class="material-icons left">access_time</i> Cooking-Time
+        </div>
+        <div class="col s12">
+            <div class="row" id="cook-time">
+                <div class="input-field col xs5 s3 m2">
+                    <label>Hours</label><input type="number" class="hours"  value="0" min="0" max="24">
+                </div>
+                <div class="input-field col xs5 s3 m2">
+                    <label>Minutes</label><input type="number" class="minutes" value="0" min="-1" max="60">
+                </div>
+            </div>
+            <input type="hidden" name="cook-time" id="cook-time-input" value="00:00">
+        </div>
+    <div class="row">
     {% if recipe['parent'] %}
     <input type="hidden" name="parent" value="{{ recipe['parent'] }}">
     {% endif %}
+
     <div class="col s12">
-        Tags:
-        <div id="tag-chips" class="chips"></div>
+        <p><i class="material-icons left">label_outline</i> Tags:</p>
+    </div>
+    <div class="col s12">
+        <div id="tag-chips" class="chips" data-add-target="add-tag-button" style="display: inline; border-bottom: none;"></div>
         <a class="dropdown-trigger btn" href="#" data-target="add-tag" id="add-tag-button"><i class="material-icons left">add</i>Add Tag</a>
-        <ul id="add-tag" class="dropdown-content">
+        <ul id="add-tag" class="dropdown-content" data-target="tag-chips">
             {% for tag in tags %}
-                <li><a href="#!" data-tag-name="{{ tag['name'] }}">{{ tag['name'] }}</a></li>
+                <li><a href="#!" data-chip-name="{{ tag['name'] }}">{{ tag['name'] }}</a></li>
             {% endfor %}
         </ul>
     </div>
     <input type="hidden" name="tags" id="tag-input" value="">
     <div class="col s12">
+        <p><i class="material-icons left">restaurant_menu</i> Meals:</p>
+    </div>
+    <div class="col s12">
+        <div id="meal-chips" class="chips" data-add-target="add-meal-button" style="display: inline; border-bottom: none;"></div>
+        <a class="dropdown-trigger btn" href="#" data-target="add-meal" id="add-meal-button"><i class="material-icons left">add</i>Add Meal</a>
+        <ul id="add-meal" class="dropdown-content" data-target="meal-chips">
+            {% for meal in meals %}
+                <li><a href="#!" data-chip-name="{{ meal['name'] }}">{{ meal['name'] }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <input type="hidden" name="meals" id="meal-input" value="">
+    <div class="input-field col s12">
         <button class="btn waves-effect waves-light" type="submit" name="action">Submit Recipe</button>
     </div>
 </form>
 {% endblock %}
 {% block javascript %}
 <script src="{{ url_for('static', filename='js/add-recipe.js')}}"></script>
-{% if recipe['tags'] %}
+{% if recipe['tags'] or recipe['meals']%}
 <script>
 $(function() {
+    {% if recipe['tags'] %}
     let tags = '{{ recipe['tags'] }}'.split('/');
     tags.forEach(function(tagName) {
         tagChips.addChip({ tag: tagName });
     });
+    {% endif %}
+    {% if recipe['meals'] %}
+    let meals = '{{ recipe['meals'] }}'.split('/');
+    meals.forEach(function(mealName) {
+        mealChips.addChip({ tag: mealName });
+    });
+    {% endif %}
 });
 </script>
 {% endif %}

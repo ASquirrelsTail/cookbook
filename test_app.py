@@ -46,13 +46,14 @@ class TestClient(unittest.TestCase):
         self.client.get('/logout', follow_redirects=True)
 
     def submit_recipe(self, title='Test Recipe', ingredients='Test ingredient 1\nTest ingredient 2',
-                      methods='Add one to two.\nEnjoy', tags='', parent=None):
+                      methods='Add one to two.\nEnjoy', tags='', meals='', prep_time='00:01', cook_time='00:01', parent=None):
         '''
         Helper function to create a recipe.
         '''
         return self.client.post('/add-recipe', follow_redirects=True,
                                 data={'title': title, 'ingredients': ingredients, 'methods': methods,
-                                      'tags': tags, 'parent': parent})
+                                      'tags': tags, 'meals': meals, 'prep-time': prep_time,
+                                      'cook-time': cook_time, 'parent': parent})
 
     def test_home(self):
         '''
@@ -228,7 +229,7 @@ class TestAddRecipe(TestClient):
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
         self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}), None)
 
-    def test_submit_recipe_has_ingredients_and_methods(self):
+    def test_submit_recipe_has_ingredients_methods_and_prep_times(self):
         '''
         Submitted recipes should have ingredients and methods
         '''
@@ -236,9 +237,13 @@ class TestAddRecipe(TestClient):
         recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
         recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
                                     'Cook until golden.'])
-        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
-        self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}.get('ingredients')), None)
-        self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}.get('methods')), None)
+        recipe_prep_time = '00:05'
+        recipe_cook_time = '00:05'
+        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods, prep_time=recipe_prep_time, cook_time=recipe_cook_time)
+        self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('ingredients'), None)
+        self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('methods'), None)
+        self.assertEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('prep-time'), '00:05')
+        self.assertEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('cook-time'), '00:05')
 
     def test_submit_recipe_has_tags_array(self):
         '''
@@ -253,6 +258,19 @@ class TestAddRecipe(TestClient):
         self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}.get('tags')), None)
         self.assertEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('tags'), ['Vegan', 'Vegetarian', 'Dairy-Free', 'Egg-Free'])
 
+    def test_submit_recipe_has_meals_array(self):
+        '''
+        Submitted recipes with meals should store them as an array
+        '''
+        recipe_title = 'Pancakes'
+        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
+        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                                    'Cook until golden.'])
+        recipe_meals = '/'.join(['Breakfast', 'Desert'])
+        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods, None, recipe_meals)
+        self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}.get('meals')), None)
+        self.assertEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('meals'), ['Breakfast', 'Desert'])
+
     def test_submit_recipe_has_username(self):
         '''
         Submitted recipes added to the recipes collection should include the username of the author
@@ -265,6 +283,19 @@ class TestAddRecipe(TestClient):
         self.create_user(username)
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
         self.assertEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('username'), username)
+
+    def test_submit_recipe_has_time(self):
+        '''
+        Submitted recipes should have timestamp
+        '''
+        recipe_title = 'Pancakes'
+        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
+        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                                    'Cook until golden.'])
+        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
+        self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('time'), None)
+        self.assertRegex(self.mongo.db.recipes.find_one({'title': recipe_title}).get('time', ''),
+                         '[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}')
 
     def test_submit_recipe_missing_fields(self):
         '''
