@@ -375,6 +375,24 @@ class TestAddRecipe(TestClient):
         self.assertIn({'urn': child_urn, 'title': forked_recipe_title},
                       self.mongo.db.recipes.find_one({'urn': parent_urn}).get('children', []))
 
+    def test_forked_recipe_has_new_name(self):
+        '''
+        A forked recipe should not share the parent recipes name
+        '''
+        recipe_title = 'Pancakes'
+        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
+        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                                    'Cook until golden.'])
+        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
+
+        parent_urn = self.mongo.db.recipes.find_one({}).get('urn')
+        forked_recipe_title = 'Pancakes'
+        forked_recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil', 'One Bannana'])
+        forked_recipe_methods = '\n'.join(['Heat oil in a pan.', 'Mush up the bananna.',
+                                           'Whisk the rest of the ingredients together.', 'Cook until golden.'])
+        self.submit_recipe(forked_recipe_title, forked_recipe_ingredients, forked_recipe_methods, parent=parent_urn)
+        self.assertEqual(self.mongo.db.recipes.find_one({'parent': parent_urn}), None)
+
     # def test_add_recipe_submit_recipe_html_escape(self):
     #     '''
     #     Submitted recipes should not contain unescaped html characters - Redundant due to autoescaping during render_template()
@@ -417,7 +435,7 @@ class TestRecipes(TestClient):
         # Delete all records from the recipe collection
         self.mongo.db.recipes.delete_many({})
 
-    def test_recipe_page(self):
+    def test_page(self):
         '''
         The recipe page for a recipe should return 200
         '''
@@ -430,7 +448,7 @@ class TestRecipes(TestClient):
         response = self.client.get('/recipes/{}'.format(urn))
         self.assertEqual(response.status_code, 200)
 
-    def test_recipe_page_recipe_does_not_exist(self):
+    def test_page_recipe_does_not_exist(self):
         '''
         None existent recipes should return 404
         '''
@@ -438,7 +456,7 @@ class TestRecipes(TestClient):
         response = self.client.get('/recipes/{}'.format(urn))
         self.assertEqual(response.status_code, 404)
 
-    def test_recipe_page_contains_recipe(self):
+    def test_page_contains_recipe(self):
         '''
         The recipe page for a recipe should return that recipe
         '''
@@ -453,7 +471,7 @@ class TestRecipes(TestClient):
         self.assertIn(b'Flour', response.data)
         self.assertIn(b'Cook until golden.', response.data)
 
-    def test_recipe_page_view_increases_views(self):
+    def test_page_view_increases_views(self):
         '''
         When a recipe page is viewed by a different user than the one that created it its number of views should increase.
         '''
@@ -464,7 +482,7 @@ class TestRecipes(TestClient):
         self.client.get('/recipes/{}'.format(urn))
         self.assertLess(0, self.mongo.db.recipes.find_one({'urn': urn}).get('views', 0))
 
-    def test_recipe_page_user_does_not_increase_views(self):
+    def test_page_view_by_author_does_not_increase_views(self):
         '''
         When a recipe page is viewed by the user that created it the number of views should not increase.
         '''

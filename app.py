@@ -74,11 +74,15 @@ def add_recipe():
             count = mongo.db.recipes.count_documents({'urn': {'$regex': '^' + recipe_data['urn'] + '[0-9]*'}})
             if count != 0:
                 recipe_data['urn'] += '{}'.format(count)
-            mongo.db.recipes.insert_one(recipe_data)
             if recipe_data.get('parent') is not None:
-                mongo.db.recipes.update_one({'urn': recipe_data['parent']},
-                                            {'$addToSet': {'children': {'urn': recipe_data['urn'],
-                                                                        'title': recipe_data['title']}}})
+                parent_title = mongo.db.recipes.find_one({'urn': recipe_data['parent']}, {'title': 1}).get('title')
+                if parent_title == recipe_data['title']:
+                    return render_template('add-recipe.html', recipe=recipe_data)
+                else:
+                    mongo.db.recipes.update_one({'urn': recipe_data['parent']},
+                                                {'$addToSet': {'children': {'urn': recipe_data['urn'],
+                                                                            'title': recipe_data['title']}}})
+            mongo.db.recipes.insert_one(recipe_data)
             flash('Recipe "{}" successfully created.'.format(recipe_data['title']))
             return redirect(url_for('recipe', urn = recipe_data['urn']))
         else:
