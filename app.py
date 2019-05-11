@@ -63,22 +63,35 @@ def logout():
 def add_recipe():
     if session.get('username') is None:
         return abort(403)
-    elif request.method == 'POST':
-        if (request.form.get('title') is not None and
-                request.form.get('ingredients') is not None and
-                request.form.get('methods') is not None):
-            recipe_data = request.form.to_dict()
+
+    if request.method == 'POST':
+        recipe_data = request.form.to_dict()
+        if (recipe_data.get('title', '') != '' and
+                recipe_data.get('ingredients', '') != '' and
+                recipe_data.get('methods', '') != ''):
             recipe_data['username'] = session.get('username')
             recipe_data['urn'] = '-'.join(findall('[a-z-]+', recipe_data['title'].lower()))
             count = mongo.db.recipes.count_documents({'urn': {'$regex': '^' + recipe_data['urn'] + '[0-9]*'}})
             if count != 0:
                 recipe_data['urn'] += '{}'.format(count)
             mongo.db.recipes.insert_one(recipe_data)
+            if recipe_data.get('parent') is not None:
+                mongo.db.recipes.update_one({'urn': recipe_data['parent']},
+                                            {'$addToSet': {'children': {'urn': recipe_data['urn'],
+                                                                        'title': recipe_data['title']}}})
             flash('Recipe "{}" successfully created.'.format(recipe_data['title']))
             return redirect(url_for('recipe', urn = recipe_data['urn']))
         else:
             flash('Failed to add recipe!')
-    return render_template('add-recipe.html')
+    elif request.args.get('fork') is not None:
+        parent = request.args.get('fork')
+        recipe_data = mongo.db.recipes.find_one({'urn': parent},
+                                                {'title': 1, 'ingredients': 1, 'methods': 1})
+        if recipe_data is not None:
+            recipe_data['parent'] = parent
+    else:
+        recipe_data = None
+    return render_template('add-recipe.html', recipe=recipe_data)
 
 
 @app.route('/recipes/<urn>')

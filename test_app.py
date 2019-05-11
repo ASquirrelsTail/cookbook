@@ -33,18 +33,25 @@ class TestApp(unittest.TestCase):
 
     def login_user(self, username='TestUser'):
         '''
-        Helper function to create a new user by sending a POST request to /new-user
+        Helper function to log in user.
         '''
         return self.client.post('/login', follow_redirects=True,
                                 data={'username': username})
 
     def logout_user(self):
+        '''
+        Helper function to logout current user.
+        '''
         self.client.get('/logout', follow_redirects=True)
 
     def submit_recipe(self, title='Test Recipe', ingredients='Test ingredient 1\nTest ingredient 2',
-                      methods='Add one to two.\nEnjoy', tags=[]):
+                      methods='Add one to two.\nEnjoy', tags=[], parent=None):
+        '''
+        Helper function to create a recipe.
+        '''
         return self.client.post('/add-recipe', follow_redirects=True,
-                                data={'title': title, 'ingredients': ingredients, 'methods': methods, 'tags': tags})
+                                data={'title': title, 'ingredients': ingredients, 'methods': methods,
+                                      'tags': tags, 'parent': parent})
 
     def test_home(self):
         '''
@@ -247,6 +254,19 @@ class TestApp(unittest.TestCase):
         self.submit_recipe(recipe_title, recipe_ingredients, None)
         self.assertEqual(self.mongo.db.recipes.find_one({'title': recipe_title}), None)
 
+    def test_add_recipe_submit_recipe_missing_fields_preserves_input(self):
+        '''
+        Submitted recipes with missing fields returns the user to the add recipe page with inputs preserved
+        '''
+        username = 'TestUser'
+        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
+        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                                    'Cook until golden.'])
+        self.create_user(username)
+        self.login_user(username)
+        response = self.submit_recipe(None, recipe_ingredients, recipe_methods)
+        self.assertIn(b'Cook until golden.', response.data)
+
     def test_add_recipe_submit_recipe_has_urn(self):
         '''
         Submitted recipes should have a Unique Resource Name
@@ -290,6 +310,80 @@ class TestApp(unittest.TestCase):
         urn = self.mongo.db.recipes.find_one({}).get('urn')
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
         self.assertEqual(self.mongo.db.recipes.count_documents({'urn': urn}), 1)
+
+    def test_add_recipe_submit_recipe_fills_inputs_from_forked_recipe(self):
+        '''
+        Forking a recipe should return an add new recipe page with that recipe filled in
+        '''
+        username = 'TestUser'
+        recipe_title = 'Mac & Cheese'
+        recipe_ingredients = '\n'.join(['Flour', 'Butter', 'Milk', 'Cheese', 'Macaroni'])
+        recipe_methods = '\n'.join(['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.',
+                                    'Once mixture thickens add boiled macaroni.'])
+        self.create_user(username)
+        self.login_user(username)
+        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
+        urn = self.mongo.db.recipes.find_one({}).get('urn')
+        response = self.client.get('/add-recipe?fork={}'.format(urn))
+        self.assertIn(b'Once mixture thickens add boiled macaroni.', response.data)
+
+    def test_add_recipe_submit_recipe_has_parent_hidden_field_from_forked_recipe(self):
+        '''
+        Forking a recipe should return an add new recipe page with that recipes urn in a hidden 'parent' field
+        '''
+        username = 'TestUser'
+        recipe_title = 'Mac & Cheese'
+        recipe_ingredients = '\n'.join(['Flour', 'Butter', 'Milk', 'Cheese', 'Macaroni'])
+        recipe_methods = '\n'.join(['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.',
+                                    'Once mixture thickens add boiled macaroni.'])
+        self.create_user(username)
+        self.login_user(username)
+        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
+        urn = self.mongo.db.recipes.find_one({}).get('urn')
+        response = self.client.get('/add-recipe?fork={}'.format(urn))
+        self.assertIn(str.encode('<input type="hidden" name="parent" value="{}">'.format(urn)), response.data)
+
+    def test_add_recipe_submit_recipe_forked_recipes_reference_parent(self):
+        '''
+        Forking a recipe should return an add new recipe page with that recipes urn in a hidden 'parent' field
+        '''
+        username = 'TestUser'
+        recipe_title = 'Pancakes'
+        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
+        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                                    'Cook until golden.'])
+        self.create_user(username)
+        self.login_user(username)
+        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
+        parent_urn = self.mongo.db.recipes.find_one({}).get('urn')
+        forked_recipe_title = 'Bananna Pancakes'
+        forked_recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil', 'One Bannana'])
+        forked_recipe_methods = '\n'.join(['Heat oil in a pan.', 'Mush up the bananna.',
+                                           'Whisk the rest of the ingredients together.', 'Cook until golden.'])
+        self.submit_recipe(forked_recipe_title, forked_recipe_ingredients, forked_recipe_methods, parent=parent_urn)
+        self.assertEqual(parent_urn, self.mongo.db.recipes.find_one({'title': forked_recipe_title}).get('parent'))
+
+    def test_add_recipe_submit_recipe_forked_recipes_parent_references_child(self):
+        '''
+        Forking a recipe should return an add new recipe page with that recipes urn in a hidden 'parent' field
+        '''
+        username = 'TestUser'
+        recipe_title = 'Pancakes'
+        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
+        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                                    'Cook until golden.'])
+        self.create_user(username)
+        self.login_user(username)
+        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
+        parent_urn = self.mongo.db.recipes.find_one({}).get('urn')
+        forked_recipe_title = 'Bananna Pancakes'
+        forked_recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil', 'One Bannana'])
+        forked_recipe_methods = '\n'.join(['Heat oil in a pan.', 'Mush up the bananna.',
+                                           'Whisk the rest of the ingredients together.', 'Cook until golden.'])
+        self.submit_recipe(forked_recipe_title, forked_recipe_ingredients, forked_recipe_methods, parent=parent_urn)
+        child_urn = self.mongo.db.recipes.find_one({'title': forked_recipe_title}).get('urn')
+        self.assertIn({'urn': child_urn, 'title': forked_recipe_title},
+                      self.mongo.db.recipes.find_one({'urn': parent_urn}).get('children', []))
 
     # def test_add_recipe_submit_recipe_html_escape(self):
     #     '''
@@ -366,7 +460,7 @@ class TestApp(unittest.TestCase):
         self.assertIn(b'Flour', response.data)
         self.assertIn(b'Cook until golden.', response.data)
 
-    def test_recipe_page_increase_views(self):
+    def test_recipe_page_view_increases_views(self):
         '''
         When a recipe page is viewed its number of views should increase.
         '''
@@ -389,7 +483,7 @@ class TestApp(unittest.TestCase):
         self.submit_recipe(title=recipe_title)
         urn = self.mongo.db.recipes.find_one({'title': recipe_title}).get('urn')
         self.client.get('/recipes/{}'.format(urn))
-        self.assertEquals(0, self.mongo.db.recipes.find_one({'urn': urn}).get('views', 0))
+        self.assertEqual(0, self.mongo.db.recipes.find_one({'urn': urn}).get('views', 0))
 
 
 if __name__ == '__main__':

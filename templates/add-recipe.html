@@ -3,14 +3,17 @@
     <h1>Add Recipe</h1>
     <form action="" method="POST">
         <div class="input-field col s12">
-        	<label for="title">Title</label><input type="text" name="title" maxlength="100" placeholder="Enter Recipe Title">
+        	<label for="title">Title</label><input type="text" name="title" maxlength="100" placeholder="Enter Recipe Title" value="{{ recipe['title'] }}">
         </div>
         <div class="input-field col s12">
-        	<label for="ingredients">Ingredients</label><textarea name="ingredients" class="materialize-textarea"></textarea>
+        	<label for="ingredients">Ingredients</label><textarea name="ingredients" class="materialize-textarea">{{ recipe['ingredients'] }}</textarea>
         </div>
         <div class="input-field col s12">
-        	<label for="methods">Method</label><textarea name="methods" class="materialize-textarea"></textarea>
+        	<label for="methods">Method</label><textarea name="methods" class="materialize-textarea">{{ recipe['methods'] }}</textarea>
         </div>
+        {% if recipe['parent'] %}
+            <input type="hidden" name="parent" value="{{ recipe['parent'] }}">
+        {% endif %}
         <input type="submit" value="Submit Recipe">
     </form>
 {% endblock %}
