@@ -1,19 +1,45 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1>Add Recipe</h1>
-    <form action="" method="POST">
-        <div class="input-field col s12">
-        	<label for="title">Title</label><input type="text" name="title" maxlength="100" placeholder="Enter Recipe Title" value="{{ recipe['title'] }}">
-        </div>
-        <div class="input-field col s12">
-        	<label for="ingredients">Ingredients</label><textarea name="ingredients" class="materialize-textarea">{{ recipe['ingredients'] }}</textarea>
-        </div>
-        <div class="input-field col s12">
-        	<label for="methods">Method</label><textarea name="methods" class="materialize-textarea">{{ recipe['methods'] }}</textarea>
-        </div>
-        {% if recipe['parent'] %}
-            <input type="hidden" name="parent" value="{{ recipe['parent'] }}">
-        {% endif %}
-        <input type="submit" value="Submit Recipe">
-    </form>
+<h1>Add Recipe</h1>
+<form action="" method="POST" id="create-recipe">
+    <div class="input-field col s12">
+        <label for="title">Title</label><input type="text" name="title" maxlength="100" placeholder="Enter Recipe Title" value="{{ recipe['title'] }}">
+    </div>
+    <div class="input-field col s12">
+        <label for="ingredients">Ingredients</label><textarea name="ingredients" class="materialize-textarea">{{ recipe['ingredients'] }}</textarea>
+    </div>
+    <div class="input-field col s12">
+        <label for="methods">Method</label><textarea name="methods" class="materialize-textarea">{{ recipe['methods'] }}</textarea>
+    </div>
+    {% if recipe['parent'] %}
+    <input type="hidden" name="parent" value="{{ recipe['parent'] }}">
+    {% endif %}
+    <div class="col s12">
+        Tags:
+        <div id="tag-chips" class="chips"></div>
+        <a class="dropdown-trigger btn" href="#" data-target="add-tag" id="add-tag-button"><i class="material-icons left">add</i>Add Tag</a>
+        <ul id="add-tag" class="dropdown-content">
+            {% for tag in tags %}
+                <li><a href="#!" data-tag-name="{{ tag['name'] }}">{{ tag['name'] }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <input type="hidden" name="tags" id="tag-input" value="">
+    <div class="col s12">
+        <button class="btn waves-effect waves-light" type="submit" name="action">Submit Recipe</button>
+    </div>
+</form>
+{% endblock %}
+{% block javascript %}
+<script src="{{ url_for('static', filename='js/add-recipe.js')}}"></script>
+{% if recipe['tags'] %}
+<script>
+$(function() {
+    let tags = '{{ recipe['tags'] }}'.split('/');
+    tags.forEach(function(tagName) {
+        tagChips.addChip({ tag: tagName });
+    });
+});
+</script>
+{% endif %}
 {% endblock %}

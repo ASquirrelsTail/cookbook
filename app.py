@@ -71,13 +71,19 @@ def add_recipe():
                 recipe_data.get('methods', '') != ''):
             recipe_data['username'] = session.get('username')
             recipe_data['urn'] = '-'.join(findall('[a-z-]+', recipe_data['title'].lower()))
+            if recipe_data.get('tags', '') != '':
+                recipe_data['tags'] = recipe_data['tags'].split('/')
             count = mongo.db.recipes.count_documents({'urn': {'$regex': '^' + recipe_data['urn'] + '[0-9]*'}})
             if count != 0:
                 recipe_data['urn'] += '{}'.format(count)
             if recipe_data.get('parent') is not None:
                 parent_title = mongo.db.recipes.find_one({'urn': recipe_data['parent']}, {'title': 1}).get('title')
                 if parent_title == recipe_data['title']:
-                    return render_template('add-recipe.html', recipe=recipe_data)
+                    flash('Forked recipes must have a different title.')
+                    all_tags = mongo.db.tags.find()
+                    if recipe_data.get('tags', '') != '':
+                        recipe_data['tags'] = '/'.join(recipe_data['tags'])
+                    return render_template('add-recipe.html', recipe=recipe_data, username=session.get('username'), tags=all_tags)
                 else:
                     mongo.db.recipes.update_one({'urn': recipe_data['parent']},
                                                 {'$addToSet': {'children': {'urn': recipe_data['urn'],
@@ -90,12 +96,16 @@ def add_recipe():
     elif request.args.get('fork') is not None:
         parent = request.args.get('fork')
         recipe_data = mongo.db.recipes.find_one({'urn': parent},
-                                                {'title': 1, 'ingredients': 1, 'methods': 1})
+                                                {'title': 1, 'ingredients': 1, 'methods': 1, 'tags': 1})
         if recipe_data is not None:
             recipe_data['parent'] = parent
+            if recipe_data.get('tags', '') != '':
+                recipe_data['tags'] = '/'.join(recipe_data['tags'])
     else:
         recipe_data = None
-    return render_template('add-recipe.html', recipe=recipe_data)
+
+    all_tags = mongo.db.tags.find()
+    return render_template('add-recipe.html', recipe=recipe_data, username=session.get('username'), tags=all_tags)
 
 
 @app.route('/recipes/<urn>')
@@ -108,7 +118,7 @@ def recipe(urn):
             mongo.db.recipes.update_one({'urn': urn}, {'$inc': {'views': 1}})
         recipe['ingredients'] = recipe['ingredients'].split('\n')
         recipe['methods'] = recipe['methods'].split('\n')
-    return render_template('recipe.html', recipe=recipe)
+    return render_template('recipe.html', recipe=recipe, username=session.get('username'))
 
 
 if __name__ == '__main__':

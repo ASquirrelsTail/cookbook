@@ -14,4 +14,11 @@
         <li>{{ method }}</li>
     {% endfor %}
     </ol>
+    {% if recipe['tags'] %}
+    <h3>Tags</h3>
+        {% for tag in recipe['tags'] %}
+            <div class="chip"><a href="#">{{tag}}</a></div>
+        {% endfor %}
+    {% endif %}
+    
 {% endblock %}

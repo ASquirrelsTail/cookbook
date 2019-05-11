@@ -45,7 +45,7 @@ class TestClient(unittest.TestCase):
         self.client.get('/logout', follow_redirects=True)
 
     def submit_recipe(self, title='Test Recipe', ingredients='Test ingredient 1\nTest ingredient 2',
-                      methods='Add one to two.\nEnjoy', tags=[], parent=None):
+                      methods='Add one to two.\nEnjoy', tags='', parent=None):
         '''
         Helper function to create a recipe.
         '''
@@ -239,6 +239,19 @@ class TestAddRecipe(TestClient):
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
         self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}.get('ingredients')), None)
         self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}.get('methods')), None)
+
+    def test_submit_recipe_has_tags_array(self):
+        '''
+        Submitted recipes should have ingredients and methods
+        '''
+        recipe_title = 'Vegan Pancakes'
+        recipe_ingredients = '\n'.join(['Flour', 'Almond Milk', 'Vegetable Oil'])
+        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                                    'Cook until golden.'])
+        recipe_tags = '\n'.join(['Vegan', 'Vegetarian', 'Dairy-Free', 'Egg-Free'])
+        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods, recipe_tags)
+        self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}.get('tags')), None)
+        self.assertEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('tags'), ['Vegan', 'Vegetarian', 'Dairy-Free', 'Egg-Free'])
 
     def test_submit_recipe_has_username(self):
         '''
