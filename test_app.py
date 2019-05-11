@@ -21,8 +21,9 @@ class TestClient(unittest.TestCase):
     '''
     Parent class with utility functions for all tests
     '''
-    def setUp(self):
-        self.client, self.mongo = flask_test_client()
+    @classmethod
+    def setUpClass(cls):
+        cls.client, cls.mongo = flask_test_client()
 
     def create_user(self, username='TestUser'):
         '''
@@ -66,9 +67,8 @@ class TestUsers(TestClient):
     Class for testing the user creation and login pages
     '''
     def setUp(self):
-        super(TestUsers, self).setUp()
-        # Delete all records from the user collection and create test user
         self.mongo.db.logins.delete_many({})
+        self.logout_user()
 
     def test_new_user_page(self):
         '''
@@ -194,9 +194,9 @@ class TestAddRecipe(TestClient):
     Class for testing the add-recipe page
     '''
     def setUp(self):
-        super(TestAddRecipe, self).setUp()
         # Delete all records from the user collection and create test user
         self.mongo.db.logins.delete_many({})
+        self.logout_user()
         self.create_user()
         self.login_user()
         # Delete all records from the recipe collection
@@ -242,13 +242,13 @@ class TestAddRecipe(TestClient):
 
     def test_submit_recipe_has_tags_array(self):
         '''
-        Submitted recipes should have ingredients and methods
+        Submitted recipes with tags should store them as an array
         '''
         recipe_title = 'Vegan Pancakes'
         recipe_ingredients = '\n'.join(['Flour', 'Almond Milk', 'Vegetable Oil'])
         recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
                                     'Cook until golden.'])
-        recipe_tags = '\n'.join(['Vegan', 'Vegetarian', 'Dairy-Free', 'Egg-Free'])
+        recipe_tags = '/'.join(['Vegan', 'Vegetarian', 'Dairy-Free', 'Egg-Free'])
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods, recipe_tags)
         self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}.get('tags')), None)
         self.assertEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('tags'), ['Vegan', 'Vegetarian', 'Dairy-Free', 'Egg-Free'])
@@ -440,9 +440,9 @@ class TestRecipes(TestClient):
     Class for testing the add-recipe page
     '''
     def setUp(self):
-        super(TestRecipes, self).setUp()
         # Delete all records from the user collection and create test user
         self.mongo.db.logins.delete_many({})
+        self.logout_user()
         self.create_user()
         self.login_user()
         # Delete all records from the recipe collection
