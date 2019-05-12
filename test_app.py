@@ -772,6 +772,13 @@ class TestRecipesList(TestClient):
         response = self.client.get('/recipes')
         self.assertLess(response.data.decode().count('href="/recipes/'), 11)
 
+    def test_pagination(self):
+        '''
+        The page should display the correct number of reuslts for the page
+        '''
+        response = self.client.get('/recipes?username=Alice&page=3')
+        self.assertEqual(response.data.decode().count('href="/recipes/'), 5)
+
 
 if __name__ == '__main__':
     unittest.main()
