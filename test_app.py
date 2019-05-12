@@ -692,5 +692,6 @@ class TestRecipesList(TestClient):
         response = self.client.get('/recipes?tags=Vegetarian')
         self.assertIn(b'Recipes: 11', response.data)
 
+
 if __name__ == '__main__':
     unittest.main()

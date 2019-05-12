@@ -155,7 +155,11 @@ def add_recipe():
 
 @app.route('/recipes')
 def recipes():
-    return render_template('recipes.html')
+    if request.args.get('tags') is not None:
+        no_recipes = 11
+    else:
+        no_recipes = 60
+    return render_template('recipes.html', no_recipes=no_recipes)
 
 
 @app.route('/recipes/<urn>')
