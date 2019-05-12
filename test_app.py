@@ -27,35 +27,39 @@ class TestClient(unittest.TestCase):
     def setUpClass(cls):
         cls.client, cls.mongo = flask_test_client()
 
-    def create_user(self, username='TestUser'):
+    @classmethod
+    def create_user(cls, username='TestUser'):
         '''
         Helper function to create a new user by sending a POST request to /new-user
         '''
-        return self.client.post('/new-user', follow_redirects=True,
-                                data={'username': username})
+        return cls.client.post('/new-user', follow_redirects=True,
+                               data={'username': username})
 
-    def login_user(self, username='TestUser'):
+    @classmethod
+    def login_user(cls, username='TestUser'):
         '''
         Helper function to log in user.
         '''
-        return self.client.post('/login', follow_redirects=True,
-                                data={'username': username})
+        return cls.client.post('/login', follow_redirects=True,
+                               data={'username': username})
 
-    def logout_user(self):
+    @classmethod
+    def logout_user(cls):
         '''
         Helper function to logout current user.
         '''
-        self.client.get('/logout', follow_redirects=True)
+        cls.client.get('/logout', follow_redirects=True)
 
-    def submit_recipe(self, title='Test Recipe', ingredients='Test ingredient 1\nTest ingredient 2',
+    @classmethod
+    def submit_recipe(cls, title='Test Recipe', ingredients='Test ingredient 1\nTest ingredient 2',
                       methods='Add one to two.\nEnjoy', tags='', meals='', prep_time='00:01', cook_time='00:01', parent=None):
         '''
         Helper function to create a recipe.
         '''
-        return self.client.post('/add-recipe', follow_redirects=True,
-                                data={'title': title, 'ingredients': ingredients, 'methods': methods,
-                                      'tags': tags, 'meals': meals, 'prep-time': prep_time,
-                                      'cook-time': cook_time, 'parent': parent})
+        return cls.client.post('/add-recipe', follow_redirects=True,
+                               data={'title': title, 'ingredients': ingredients, 'methods': methods,
+                                     'tags': tags, 'meals': meals, 'prep-time': prep_time,
+                                     'cook-time': cook_time, 'parent': parent})
 
     def test_home(self):
         '''
@@ -439,6 +443,18 @@ class TestAddRecipe(TestClient):
         self.submit_recipe(forked_recipe_title, forked_recipe_ingredients, forked_recipe_methods, parent=parent_urn)
         self.assertEqual(self.mongo.db.recipes.find_one({'parent': parent_urn}), None)
 
+    def test_forked_recipe_incorrect_parent(self):
+        '''
+        A forked recipe with an incorrect parent should have no parent attribute
+        '''
+        parent_urn = 'pancakes'
+        forked_recipe_title = 'Bannana Pancakes'
+        forked_recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil', 'One Bannana'])
+        forked_recipe_methods = '\n'.join(['Heat oil in a pan.', 'Mush up the bananna.',
+                                           'Whisk the rest of the ingredients together.', 'Cook until golden.'])
+        self.submit_recipe(forked_recipe_title, forked_recipe_ingredients, forked_recipe_methods, parent=parent_urn)
+        self.assertEqual(self.mongo.db.recipes.find_one({'title': forked_recipe_title}).get('parent'), None)
+
     # def test_add_recipe_submit_recipe_html_escape(self):
     #     '''
     #     Submitted recipes should not contain unescaped html characters - Redundant due to autoescaping during render_template()
@@ -609,6 +625,55 @@ class TestRecipes(TestClient):
         urn = self.mongo.db.recipes.find_one({'title': recipe_title}).get('urn')
         self.client.get('/recipes/{}'.format(urn))
         self.assertEqual(0, self.mongo.db.recipes.find_one({'urn': urn}).get('views', 0))
+
+
+class TestRecipesList(TestClient):
+    '''
+    Class for testing the add-recipe page
+    '''
+    @classmethod
+    def setUpClass(cls):
+        super(TestRecipesList, cls).setUpClass()
+        # Delete all records from the user collection and create test user
+        cls.mongo.db.logins.delete_many({})
+        # Delete all records from the recipe collection
+        cls.mongo.db.recipes.delete_many({})
+
+        # Create plenty of fake recipes and users
+        cls.logout_user()
+        cls.create_user('Alice')
+        cls.login_user('Alice')
+        cls.submit_recipe(title='Alice\'s Apple Pie', tags=['Vegetarian'], meals=['Dessert'])
+        cls.submit_recipe(title='Alice\'s Aromatic Duck', meals=['Dinner'])
+        cls.submit_recipe(title='Alice\'s Avocado Salad', tags=['Vegetarian', 'Vegan', 'Dairy-free'], meals=['Lunch', 'Snack'])
+        cls.submit_recipe(title='Alice\'s Apple Coleslaw', tags=['Vegetarian', 'Dairy-free', 'Gluten-free'], meals=['Side'])
+        cls.submit_recipe(title='Alice\'s Anzac Biscuits', tags=['Vegetarian', 'Dairy-free'], meals=['Snack'])
+        [cls.submit_recipe() for n in range(20)]
+        cls.logout_user()
+        cls.create_user('Benjamin')
+        cls.login_user('Benjamin')
+        cls.submit_recipe(title='Ben\'s Baked Alaska', tags=['Vegetarian'], meals=['Dessert'])
+        cls.submit_recipe(title='Ben\'s Bean Chilli', tags=['Vegetarian', 'Vegan'], meals=['Dinner'])
+        cls.submit_recipe(title='Ben\'s Bannana Smoothie', tags=['Vegetarian', 'Gluten-free'], meals=['Drink'])
+        cls.submit_recipe(title='Ben\'s Beef Curry', tags=['Gluten-free'], meals=['Dinner'])
+        cls.submit_recipe(title='Ben\'s Blackberry & Apple Pie', tags=['Vegetarian'], meals=['Dessert'], parent='alice-s-apple-pie')
+        [cls.submit_recipe() for n in range(15)]
+        cls.logout_user()
+        cls.create_user('Charlie')
+        cls.login_user('Charlie')
+        cls.submit_recipe(title='Charlie\'s Chicken Curry', tags=['Gluten-free'], meals=['Dinner'], parent='ben-s-beef-curry')
+        cls.submit_recipe(title='Charlie\'s Chocolate Chip Cookies', tags=['Vegetarian'], meals=['Snack', 'Dessert'])
+        cls.submit_recipe(title='Charlie\'s Cherry Bakewells', tags=['Vegetarian', 'Dairy-free'], meals=['Snack', 'Dessert'])
+        cls.submit_recipe(title='Charlie\'s Cottage Pie', tags=['Vegetarian'], meals=['Dinner'])
+        cls.submit_recipe(title='Charlie\'s Chicken Caesar Salad', tags=['Gluten-free'], meals=['Lunch', 'Dinner'])
+        [cls.submit_recipe() for n in range(10)]
+        cls.logout_user()
+        cls.create_user()
+        cls.logout_user()
+
+    def test_page(self):
+        response = self.client.get('/recipes')
+        self.assertEqual(response.status_code, 200)
 
 
 if __name__ == '__main__':

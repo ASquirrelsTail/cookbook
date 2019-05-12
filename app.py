@@ -104,22 +104,27 @@ def add_recipe():
             if count != 0:
                 recipe_data['urn'] += '{}'.format(count)
             if recipe_data.get('parent') is not None:
-                parent_title = mongo.db.recipes.find_one({'urn': recipe_data['parent']}, {'title': 1}).get('title')
-                if parent_title == recipe_data['title']:
-                    flash('Forked recipes must have a different title.')
-                    all_tags = mongo.db.tags.find()
-                    all_meals = mongo.db.meals.find()
-                    recipe_data['prep-time'] = recipe_data['prep-time'].split(':')
-                    recipe_data['cook-time'] = recipe_data['cook-time'].split(':')
-                    if recipe_data.get('tags', '') != '':
-                        recipe_data['tags'] = '/'.join(recipe_data['tags'])
-                    if recipe_data.get('meals', '') != '':
-                        recipe_data['meals'] = '/'.join(recipe_data['meals'])
-                    return render_template('add-recipe.html', recipe=recipe_data, username=session.get('username'), tags=all_tags, meals=all_meals)
+                parent = mongo.db.recipes.find_one({'urn': recipe_data['parent']}, {'title': 1})
+                if parent is not None:
+                    parent_title = parent.get('title')
+                    if parent_title == recipe_data['title']:
+                        flash('Forked recipes must have a different title.')
+                        all_tags = mongo.db.tags.find()
+                        all_meals = mongo.db.meals.find()
+                        recipe_data['prep-time'] = recipe_data['prep-time'].split(':')
+                        recipe_data['cook-time'] = recipe_data['cook-time'].split(':')
+                        if recipe_data.get('tags', '') != '':
+                            recipe_data['tags'] = '/'.join(recipe_data['tags'])
+                        if recipe_data.get('meals', '') != '':
+                            recipe_data['meals'] = '/'.join(recipe_data['meals'])
+                        return render_template('add-recipe.html', recipe=recipe_data, username=session.get('username'), tags=all_tags, meals=all_meals)
+                    else:
+                        mongo.db.recipes.update_one({'urn': recipe_data['parent']},
+                                                    {'$addToSet': {'children': {'urn': recipe_data['urn'],
+                                                                                'title': recipe_data['title']}}})
                 else:
-                    mongo.db.recipes.update_one({'urn': recipe_data['parent']},
-                                                {'$addToSet': {'children': {'urn': recipe_data['urn'],
-                                                                            'title': recipe_data['title']}}})
+                    recipe_data['parent'] = None
+                    flash('Parent recipe does not exist!')
             mongo.db.recipes.insert_one(recipe_data)
             flash('Recipe "{}" successfully created.'.format(recipe_data['title']))
             return redirect(url_for('recipe', urn = recipe_data['urn']))
