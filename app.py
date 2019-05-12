@@ -156,9 +156,9 @@ def add_recipe():
 @app.route('/recipes')
 def recipes():
     if request.args.get('tags') is not None:
-        no_recipes = 11
+        no_recipes = mongo.db.recipes.count_documents({'tags': request.args.get('tags')})
     else:
-        no_recipes = 60
+        no_recipes = mongo.db.recipes.count_documents({})
     return render_template('recipes.html', no_recipes=no_recipes)
 
 

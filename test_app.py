@@ -51,14 +51,20 @@ class TestClient(unittest.TestCase):
         cls.client.get('/logout', follow_redirects=True)
 
     @classmethod
-    def submit_recipe(cls, title='Test Recipe', ingredients='Test ingredient 1\nTest ingredient 2',
-                      methods='Add one to two.\nEnjoy', tags='', meals='', prep_time='00:01', cook_time='00:01', parent=None):
+    def submit_recipe(cls, title='Test Recipe', ingredients=['Test ingredient 1', 'Test ingredient 2'],
+                      methods=['Add one to two.', 'Enjoy'], tags='', meals='', prep_time='00:01', cook_time='00:01', parent=None):
         '''
         Helper function to create a recipe.
         '''
+        def join_if_array(input_list, string='\n'):
+            if isinstance(input_list, list):
+                return string.join(input_list)
+            else:
+                return input_list
+
         return cls.client.post('/add-recipe', follow_redirects=True,
-                               data={'title': title, 'ingredients': ingredients, 'methods': methods,
-                                     'tags': tags, 'meals': meals, 'prep-time': prep_time,
+                               data={'title': title, 'ingredients': join_if_array(ingredients), 'methods': join_if_array(methods),
+                                     'tags': join_if_array(tags, '/'), 'meals': join_if_array(meals, '/'), 'prep-time': prep_time,
                                      'cook-time': cook_time, 'parent': parent})
 
     def test_home(self):
@@ -229,9 +235,9 @@ class TestAddRecipe(TestClient):
         Submitted recipes should be added to the recipes collection
         '''
         recipe_title = 'Pancakes'
-        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
-        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
-                                    'Cook until golden.'])
+        recipe_ingredients = ['Flour', 'Eggs', 'Milk', 'Vegetable Oil']
+        recipe_methods = ['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                          'Cook until golden.']
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
         self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}), None)
 
@@ -240,9 +246,9 @@ class TestAddRecipe(TestClient):
         Submitted recipes should have ingredients and methods
         '''
         recipe_title = 'Pancakes'
-        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
-        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
-                                    'Cook until golden.'])
+        recipe_ingredients = ['Flour', 'Eggs', 'Milk', 'Vegetable Oil']
+        recipe_methods = ['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                          'Cook until golden.']
         recipe_prep_time = '00:05'
         recipe_cook_time = '00:05'
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods, prep_time=recipe_prep_time, cook_time=recipe_cook_time)
@@ -256,10 +262,10 @@ class TestAddRecipe(TestClient):
         Submitted recipes with tags should store them as an array
         '''
         recipe_title = 'Vegan Pancakes'
-        recipe_ingredients = '\n'.join(['Flour', 'Almond Milk', 'Vegetable Oil'])
-        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
-                                    'Cook until golden.'])
-        recipe_tags = '/'.join(['Vegan', 'Vegetarian', 'Dairy-Free', 'Egg-Free'])
+        recipe_ingredients = ['Flour', 'Almond Milk', 'Vegetable Oil']
+        recipe_methods = ['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                          'Cook until golden.']
+        recipe_tags = ['Vegan', 'Vegetarian', 'Dairy-Free', 'Egg-Free']
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods, recipe_tags)
         self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}.get('tags')), None)
         self.assertEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('tags'), ['Vegan', 'Vegetarian', 'Dairy-Free', 'Egg-Free'])
@@ -269,10 +275,10 @@ class TestAddRecipe(TestClient):
         Submitted recipes with meals should store them as an array
         '''
         recipe_title = 'Pancakes'
-        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
-        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
-                                    'Cook until golden.'])
-        recipe_meals = '/'.join(['Breakfast', 'Desert'])
+        recipe_ingredients = ['Flour', 'Eggs', 'Milk', 'Vegetable Oil']
+        recipe_methods = ['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                          'Cook until golden.']
+        recipe_meals = ['Breakfast', 'Desert']
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods, None, recipe_meals)
         self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}.get('meals')), None)
         self.assertEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('meals'), ['Breakfast', 'Desert'])
@@ -283,9 +289,9 @@ class TestAddRecipe(TestClient):
         '''
         username = 'TestUser'
         recipe_title = 'Pancakes'
-        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
-        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
-                                    'Cook until golden.'])
+        recipe_ingredients = ['Flour', 'Eggs', 'Milk', 'Vegetable Oil']
+        recipe_methods = ['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                          'Cook until golden.']
         self.create_user(username)
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
         self.assertEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('username'), username)
@@ -295,9 +301,9 @@ class TestAddRecipe(TestClient):
         Submitted recipes should have timestamp
         '''
         recipe_title = 'Pancakes'
-        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
-        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
-                                    'Cook until golden.'])
+        recipe_ingredients = ['Flour', 'Eggs', 'Milk', 'Vegetable Oil']
+        recipe_methods = ['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                          'Cook until golden.']
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
         self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('date'), None)
         self.assertRegex(self.mongo.db.recipes.find_one({'title': recipe_title}).get('date', ''),
@@ -308,9 +314,9 @@ class TestAddRecipe(TestClient):
         Submitted recipes without a title, ingredients or methods should should not be added
         '''
         recipe_title = 'Pancakes'
-        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
-        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
-                                    'Cook until golden.'])
+        recipe_ingredients = ['Flour', 'Eggs', 'Milk', 'Vegetable Oil']
+        recipe_methods = ['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                          'Cook until golden.']
         self.submit_recipe(None, recipe_ingredients, recipe_methods)
         self.submit_recipe(recipe_title, None, recipe_methods)
         self.submit_recipe(recipe_title, recipe_ingredients, None)
@@ -320,9 +326,9 @@ class TestAddRecipe(TestClient):
         '''
         Submitted recipes with missing fields returns the user to the add recipe page with inputs preserved
         '''
-        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
-        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
-                                    'Cook until golden.'])
+        recipe_ingredients = ['Flour', 'Eggs', 'Milk', 'Vegetable Oil']
+        recipe_methods = ['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                          'Cook until golden.']
         response = self.submit_recipe(None, recipe_ingredients, recipe_methods)
         self.assertIn(b'Cook until golden.', response.data)
 
@@ -331,9 +337,9 @@ class TestAddRecipe(TestClient):
         Submitted recipes should have a Unique Resource Name
         '''
         recipe_title = 'Pancakes'
-        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
-        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
-                                    'Cook until golden.'])
+        recipe_ingredients = ['Flour', 'Eggs', 'Milk', 'Vegetable Oil']
+        recipe_methods = ['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                          'Cook until golden.']
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
         self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('urn'), None)
 
@@ -342,9 +348,9 @@ class TestAddRecipe(TestClient):
         Submitted recipes should have a valid Unique Resource Name that only contains lowercase alphanumeric characters, underscores and dashes
         '''
         recipe_title = 'Mac & Cheese'
-        recipe_ingredients = '\n'.join(['Flour', 'Butter', 'Milk', 'Cheese', 'Macaroni'])
-        recipe_methods = '\n'.join(['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.',
-                                    'Once mixture thickens add boiled macaroni.'])
+        recipe_ingredients = ['Flour', 'Butter', 'Milk', 'Cheese', 'Macaroni']
+        recipe_methods = ['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.',
+                          'Once mixture thickens add boiled macaroni.']
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
         self.assertNotRegex(self.mongo.db.recipes.find_one({}).get('urn'), '[^a-z0-9_-]+')
 
@@ -353,9 +359,9 @@ class TestAddRecipe(TestClient):
         Submitted recipes should have a unique URN, even though titles can be identical
         '''
         recipe_title = 'Mac & Cheese'
-        recipe_ingredients = '\n'.join(['Flour', 'Butter', 'Milk', 'Cheese', 'Macaroni'])
-        recipe_methods = '\n'.join(['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.',
-                                    'Once mixture thickens add boiled macaroni.'])
+        recipe_ingredients = ['Flour', 'Butter', 'Milk', 'Cheese', 'Macaroni']
+        recipe_methods = ['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.',
+                          'Once mixture thickens add boiled macaroni.']
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
         urn = self.mongo.db.recipes.find_one({}).get('urn')
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
@@ -366,9 +372,9 @@ class TestAddRecipe(TestClient):
         Forking a recipe should return an add new recipe page with that recipe filled in
         '''
         recipe_title = 'Mac & Cheese'
-        recipe_ingredients = '\n'.join(['Flour', 'Butter', 'Milk', 'Cheese', 'Macaroni'])
-        recipe_methods = '\n'.join(['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.',
-                                    'Once mixture thickens add boiled macaroni.'])
+        recipe_ingredients = ['Flour', 'Butter', 'Milk', 'Cheese', 'Macaroni']
+        recipe_methods = ['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.',
+                          'Once mixture thickens add boiled macaroni.']
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
         urn = self.mongo.db.recipes.find_one({}).get('urn')
         response = self.client.get('/add-recipe?fork={}'.format(urn))
@@ -379,9 +385,9 @@ class TestAddRecipe(TestClient):
         Forking a recipe should return an add new recipe page with that recipes urn in a hidden 'parent' field
         '''
         recipe_title = 'Mac & Cheese'
-        recipe_ingredients = '\n'.join(['Flour', 'Butter', 'Milk', 'Cheese', 'Macaroni'])
-        recipe_methods = '\n'.join(['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.',
-                                    'Once mixture thickens add boiled macaroni.'])
+        recipe_ingredients = ['Flour', 'Butter', 'Milk', 'Cheese', 'Macaroni']
+        recipe_methods = ['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.',
+                          'Once mixture thickens add boiled macaroni.']
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
         urn = self.mongo.db.recipes.find_one({}).get('urn')
         response = self.client.get('/add-recipe?fork={}'.format(urn))
@@ -392,16 +398,16 @@ class TestAddRecipe(TestClient):
         Forking a recipe should return an add new recipe page with that recipes urn in a hidden 'parent' field
         '''
         recipe_title = 'Pancakes'
-        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
-        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
-                                    'Cook until golden.'])
+        recipe_ingredients = ['Flour', 'Eggs', 'Milk', 'Vegetable Oil']
+        recipe_methods = ['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                          'Cook until golden.']
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
 
         parent_urn = self.mongo.db.recipes.find_one({}).get('urn')
         forked_recipe_title = 'Bananna Pancakes'
-        forked_recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil', 'One Bannana'])
-        forked_recipe_methods = '\n'.join(['Heat oil in a pan.', 'Mush up the bananna.',
-                                           'Whisk the rest of the ingredients together.', 'Cook until golden.'])
+        forked_recipe_ingredients = ['Flour', 'Eggs', 'Milk', 'Vegetable Oil', 'One Bannana']
+        forked_recipe_methods = ['Heat oil in a pan.', 'Mush up the bananna.',
+                                 'Whisk the rest of the ingredients together.', 'Cook until golden.']
         self.submit_recipe(forked_recipe_title, forked_recipe_ingredients, forked_recipe_methods, parent=parent_urn)
         self.assertEqual(parent_urn, self.mongo.db.recipes.find_one({'title': forked_recipe_title}).get('parent'))
 
@@ -410,16 +416,16 @@ class TestAddRecipe(TestClient):
         Forking a recipe should return an add new recipe page with that recipes urn in a hidden 'parent' field
         '''
         recipe_title = 'Pancakes'
-        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
-        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
-                                    'Cook until golden.'])
+        recipe_ingredients = ['Flour', 'Eggs', 'Milk', 'Vegetable Oil']
+        recipe_methods = ['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                          'Cook until golden.']
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
 
         parent_urn = self.mongo.db.recipes.find_one({}).get('urn')
         forked_recipe_title = 'Bananna Pancakes'
-        forked_recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil', 'One Bannana'])
-        forked_recipe_methods = '\n'.join(['Heat oil in a pan.', 'Mush up the bananna.',
-                                           'Whisk the rest of the ingredients together.', 'Cook until golden.'])
+        forked_recipe_ingredients = ['Flour', 'Eggs', 'Milk', 'Vegetable Oil', 'One Bannana']
+        forked_recipe_methods = ['Heat oil in a pan.', 'Mush up the bananna.',
+                                 'Whisk the rest of the ingredients together.', 'Cook until golden.']
         self.submit_recipe(forked_recipe_title, forked_recipe_ingredients, forked_recipe_methods, parent=parent_urn)
         child_urn = self.mongo.db.recipes.find_one({'title': forked_recipe_title}).get('urn')
         self.assertIn({'urn': child_urn, 'title': forked_recipe_title},
@@ -430,16 +436,16 @@ class TestAddRecipe(TestClient):
         A forked recipe should not share the parent recipes name
         '''
         recipe_title = 'Pancakes'
-        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
-        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
-                                    'Cook until golden.'])
+        recipe_ingredients = ['Flour', 'Eggs', 'Milk', 'Vegetable Oil']
+        recipe_methods = ['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                          'Cook until golden.']
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
 
         parent_urn = self.mongo.db.recipes.find_one({}).get('urn')
         forked_recipe_title = 'Pancakes'
-        forked_recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil', 'One Bannana'])
-        forked_recipe_methods = '\n'.join(['Heat oil in a pan.', 'Mush up the bananna.',
-                                           'Whisk the rest of the ingredients together.', 'Cook until golden.'])
+        forked_recipe_ingredients = ['Flour', 'Eggs', 'Milk', 'Vegetable Oil', 'One Bannana']
+        forked_recipe_methods = ['Heat oil in a pan.', 'Mush up the bananna.',
+                                 'Whisk the rest of the ingredients together.', 'Cook until golden.']
         self.submit_recipe(forked_recipe_title, forked_recipe_ingredients, forked_recipe_methods, parent=parent_urn)
         self.assertEqual(self.mongo.db.recipes.find_one({'parent': parent_urn}), None)
 
@@ -449,9 +455,9 @@ class TestAddRecipe(TestClient):
         '''
         parent_urn = 'pancakes'
         forked_recipe_title = 'Bannana Pancakes'
-        forked_recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil', 'One Bannana'])
-        forked_recipe_methods = '\n'.join(['Heat oil in a pan.', 'Mush up the bananna.',
-                                           'Whisk the rest of the ingredients together.', 'Cook until golden.'])
+        forked_recipe_ingredients = ['Flour', 'Eggs', 'Milk', 'Vegetable Oil', 'One Bannana']
+        forked_recipe_methods = ['Heat oil in a pan.', 'Mush up the bananna.',
+                                 'Whisk the rest of the ingredients together.', 'Cook until golden.']
         self.submit_recipe(forked_recipe_title, forked_recipe_ingredients, forked_recipe_methods, parent=parent_urn)
         self.assertEqual(self.mongo.db.recipes.find_one({'title': forked_recipe_title}).get('parent'), None)
 
@@ -474,9 +480,9 @@ class TestAddRecipe(TestClient):
         After successfully submitting a recipe users should be redirected to its page
         '''
         recipe_title = 'Mac & Cheese'
-        recipe_ingredients = '\n'.join(['Flour', 'Butter', 'Milk', 'Cheese', 'Macaroni'])
-        recipe_methods = '\n'.join(['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.',
-                                    'Once mixture thickens add boiled macaroni.'])
+        recipe_ingredients = ['Flour', 'Butter', 'Milk', 'Cheese', 'Macaroni']
+        recipe_methods = ['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.',
+                          'Once mixture thickens add boiled macaroni.']
         response = self.client.post('/add-recipe', follow_redirects=False,
                                     data={'title': recipe_title, 'ingredients': recipe_ingredients,
                                           'methods': recipe_methods})
@@ -502,9 +508,9 @@ class TestRecipes(TestClient):
         The recipe page for a recipe should return 200
         '''
         recipe_title = 'Pancakes'
-        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
-        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
-                                    'Cook until golden.'])
+        recipe_ingredients = ['Flour', 'Eggs', 'Milk', 'Vegetable Oil']
+        recipe_methods = ['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                          'Cook until golden.']
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
         urn = self.mongo.db.recipes.find_one({'title': recipe_title}).get('urn')
         response = self.client.get('/recipes/{}'.format(urn))
@@ -523,9 +529,9 @@ class TestRecipes(TestClient):
         The recipe page for a recipe should return that recipe
         '''
         recipe_title = 'Pancakes'
-        recipe_ingredients = '\n'.join(['Flour', 'Eggs', 'Milk', 'Vegetable Oil'])
-        recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
-                                    'Cook until golden.'])
+        recipe_ingredients = ['Flour', 'Eggs', 'Milk', 'Vegetable Oil']
+        recipe_methods = ['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                          'Cook until golden.']
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
         urn = self.mongo.db.recipes.find_one({'title': recipe_title}).get('urn')
         response = self.client.get('/recipes/{}'.format(urn))
@@ -552,7 +558,7 @@ class TestRecipes(TestClient):
         The returned page should contain all tags
         '''
         recipe_tags = ['Vegan', 'Vegetarian', 'Dairy-free']
-        self.submit_recipe(tags='/'.join(recipe_tags))
+        self.submit_recipe(tags=recipe_tags)
         urn = self.mongo.db.recipes.find_one({}).get('urn')
         response = self.client.get('/recipes/{}'.format(urn))
         for tag in recipe_tags:
@@ -563,7 +569,7 @@ class TestRecipes(TestClient):
         The returned page should contain all meals
         '''
         recipe_meals = ['Breakfast', 'Brunch', 'Dessert']
-        self.submit_recipe(meals='/'.join(recipe_meals))
+        self.submit_recipe(meals=recipe_meals)
         urn = self.mongo.db.recipes.find_one({}).get('urn')
         response = self.client.get('/recipes/{}'.format(urn))
         for meal in recipe_meals:
