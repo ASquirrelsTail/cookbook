@@ -173,7 +173,7 @@ def recipes():
     if request.args.get('username') is not None:
         query['username'] = request.args.get('username')
 
-    recipes = mongo.db.recipes.find(query, {'urn': 1, 'title': 1})
+    recipes = mongo.db.recipes.find(query, {'urn': 1, 'title': 1, 'username': 1})
     no_recipes = mongo.db.recipes.count_documents(query)
     return render_template('recipes.html', no_recipes=no_recipes, recipes=recipes)
 

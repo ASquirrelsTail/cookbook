@@ -765,6 +765,13 @@ class TestRecipesList(TestClient):
         response = self.client.get('/recipes?meals=Drink')
         self.assertIn(b'Benjamin', response.data)
 
+    def test_less_than_ten_recipes_per_page(self):
+        '''
+        The page should display ten or less recipes per page
+        '''
+        response = self.client.get('/recipes')
+        self.assertLess(response.data.decode().count('href="/recipes/'), 11)
+
 
 if __name__ == '__main__':
     unittest.main()
