@@ -691,6 +691,8 @@ class TestRecipesList(TestClient):
         '''
         response = self.client.get('/recipes?tags=Vegetarian')
         self.assertIn(b'Recipes: 11', response.data)
+        response2 = self.client.get('/recipes?tags=Vegan')
+        self.assertIn(b'Recipes: 2', response2.data)
 
 
 if __name__ == '__main__':
