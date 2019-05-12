@@ -791,8 +791,17 @@ class TestRecipesList(TestClient):
         The current page should link to the previous and next pages
         '''
         response = self.client.get('/recipes?page=3')
-        self.assertin(b'/recipes?page=2', response.data)
-        self.assertin(b'/recipes?page=4', response.data)
+        self.assertIn(b'/recipes?page=2', response.data)
+        self.assertIn(b'/recipes?page=4', response.data)
+
+    def test_pagination_no_links_beyond_range(self):
+        '''
+        There shouldn't be pagination links to pages beyond bounds
+        '''
+        response = self.client.get('/recipes')
+        self.assertNotIn(b'/recipes?page=0', response.data)
+        response = self.client.get('/recipes?page=6')
+        self.assertIn(b'/recipes?page=7', response.data)
 
 
 if __name__ == '__main__':
