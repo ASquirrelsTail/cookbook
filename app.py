@@ -153,6 +153,11 @@ def add_recipe():
     return render_template('add-recipe.html', recipe=recipe_data, username=session.get('username'), tags=all_tags, meals=all_meals)
 
 
+@app.route('/recipes')
+def recipes():
+    return render_template('recipes.html')
+
+
 @app.route('/recipes/<urn>')
 def recipe(urn):
     recipe = mongo.db.recipes.find_one({'urn': urn})
