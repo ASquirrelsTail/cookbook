@@ -155,17 +155,25 @@ def add_recipe():
 
 @app.route('/recipes')
 def recipes():
+    query = {}
     if request.args.get('tags') is not None:
         tags = request.args['tags']
         if ' ' in tags:
             tags = tags.split(' ')
-            no_recipes = mongo.db.recipes.count_documents({'tags': {'$all': tags}})
+            query['tags'] = {'$all': tags}
         else:
-            no_recipes = mongo.db.recipes.count_documents({'tags': tags})
-    elif request.args.get('username') is not None:
-        no_recipes = mongo.db.recipes.count_documents({'username': request.args.get('username')})
-    else:
-        no_recipes = mongo.db.recipes.count_documents({})
+            query['tags'] = tags
+    if request.args.get('meals') is not None:
+        meals = request.args['meals']
+        if ' ' in meals:
+            meals = meals.split(' ')
+            query['meals'] = {'$all': meals}
+        else:
+            query['meals'] = meals
+    if request.args.get('username') is not None:
+        query['username'] = request.args.get('username')
+
+    no_recipes = mongo.db.recipes.count_documents(query)
     return render_template('recipes.html', no_recipes=no_recipes)
 
 

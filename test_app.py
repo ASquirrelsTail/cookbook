@@ -693,7 +693,7 @@ class TestRecipesList(TestClient):
 
     def test_number_of_tagged_recipes(self):
         '''
-        Recipes page should show how many recipes have the requested tags
+        Recipes page should show how many recipes have the requested tag
         '''
         response = self.client.get('/recipes?tags=Vegetarian')
         self.assertIn(b'Recipes: 11', response.data)
@@ -701,16 +701,46 @@ class TestRecipesList(TestClient):
         self.assertIn(b'Recipes: 2', response2.data)
 
     def test_number_of_multiple_tags(self):
+        '''
+        Recipes page should show how many recipes have the requested tags
+        '''
         response = self.client.get('/recipes?tags=Vegetarian%20Vegan')
         self.assertIn(b'Recipes: 2', response.data)
 
     def test_number_of_recipes_by_author(self):
+        '''
+        Recipes page should show how many recipes by the requested user
+        '''
         response = self.client.get('/recipes?username=Alice')
         self.assertIn(b'Recipes: 25', response.data)
 
     def test_number_of_recipes_by_author_and_tags(self):
+        '''
+        Recipes page should show how many recipes by the requested user, with requested tags
+        '''
         response = self.client.get('/recipes?username=Alice&tags=Vegetarian')
         self.assertIn(b'Recipes: 4', response.data)
+
+    def test_number_of_recipes_by_meal(self):
+        '''
+        Recipes page should show how many recipes are the requested meal
+        '''
+        response = self.client.get('/recipes?meals=Snack')
+        self.assertIn(b'Recipes: 4', response.data)
+
+    def test_number_of_recipes_by_author_and_tags_and_meal(self):
+        '''
+        Recipes page should show how many recipes by the requested user, with requested tags
+        '''
+        response = self.client.get('/recipes?username=Alice&tags=Vegetarian&meals=Snack%20Lunch')
+        self.assertIn(b'Recipes: 1', response.data)
+
+    def test_links_to_recipes(self):
+        '''
+        Recipes page should contain links to recipes
+        '''
+        response = self.client.get('/recipes')
+        self.assertRegex(response.data.decode(), 'href="/recipes/[a-z0-9-]+"')
 
 
 if __name__ == '__main__':
