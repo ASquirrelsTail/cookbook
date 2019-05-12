@@ -708,6 +708,10 @@ class TestRecipesList(TestClient):
         response = self.client.get('/recipes?username=Alice')
         self.assertIn(b'Recipes: 25', response.data)
 
+    def test_number_of_recipes_by_author_and_tags(self):
+        response = self.client.get('/recipes?username=Alice&tags=Vegetarian')
+        self.assertIn(b'Recipes: 4', response.data)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -162,6 +162,8 @@ def recipes():
             no_recipes = mongo.db.recipes.count_documents({'tags': {'$all': tags}})
         else:
             no_recipes = mongo.db.recipes.count_documents({'tags': tags})
+    elif request.args.get('username') is not None:
+        no_recipes = mongo.db.recipes.count_documents({'username': request.args.get('username')})
     else:
         no_recipes = mongo.db.recipes.count_documents({})
     return render_template('recipes.html', no_recipes=no_recipes)
