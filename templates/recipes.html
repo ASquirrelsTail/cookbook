@@ -1,4 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
     Recipes: {{ no_recipes }}
+    <div class="row">
+    	<div class="col s12">
+    		<a href="{{ url_for('recipe', urn='a') }}">Recipe</a>
+    	</div>
+    </div>
 {% endblock %}

@@ -742,6 +742,14 @@ class TestRecipesList(TestClient):
         response = self.client.get('/recipes')
         self.assertRegex(response.data.decode(), 'href="/recipes/[a-z0-9-]+"')
 
+    def test_links_to_recipes_in_filter(self):
+        '''
+        Recipes page should contain links to recipes that have been filtrered
+        '''
+        response = self.client.get('/recipes?tags=Vegan')
+        self.assertIn(b'href="/recipes/ben-s-bean-chilli"', response.data)
+        self.assertIn(b'href="/recipes/alice-s-avocado-salad"', response.data)
+
 
 if __name__ == '__main__':
     unittest.main()
