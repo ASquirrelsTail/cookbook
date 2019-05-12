@@ -174,8 +174,11 @@ def recipes():
         query['username'] = request.args.get('username')
 
     offset = (int(request.args.get('page', '1')) - 1) * 10
-    recipes = mongo.db.recipes.find(query, {'urn': 1, 'title': 1, 'username': 1}).skip(offset).limit(10)
     no_recipes = mongo.db.recipes.count_documents(query)
+    if offset >= no_recipes:
+        abort(404)
+    recipes = mongo.db.recipes.find(query, {'urn': 1, 'title': 1, 'username': 1}).skip(offset).limit(10)
+
     return render_template('recipes.html', no_recipes=no_recipes, recipes=recipes)
 
 

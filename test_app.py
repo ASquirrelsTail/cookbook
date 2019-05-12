@@ -783,8 +783,16 @@ class TestRecipesList(TestClient):
         '''
         Pages beyond range should return 404 not found
         '''
-        response = self.client.get('/recipes?username=Alice&page=22')
+        response = self.client.get('/recipes?page=7')
         self.assertEqual(response.status_code, 404)
+
+    def test_pagination_links(self):
+        '''
+        The current page should link to the previous and next pages
+        '''
+        response = self.client.get('/recipes?page=3')
+        self.assertin(b'/recipes?page=2', response.data)
+        self.assertin(b'/recipes?page=4', response.data)
 
 
 if __name__ == '__main__':
