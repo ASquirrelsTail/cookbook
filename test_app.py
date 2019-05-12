@@ -685,6 +685,12 @@ class TestRecipesList(TestClient):
         response = self.client.get('/recipes')
         self.assertIn(b'Recipes: 60', response.data)
 
+    def test_number_of_tagged_recipes(self):
+        '''
+        Recipes page should show how many recipes have the requested tags
+        '''
+        response = self.client.get('/recipes?tags=Vegetarian')
+        self.assertIn(b'Recipes: 11', response.data)
 
 if __name__ == '__main__':
     unittest.main()
