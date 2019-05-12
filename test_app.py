@@ -700,6 +700,10 @@ class TestRecipesList(TestClient):
         response2 = self.client.get('/recipes?tags=Vegan')
         self.assertIn(b'Recipes: 2', response2.data)
 
+    def test_number_of_multiple_tags(self):
+        response = self.client.get('/recipes?tags=Vegetarian%20Vegan')
+        self.assertIn(b'Recipes: 2', response.data)
+
 
 if __name__ == '__main__':
     unittest.main()
