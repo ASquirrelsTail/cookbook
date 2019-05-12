@@ -779,6 +779,13 @@ class TestRecipesList(TestClient):
         response = self.client.get('/recipes?username=Alice&page=3')
         self.assertEqual(response.data.decode().count('href="/recipes/'), 5)
 
+    def test_pagination_beyond_range(self):
+        '''
+        Pages beyond range should return 404 not found
+        '''
+        response = self.client.get('/recipes?username=Alice&page=22')
+        self.assertEqual(response.status_code, 404)
+
 
 if __name__ == '__main__':
     unittest.main()
