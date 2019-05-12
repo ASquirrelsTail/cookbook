@@ -1,7 +1,7 @@
 import os
 from re import match, findall
 from datetime import datetime
-from flask import Flask, render_template, request, flash, session, redirect, url_for, abort, escape
+from flask import Flask, render_template, request, flash, session, redirect, url_for, abort
 from flask_pymongo import PyMongo
 
 app = Flask(__name__)
@@ -10,6 +10,29 @@ app.config['MONGO_URI'] = os.getenv('MONGO_URI')
 app.secret_key = os.getenv('SECRET_KEY')
 
 mongo = PyMongo(app)
+
+
+def hours_mins_to_string(hours_mins):
+    '''
+    Helper function to convert stored times to strings
+    '''
+    if hours_mins == '00:00' or not match("^[0-9]{2}:[0-5][0-9]$", hours_mins):
+        return '0 minutes'
+    hours, mins = hours_mins.split(':')
+    hours = int(hours)
+    mins = int(mins)
+    string = ''
+    if hours > 1:
+        string += str(hours) + ' hours'
+    elif hours == 1:
+        string += str(hours) + ' hour'
+    if hours > 0 and mins > 0:
+        string += ' '
+    if mins > 1:
+        string += str(mins) + ' minutes'
+    elif mins == 1:
+        string += '1 minute'
+    return string
 
 
 @app.route('/')
@@ -71,7 +94,7 @@ def add_recipe():
                 recipe_data.get('ingredients', '') != '' and
                 recipe_data.get('methods', '') != ''):
             recipe_data['username'] = session.get('username')
-            recipe_data['time'] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            recipe_data['date'] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
             recipe_data['urn'] = '-'.join(findall('[a-z-]+', recipe_data['title'].lower()))
             if recipe_data.get('tags', '') != '':
                 recipe_data['tags'] = recipe_data['tags'].split('/')
@@ -86,6 +109,8 @@ def add_recipe():
                     flash('Forked recipes must have a different title.')
                     all_tags = mongo.db.tags.find()
                     all_meals = mongo.db.meals.find()
+                    recipe_data['prep-time'] = recipe_data['prep-time'].split(':')
+                    recipe_data['cook-time'] = recipe_data['cook-time'].split(':')
                     if recipe_data.get('tags', '') != '':
                         recipe_data['tags'] = '/'.join(recipe_data['tags'])
                     if recipe_data.get('meals', '') != '':
@@ -103,9 +128,12 @@ def add_recipe():
     elif request.args.get('fork') is not None:
         parent = request.args.get('fork')
         recipe_data = mongo.db.recipes.find_one({'urn': parent},
-                                                {'title': 1, 'ingredients': 1, 'methods': 1, 'tags': 1, 'meals': 1})
+                                                {'title': 1, 'ingredients': 1, 'methods': 1, 'tags': 1,
+                                                'meals': 1, 'prep-time': 1, 'cook-time': 1})
         if recipe_data is not None:
             recipe_data['parent'] = parent
+            recipe_data['prep-time'] = recipe_data['prep-time'].split(':')
+            recipe_data['cook-time'] = recipe_data['cook-time'].split(':')
             if recipe_data.get('tags', '') != '':
                 recipe_data['tags'] = '/'.join(recipe_data['tags'])
             if recipe_data.get('meals', '') != '':
@@ -130,6 +158,11 @@ def recipe(urn):
             mongo.db.recipes.update_one({'urn': urn}, {'$inc': {'views': 1}})
         recipe['ingredients'] = recipe['ingredients'].split('\n')
         recipe['methods'] = recipe['methods'].split('\n')
+        recipe['date'] = datetime.strptime(recipe['date'], "%Y-%m-%d %H:%M:%S").strftime('%a %d %b \'%y')
+        recipe['prep-time'] = hours_mins_to_string(recipe['prep-time'])
+        recipe['cook-time'] = hours_mins_to_string(recipe['cook-time'])
+        if recipe.get('children') is not None:
+            recipe['forks'] = len(recipe['children'])
     return render_template('recipe.html', recipe=recipe, username=session.get('username'))
 
 

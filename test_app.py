@@ -1,6 +1,8 @@
 import os
 import unittest
 import app
+import datetime
+from flask import escape
 
 
 def flask_test_client():
@@ -293,8 +295,8 @@ class TestAddRecipe(TestClient):
         recipe_methods = '\n'.join(['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
                                     'Cook until golden.'])
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
-        self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('time'), None)
-        self.assertRegex(self.mongo.db.recipes.find_one({'title': recipe_title}).get('time', ''),
+        self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('date'), None)
+        self.assertRegex(self.mongo.db.recipes.find_one({'title': recipe_title}).get('date', ''),
                          '[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}')
 
     def test_submit_recipe_missing_fields(self):
@@ -514,6 +516,77 @@ class TestRecipes(TestClient):
         self.assertIn(b'Pancakes', response.data)
         self.assertIn(b'Flour', response.data)
         self.assertIn(b'Cook until golden.', response.data)
+
+    def test_page_contains_author(self):
+        '''
+        The recipe page should display the authors Username.
+        '''
+        username = 'AuthorName'
+        self.logout_user()
+        self.create_user(username)
+        self.login_user(username)
+        self.submit_recipe()
+        urn = self.mongo.db.recipes.find_one({}).get('urn')
+        self.logout_user()
+        response = self.client.get('/recipes/{}'.format(urn))
+        self.assertIn(str.encode(username), response.data)
+
+    def test_page_contains_tags(self):
+        '''
+        The returned page should contain all tags
+        '''
+        recipe_tags = ['Vegan', 'Vegetarian', 'Dairy-free']
+        self.submit_recipe(tags='/'.join(recipe_tags))
+        urn = self.mongo.db.recipes.find_one({}).get('urn')
+        response = self.client.get('/recipes/{}'.format(urn))
+        for tag in recipe_tags:
+            self.assertIn(str.encode(tag), response.data)
+
+    def test_page_contains_meals(self):
+        '''
+        The returned page should contain all meals
+        '''
+        recipe_meals = ['Breakfast', 'Brunch', 'Dessert']
+        self.submit_recipe(meals='/'.join(recipe_meals))
+        urn = self.mongo.db.recipes.find_one({}).get('urn')
+        response = self.client.get('/recipes/{}'.format(urn))
+        for meal in recipe_meals:
+            self.assertIn(str.encode(meal), response.data)
+
+    def test_page_contains_creation_date(self):
+        '''
+        The returned page should contain the date the recipe was created.
+        '''
+        self.submit_recipe()
+        today = datetime.date.today()
+        urn = self.mongo.db.recipes.find_one({}).get('urn')
+        response = self.client.get('/recipes/{}'.format(urn))
+        self.assertIn(str.encode(escape(today.strftime('%a %d %b \'%y'))), response.data)
+
+    def test_page_contains_number_of_forks(self):
+        '''
+        The returned page should show the number of child recipes.
+        '''
+        parent_title = 'Pancakes'
+        self.submit_recipe(title=parent_title)
+        parent_urn = self.mongo.db.recipes.find_one({}).get('urn')
+        self.submit_recipe(parent=parent_urn)
+        self.submit_recipe(parent=parent_urn)
+        self.submit_recipe(parent=parent_urn)
+        response = self.client.get('/recipes/{}'.format(parent_urn))
+        self.assertIn(b'3 forks', response.data)
+
+    def test_page_contains_prep_time_and_cook_time(self):
+        '''
+        The returned page should contain the prep time and cook time as strings in hours and minutes
+        '''
+        recipe_prep_time = '00:15'
+        recipe_cook_time = '01:20'
+        self.submit_recipe(prep_time=recipe_prep_time, cook_time=recipe_cook_time)
+        urn = self.mongo.db.recipes.find_one({}).get('urn')
+        response = self.client.get('/recipes/{}'.format(urn))
+        self.assertIn(b'Prep-Time: 15 minutes', response.data)
+        self.assertIn(b'Cooking-Time: 1 hour 20 minutes', response.data)
 
     def test_page_view_increases_views(self):
         '''

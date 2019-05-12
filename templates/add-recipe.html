@@ -18,29 +18,53 @@
             <i class="material-icons left">access_time</i> Prep-Time
         </div>
         <div class="col s12">
+            {% if recipe['prep-time'] %}
             <div class="row" id="prep-time">
                 <div class="input-field col xs5 s3 m2">
-                    <label>Hours</label><input type="number" class="hours" value="0" min="0" max="24">
+                    <label>Hours</label><input type="number" class="hours" value="{{ recipe['prep-time'][0] }}" min="0" max="24">
                 </div>
                 <div class="input-field col xs5 s3 m2">
-                    <label>Minutes</label><input type="number" class="minutes"  value="0" min="-1" max="60">
+                    <label>Minutes</label><input type="number" class="minutes"  value="{{ recipe['prep-time'][1] }}" min="-1" max="60">
+                </div>
+            </div>
+            <input type="hidden" name="prep-time" id="prep-time-input" value="{{ recipe['prep-time'][0] }}:{{ recipe['prep-time'][1] }}">
+            {% else %}
+            <div class="row" id="prep-time">
+                <div class="input-field col xs5 s3 m2">
+                    <label>Hours</label><input type="number" class="hours" value="00" min="0" max="24">
+                </div>
+                <div class="input-field col xs5 s3 m2">
+                    <label>Minutes</label><input type="number" class="minutes"  value="00" min="-1" max="60">
                 </div>
             </div>
             <input type="hidden" name="prep-time" id="prep-time-input" value="00:00">
+            {% endif %}
         </div>
         <div class="col s12">
             <i class="material-icons left">access_time</i> Cooking-Time
         </div>
         <div class="col s12">
+            {% if recipe['cook-time'] %}
             <div class="row" id="cook-time">
                 <div class="input-field col xs5 s3 m2">
-                    <label>Hours</label><input type="number" class="hours"  value="0" min="0" max="24">
+                    <label>Hours</label><input type="number" class="hours"  value="{{ recipe['cook-time'][0] }}" min="0" max="24">
                 </div>
                 <div class="input-field col xs5 s3 m2">
-                    <label>Minutes</label><input type="number" class="minutes" value="0" min="-1" max="60">
+                    <label>Minutes</label><input type="number" class="minutes" value="{{ recipe['cook-time'][1] }}" min="-1" max="60">
+                </div>
+            </div>
+            <input type="hidden" name="cook-time" id="cook-time-input" value="{{ recipe['cook-time'][0] }}:{{ recipe['cook-time'][1] }}">
+            {% else %}
+            <div class="row" id="cook-time">
+                <div class="input-field col xs5 s3 m2">
+                    <label>Hours</label><input type="number" class="hours"  value="00" min="0" max="24">
+                </div>
+                <div class="input-field col xs5 s3 m2">
+                    <label>Minutes</label><input type="number" class="minutes" value="00" min="-1" max="60">
                 </div>
             </div>
             <input type="hidden" name="cook-time" id="cook-time-input" value="00:00">
+            {% endif %}
         </div>
     <div class="row">
     {% if recipe['parent'] %}
@@ -52,7 +76,7 @@
     </div>
     <div class="col s12">
         <div id="tag-chips" class="chips" data-add-target="add-tag-button" style="display: inline; border-bottom: none;"></div>
-        <a class="dropdown-trigger btn" href="#" data-target="add-tag" id="add-tag-button"><i class="material-icons left">add</i>Add Tag</a>
+        <a class="dropdown-trigger btn-small" href="#" data-target="add-tag" id="add-tag-button"><i class="material-icons left">add</i>Add Tag</a>
         <ul id="add-tag" class="dropdown-content" data-target="tag-chips">
             {% for tag in tags %}
                 <li><a href="#!" data-chip-name="{{ tag['name'] }}">{{ tag['name'] }}</a></li>
@@ -65,7 +89,7 @@
     </div>
     <div class="col s12">
         <div id="meal-chips" class="chips" data-add-target="add-meal-button" style="display: inline; border-bottom: none;"></div>
-        <a class="dropdown-trigger btn" href="#" data-target="add-meal" id="add-meal-button"><i class="material-icons left">add</i>Add Meal</a>
+        <a class="dropdown-trigger btn-small" href="#" data-target="add-meal" id="add-meal-button"><i class="material-icons left">add</i>Add Meal</a>
         <ul id="add-meal" class="dropdown-content" data-target="meal-chips">
             {% for meal in meals %}
                 <li><a href="#!" data-chip-name="{{ meal['name'] }}">{{ meal['name'] }}</a></li>
