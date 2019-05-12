@@ -672,8 +672,18 @@ class TestRecipesList(TestClient):
         cls.logout_user()
 
     def test_page(self):
+        '''
+        Page should return 200 status
+        '''
         response = self.client.get('/recipes')
         self.assertEqual(response.status_code, 200)
+
+    def test_number_of_recipes(self):
+        '''
+        Recipes page should show how many recipes match the query
+        '''
+        response = self.client.get('/recipes')
+        self.assertIn(b'Recipes: 60', response.data)
 
 
 if __name__ == '__main__':
