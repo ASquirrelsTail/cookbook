@@ -704,6 +704,10 @@ class TestRecipesList(TestClient):
         response = self.client.get('/recipes?tags=Vegetarian%20Vegan')
         self.assertIn(b'Recipes: 2', response.data)
 
+    def test_number_of_recipes_by_author(self):
+        response = self.client.get('/recipes?username=Alice')
+        self.assertIn(b'Recipes: 25', response.data)
+
 
 if __name__ == '__main__':
     unittest.main()
