@@ -749,13 +749,21 @@ class TestRecipesList(TestClient):
         response = self.client.get('/recipes?tags=Vegan')
         self.assertIn(b'href="/recipes/ben-s-bean-chilli"', response.data)
         self.assertIn(b'href="/recipes/alice-s-avocado-salad"', response.data)
+        self.assertNotIn(b'href="/recipes/alice-s-apple-pie"', response.data)
 
     def test_recipe_names_in_link(self):
         '''
-        Recipes page should contain links to recipes that have been filtrered
+        Recipes page should contain links with recipe names
         '''
         response = self.client.get('/recipes?meals=Side')
         self.assertIn(str.encode('>{}</a>'.format(escape('Alice\'s Apple Coleslaw'))), response.data)
+
+    def test_recipe_author(self):
+        '''
+        Recipes page should contain authors names
+        '''
+        response = self.client.get('/recipes?meals=Drink')
+        self.assertIn(b'Benjamin', response.data)
 
 
 if __name__ == '__main__':

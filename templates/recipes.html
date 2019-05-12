@@ -4,7 +4,7 @@
     <div class="row">
     {% for recipe in recipes %}
         <div class="col s12">
-            <a href="{{ url_for('recipe', urn=recipe['urn']) }}">Recipe</a>
+            <a href="{{ url_for('recipe', urn=recipe['urn']) }}">{{ recipe['title']}}</a>
         </div>
     {% endfor %}
     </div>
