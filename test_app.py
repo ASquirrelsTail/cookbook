@@ -750,6 +750,13 @@ class TestRecipesList(TestClient):
         self.assertIn(b'href="/recipes/ben-s-bean-chilli"', response.data)
         self.assertIn(b'href="/recipes/alice-s-avocado-salad"', response.data)
 
+    def test_recipe_names_in_link(self):
+        '''
+        Recipes page should contain links to recipes that have been filtrered
+        '''
+        response = self.client.get('/recipes?meals=Side')
+        self.assertIn(str.encode('>{}</a>'.format(escape('Alice\'s Apple Coleslaw'))), response.data)
+
 
 if __name__ == '__main__':
     unittest.main()
