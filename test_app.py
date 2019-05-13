@@ -649,10 +649,12 @@ class TestRecipesList(TestClient):
         cls.logout_user()
         cls.create_user('Alice')
         cls.login_user('Alice')
-        cls.submit_recipe(title='Alice\'s Apple Pie', tags=['Vegetarian'], meals=['Dessert'])
+        cls.submit_recipe(title='Alice\'s Apple Pie', ingredients=['12 Apples', '2 oz Flour', 'One Stick of Butter'],
+                          tags=['Vegetarian'], meals=['Dessert'])
         cls.submit_recipe(title='Alice\'s Aromatic Duck', meals=['Dinner'])
         cls.submit_recipe(title='Alice\'s Avocado Salad', tags=['Vegetarian', 'Vegan', 'Dairy-free'], meals=['Lunch', 'Snack'])
-        cls.submit_recipe(title='Alice\'s Apple Coleslaw', tags=['Vegetarian', 'Dairy-free', 'Gluten-free'], meals=['Side'])
+        cls.submit_recipe(title='Alice\'s Apple Coleslaw', ingredients=['One Apple', 'Half a white Cabbage', 'Half a jar of Mayo'],
+                          tags=['Vegetarian', 'Dairy-free', 'Gluten-free'], meals=['Side'])
         cls.submit_recipe(title='Alice\'s Anzac Biscuits', tags=['Vegetarian', 'Dairy-free'], meals=['Snack'])
         [cls.submit_recipe() for n in range(20)]
         cls.logout_user()
@@ -660,9 +662,10 @@ class TestRecipesList(TestClient):
         cls.login_user('Benjamin')
         cls.submit_recipe(title='Ben\'s Baked Alaska', tags=['Vegetarian'], meals=['Dessert'])
         cls.submit_recipe(title='Ben\'s Bean Chilli', tags=['Vegetarian', 'Vegan'], meals=['Dinner'])
-        cls.submit_recipe(title='Ben\'s Bannana Smoothie', tags=['Vegetarian', 'Gluten-free'], meals=['Drink'])
+        cls.submit_recipe(title='Ben\'s Bannana Smoothie', ingredients=['Bannana', 'Apple Juice'], tags=['Vegetarian', 'Gluten-free'], meals=['Drink'])
         cls.submit_recipe(title='Ben\'s Beef Curry', tags=['Gluten-free'], meals=['Dinner'])
-        cls.submit_recipe(title='Ben\'s Blackberry & Apple Pie', tags=['Vegetarian'], meals=['Dessert'], parent='alice-s-apple-pie')
+        cls.submit_recipe(title='Ben\'s Blackberry & Apple Pie', ingredients=['12 Apples', '4 cups Blackberries', '2 oz Flour', 'One Stick of Butter'],
+                          tags=['Vegetarian'], meals=['Dessert'], parent='alice-s-apple-pie')
         [cls.submit_recipe() for n in range(15)]
         cls.logout_user()
         cls.create_user('Charlie')
@@ -830,6 +833,18 @@ class TestRecipesList(TestClient):
         response = self.client.get('/recipes?page=1')
         self.assertLess(response.data.decode().index('recipes/ben-s-beef-curry'), response.data.decode().index('recipes/alice-s-apple-pie'))
         self.assertLess(response.data.decode().index('recipes/alice-s-apple-pie'), response.data.decode().index('recipes/charlie-s-cottage-pie'))
+
+    def test_text_search_ingredients(self):
+        '''
+        The search queries should return recipes with ingredients that match the query
+        '''
+        response = self.client.get('/recipes?search=apples')
+        self.assertIn(str.encode('>{}</a>'.format(escape('Alice\'s Apple Coleslaw'))), response.data)
+        self.assertIn(str.encode('>{}</a>'.format(escape('Ben\'s Bannana Smoothie'))), response.data)
+
+        response = self.client.get('/recipes?search=apples%20flour')
+        self.assertIn(str.encode('>{}</a>'.format(escape('Ben\'s Blackberry & Apple Pie'))), response.data)
+        self.assertNotIn(str.encode('>{}</a>'.format(escape('Alice\'s Apple Coleslaw'))), response.data)
 
 
 if __name__ == '__main__':
