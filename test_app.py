@@ -664,7 +664,7 @@ class TestRecipesList(TestClient):
         cls.submit_recipe(title='Ben\'s Bean Chilli', tags=['Vegetarian', 'Vegan'], meals=['Dinner'])
         cls.submit_recipe(title='Ben\'s Bannana Smoothie', ingredients=['Bannana', 'Apple Juice'], tags=['Vegetarian', 'Gluten-free'], meals=['Drink'])
         cls.submit_recipe(title='Ben\'s Beef Curry', tags=['Gluten-free'], meals=['Dinner'])
-        cls.submit_recipe(title='Ben\'s Blackberry & Apple Pie', ingredients=['12 Apples', '4 cups Blackberries', '2 oz Flour', 'One Stick of Butter'],
+        cls.submit_recipe(title='Ben\'s Apple & Blackberry Pie', ingredients=['12 Apples', '4 cups Blackberries', '2 oz Flour', 'One Stick of Butter'],
                           tags=['Vegetarian'], meals=['Dessert'], parent='alice-s-apple-pie')
         [cls.submit_recipe() for n in range(15)]
         cls.logout_user()
@@ -843,7 +843,7 @@ class TestRecipesList(TestClient):
         self.assertIn(str.encode('>{}</a>'.format(escape('Ben\'s Bannana Smoothie'))), response.data)
 
         response = self.client.get('/recipes?search=apples%20flour')
-        self.assertIn(str.encode('>{}</a>'.format(escape('Ben\'s Blackberry & Apple Pie'))), response.data)
+        self.assertIn(str.encode('>{}</a>'.format(escape('Ben\'s Apple & Blackberry Pie'))), response.data)
         self.assertNotIn(str.encode('>{}</a>'.format(escape('Alice\'s Apple Coleslaw'))), response.data)
 
     def test_text_search_titles(self):
@@ -853,6 +853,14 @@ class TestRecipesList(TestClient):
         response = self.client.get('/recipes?search=salad')
         self.assertIn(str.encode('>{}</a>'.format(escape('Alice\'s Avocado Salad'))), response.data)
         self.assertIn(str.encode('>{}</a>'.format(escape('Charlie\'s Chicken Caesar Salad'))), response.data)
+
+    def test_text_search_exact_string(self):
+        '''
+        The search query should return recipes with exact matches to queries surrounded by quote marks
+        '''
+        response = self.client.get('/recipes?search=%22apple pie%22')
+        self.assertIn(str.encode('>{}</a>'.format(escape('Alice\'s Apple Pie'))), response.data)
+        self.assertNotIn(str.encode('>{}</a>'.format(escape('Ben\'s Apple & Blackberry Pie'))), response.data)
 
 
 if __name__ == '__main__':
