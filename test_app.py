@@ -801,7 +801,7 @@ class TestRecipesList(TestClient):
         response = self.client.get('/recipes')
         self.assertNotIn(b'/recipes?page=0', response.data)
         response = self.client.get('/recipes?page=6')
-        self.assertIn(b'/recipes?page=7', response.data)
+        self.assertNotIn(b'/recipes?page=7', response.data)
 
 
 if __name__ == '__main__':
