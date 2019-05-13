@@ -735,6 +735,13 @@ class TestRecipesList(TestClient):
         response = self.client.get('/recipes?username=Alice&tags=Vegetarian&meals=Snack%20Lunch')
         self.assertIn(b'Recipes: 1', response.data)
 
+    def test_number_of_recipes_by_fork(self):
+        '''
+        Recipes page should show how many forked recipes are returned.
+        '''
+        response = self.client.get('/recipes?forks=alice-s-apple-pie')
+        self.assertIn(b'Recipes: 1', response.data)
+
     def test_links_to_recipes(self):
         '''
         Recipes page should contain links to recipes
