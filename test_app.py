@@ -803,6 +803,27 @@ class TestRecipesList(TestClient):
         response = self.client.get('/recipes?page=6')
         self.assertNotIn(b'/recipes?page=7', response.data)
 
+    def test_results_should_be_ordered_by_views(self):
+        '''
+        The results should be ordered by most viewed
+        '''
+        self.client.get('recipes/ben-s-beef-curry')
+        self.client.get('recipes/ben-s-beef-curry')
+        self.client.get('recipes/ben-s-beef-curry')
+        self.client.get('recipes/ben-s-beef-curry')
+        self.client.get('recipes/ben-s-beef-curry')
+        self.client.get('recipes/ben-s-beef-curry')
+        self.client.get('recipes/ben-s-beef-curry')
+        self.client.get('recipes/alice-s-apple-pie')
+        self.client.get('recipes/alice-s-apple-pie')
+        self.client.get('recipes/alice-s-apple-pie')
+        self.client.get('recipes/alice-s-apple-pie')
+        self.client.get('recipes/charlie-s-cottage-pie')
+        self.client.get('recipes/charlie-s-cottage-pie')
+        response = self.client.get('/recipes?page=1')
+        self.assertLess(response.data.decode().index('recipes/ben-s-beef-curry'), response.decode().index('recipes/alice-s-apple-pie'))
+        self.assertLess(response.data.decode().index('recipes/alice-s-apple-pie'), response.decode().index('recipes/charlie-s-cottage-pie'))
+
 
 if __name__ == '__main__':
     unittest.main()
