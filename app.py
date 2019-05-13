@@ -172,6 +172,8 @@ def recipes():
             query['meals'] = meals
     if request.args.get('username') is not None:
         query['username'] = request.args.get('username')
+    if request.args.get('forks') is not None:
+        query['parent'] = request.args.get('forks')
 
     page = int(request.args.get('page', '1'))
     offset = (page - 1) * 10
