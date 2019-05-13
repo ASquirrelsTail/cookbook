@@ -1,5 +1,5 @@
 import os
-from re import match, findall
+from re import match, findall, sub, split, escape as re_escape
 from datetime import datetime
 from flask import Flask, render_template, request, flash, session, redirect, url_for, abort
 from flask_pymongo import PyMongo
@@ -176,9 +176,16 @@ def recipes():
         query['parent'] = request.args.get('forks')
     if request.args.get('search') is not None:
         search = request.args.get('search')
+        search_strings = None
+        if '"' in search:
+            search_strings = findall('".+"', search)
+            for search_string in search_strings:
+                search = sub(' *' + re_escape(search_string) + ' *', '', search)
         if ' ' in search:
-            search = search.split(' ')
+            search = split(' +', search)
             search = '"' + '" "'.join(search) + '"'
+        if search_strings is not None:
+            search += ' ' + ' '.join(search_strings)
         query['$text'] = {'$search': search}
 
     page = int(request.args.get('page', '1'))
