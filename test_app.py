@@ -821,8 +821,8 @@ class TestRecipesList(TestClient):
         self.client.get('recipes/charlie-s-cottage-pie')
         self.client.get('recipes/charlie-s-cottage-pie')
         response = self.client.get('/recipes?page=1')
-        self.assertLess(response.data.decode().index('recipes/ben-s-beef-curry'), response.decode().index('recipes/alice-s-apple-pie'))
-        self.assertLess(response.data.decode().index('recipes/alice-s-apple-pie'), response.decode().index('recipes/charlie-s-cottage-pie'))
+        self.assertLess(response.data.decode().index('recipes/ben-s-beef-curry'), response.data.decode().index('recipes/alice-s-apple-pie'))
+        self.assertLess(response.data.decode().index('recipes/alice-s-apple-pie'), response.data.decode().index('recipes/charlie-s-cottage-pie'))
 
 
 if __name__ == '__main__':
