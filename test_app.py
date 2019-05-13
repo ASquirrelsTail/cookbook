@@ -846,6 +846,14 @@ class TestRecipesList(TestClient):
         self.assertIn(str.encode('>{}</a>'.format(escape('Ben\'s Blackberry & Apple Pie'))), response.data)
         self.assertNotIn(str.encode('>{}</a>'.format(escape('Alice\'s Apple Coleslaw'))), response.data)
 
+    def test_text_search_titles(self):
+        '''
+        The search queries should return recipes with titles that match the query
+        '''
+        response = self.client.get('/recipes?search=salad')
+        self.assertIn(str.encode('>{}</a>'.format(escape('Alice\'s Avocado Salad'))), response.data)
+        self.assertIn(str.encode('>{}</a>'.format(escape('Charlie\'s Chicken Caesar Salad'))), response.data)
+
 
 if __name__ == '__main__':
     unittest.main()

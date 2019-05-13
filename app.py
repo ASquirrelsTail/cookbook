@@ -174,6 +174,12 @@ def recipes():
         query['username'] = request.args.get('username')
     if request.args.get('forks') is not None:
         query['parent'] = request.args.get('forks')
+    if request.args.get('search') is not None:
+        search = request.args.get('search')
+        if ' ' in search:
+            search = search.split(' ')
+            search = '"' + '" "'.join(search) + '"'
+        query['$text'] = {'$search': search}
 
     page = int(request.args.get('page', '1'))
     offset = (page - 1) * 10
