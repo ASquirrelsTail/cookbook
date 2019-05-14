@@ -156,6 +156,8 @@ def add_recipe():
 @app.route('/recipes')
 def recipes():
     query = {}
+    query_args = request.args.to_dict()
+    query_args.pop('page', '')
     if request.args.get('tags') is not None:
         tags = request.args['tags']
         if ' ' in tags:
@@ -195,7 +197,8 @@ def recipes():
         abort(404)
     recipes = mongo.db.recipes.find(query, {'urn': 1, 'title': 1, 'username': 1}).sort('views', -1).skip(offset).limit(10)
 
-    return render_template('recipes.html', no_recipes=no_recipes, recipes=recipes, page=page)
+    return render_template('recipes.html', no_recipes=no_recipes, recipes=recipes, page=page,
+                           current_query=query_args, username=session.get('username'))
 
 
 @app.route('/recipes/<urn>')
