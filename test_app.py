@@ -3,6 +3,7 @@ import unittest
 import app
 import datetime
 from flask import escape
+from re import findall
 
 
 def flask_test_client():
@@ -813,9 +814,18 @@ class TestRecipesList(TestClient):
         response = self.client.get('/recipes?page=6')
         self.assertNotIn(b'/recipes?page=7', response.data)
 
+    def test_pagination_links_include_queries(self):
+        '''
+        Pagination links should preserve the current query
+        '''
+        response = self.client.get('/recipes?username=Alice&page=1')
+        links = findall('/recipes\?.+?"', response.data.decode())
+        self.assertIn('page=2', links[0])
+        self.assertIn('username=Alice', links[0])
+
     def test_results_should_be_ordered_by_views(self):
         '''
-        The results should be ordered by most viewed
+        The filter should be ordered by most viewed
         '''
         self.client.get('recipes/ben-s-beef-curry')
         self.client.get('recipes/ben-s-beef-curry')
