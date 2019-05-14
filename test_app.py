@@ -879,12 +879,21 @@ class TestRecipesList(TestClient):
         self.assertIn(str.encode('>{}</a>'.format(escape('Alice\'s Apple Pie'))), response.data)
         self.assertNotIn(str.encode('>{}</a>'.format(escape('Ben\'s Apple & Blackberry Pie'))), response.data)
 
+    def test_text_search_two_exact_strings(self):
+        '''
+        The search query should return recipes with exact matches to queries surrounded by quote marks when the query
+        contains more than one double quoted string.
+        '''
+        response = self.client.get('/recipes?search=%2212%20apples%22%20%22stick%20of%20butter%22')
+        self.assertIn(str.encode('>{}</a>'.format(escape('Alice\'s Apple Pie'))), response.data)
+        self.assertIn(str.encode('>{}</a>'.format(escape('Ben\'s Apple & Blackberry Pie'))), response.data)
+
     def test_text_search_string_in_page(self):
         '''
         The search query should appear on the page
         '''
         response = self.client.get('/recipes?search=%22apple%20pie%22')
-        self.assertIn(b'"apple pie"', response.data)
+        self.assertIn(str.encode(escape('"apple pie"')), response.data)
 
 
 if __name__ == '__main__':

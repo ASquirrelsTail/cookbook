@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
+	{% if current_query['search'] %}
+	Search: {{ current_query['search']}} 
+	{% endif %}
     Recipes: {{ no_recipes }}
     <div class="row">
     {% for recipe in recipes %}
