@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
 	{% if current_query['search'] %}
-	Search: {{ current_query['search']}} 
+	Ingredient search: {{ current_query['search']}} <br>
 	{% endif %}
-    Recipes: {{ no_recipes }}
+    Found {{ no_recipes }} recipes.
     <div class="row">
     {% for recipe in recipes %}
-        <div class="col s12">
+        <div class="col s12 m6">
             <a href="{{ url_for('recipe', urn=recipe['urn']) }}">{{ recipe['title']}}</a> by {{ recipe['username'] }}
         </div>
     {% endfor %}
@@ -14,15 +14,18 @@
     <div class="row">
     	<div class="col s12 center">
     		<ul class="pagination">
+    		{% set max_page = ((no_recipes - 1)/10|round(0,'ceil'))|int %}
 		    {% if page > 1 %}<li class="waves-effect"><a href="{{ url_for(endpoint='recipes', page=page - 1, **current_query) }}"><i class="material-icons">chevron_left</i></a></li>
-		    {% else %}<li class="disabled"><i class="material-icons">chevron_left</i></li>{% endif %}
-		    <li class="active"><a href="#!">1</a></li>
-		    <li class="waves-effect"><a href="#!">2</a></li>
-		    <li class="waves-effect"><a href="#!">3</a></li>
-		    <li class="waves-effect"><a href="#!">4</a></li>
-		    <li class="waves-effect"><a href="#!">5</a></li>
-		    {% if page * 10 < no_recipes %}<li class="waves-effect"><a href="{{ url_for(endpoint='recipes', page=page + 1, **current_query,) }}"><i class="material-icons">chevron_right</i></a></li>
-		    {% else %}<li class="disabled"><i class="material-icons">chevron_right</i></li>
+		    {% else %}<li class="disabled"><a href="#!"><i class="material-icons">chevron_left</i></a></li>{% endif %}
+		    {% for number in range ([[page -2, max_page - 4]|min, 1]|max, [[page + 2, 5]|max, max_page + 1]|min + 1) %}
+		        {% if page == number %}
+		        <li class="active"><a href="#!">{{ number }}</a></li>
+		        {% else %}
+		        <li class="waves-effect"><a href="{{ url_for(endpoint='recipes', page=number, **current_query) }}">{{ number }}</a></li>
+		        {% endif %}
+		    {% endfor %}
+		    {% if page <= max_page %}<li class="waves-effect"><a href="{{ url_for(endpoint='recipes', page=page + 1, **current_query,) }}"><i class="material-icons">chevron_right</i></a></li>
+		    {% else %}<li class="disabled"><a href="#!"><i class="material-icons">chevron_right</i></a></li>
 		    {% endif %}
 		  </ul>
     	</div>

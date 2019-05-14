@@ -693,65 +693,65 @@ class TestRecipesList(TestClient):
         Recipes page should show how many recipes match the query
         '''
         response = self.client.get('/recipes')
-        self.assertIn(b'Recipes: 60', response.data)
+        self.assertIn(b'60 recipes', response.data)
 
     def test_number_of_tagged_recipes(self):
         '''
         Recipes page should show how many recipes have the requested tag
         '''
         response = self.client.get('/recipes?tags=Vegetarian')
-        self.assertIn(b'Recipes: 11', response.data)
+        self.assertIn(b'11 recipes', response.data)
         response2 = self.client.get('/recipes?tags=Vegan')
-        self.assertIn(b'Recipes: 2', response2.data)
+        self.assertIn(b'2 recipes', response2.data)
 
     def test_number_of_multiple_tags(self):
         '''
         Recipes page should show how many recipes have the requested tags
         '''
         response = self.client.get('/recipes?tags=Vegetarian%20Vegan')
-        self.assertIn(b'Recipes: 2', response.data)
+        self.assertIn(b'2 recipes', response.data)
 
     def test_number_of_recipes_by_author(self):
         '''
         Recipes page should show how many recipes by the requested user
         '''
         response = self.client.get('/recipes?username=Alice')
-        self.assertIn(b'Recipes: 25', response.data)
+        self.assertIn(b'25 recipes', response.data)
 
     def test_number_of_recipes_by_author_and_tags(self):
         '''
         Recipes page should show how many recipes by the requested user, with requested tags
         '''
         response = self.client.get('/recipes?username=Alice&tags=Vegetarian')
-        self.assertIn(b'Recipes: 4', response.data)
+        self.assertIn(b'4 recipes', response.data)
 
     def test_number_of_recipes_by_meal(self):
         '''
         Recipes page should show how many recipes are the requested meal
         '''
         response = self.client.get('/recipes?meals=Snack')
-        self.assertIn(b'Recipes: 4', response.data)
+        self.assertIn(b'4 recipes', response.data)
 
     def test_number_of_recipes_by_author_and_tags_and_meal(self):
         '''
         Recipes page should show how many recipes by the requested user, with requested tags
         '''
         response = self.client.get('/recipes?username=Alice&tags=Vegetarian&meals=Snack%20Lunch')
-        self.assertIn(b'Recipes: 1', response.data)
+        self.assertIn(b'1 recipes', response.data)
 
     def test_number_of_recipes_by_fork(self):
         '''
         Recipes page should show how many forked recipes are returned.
         '''
         response = self.client.get('/recipes?forks=alice-s-apple-pie')
-        self.assertIn(b'Recipes: 1', response.data)
+        self.assertIn(b'1 recipes', response.data)
 
     def test_no_recipes(self):
         '''
         Test to show number of recipes when none found
         '''
         response = self.client.get('/recipes?forks=alice-s-apple-pie&meals=breakfast')
-        self.assertIn(b'Recipes: 0', response.data)
+        self.assertIn(b'0 recipes', response.data)
 
     def test_links_to_recipes(self):
         '''
