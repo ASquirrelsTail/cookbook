@@ -875,9 +875,16 @@ class TestRecipesList(TestClient):
         '''
         The search query should return recipes with exact matches to queries surrounded by quote marks
         '''
-        response = self.client.get('/recipes?search=%22apple pie%22')
+        response = self.client.get('/recipes?search=%22apple%20pie%22')
         self.assertIn(str.encode('>{}</a>'.format(escape('Alice\'s Apple Pie'))), response.data)
         self.assertNotIn(str.encode('>{}</a>'.format(escape('Ben\'s Apple & Blackberry Pie'))), response.data)
+
+    def test_text_search_string_in_page(self):
+        '''
+        The search query should appear on the page
+        '''
+        response = self.client.get('/recipes?search=%22apple%20pie%22')
+        self.assertIn(b'"apple pie"', response.data)
 
 
 if __name__ == '__main__':
