@@ -746,6 +746,13 @@ class TestRecipesList(TestClient):
         response = self.client.get('/recipes?forks=alice-s-apple-pie')
         self.assertIn(b'Recipes: 1', response.data)
 
+    def test_no_recipes(self):
+        '''
+        Test to show number of recipes when none found
+        '''
+        response = self.client.get('/recipes?forks=alice-s-apple-pie&meals=breakfast')
+        self.assertIn(b'Recipes: 0', response.data)
+
     def test_links_to_recipes(self):
         '''
         Recipes page should contain links to recipes
