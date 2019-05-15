@@ -507,14 +507,22 @@ class TestEditRecipe(TestClient):
         self.create_user('Tester')
         self.login_user('Tester')
         self.submit_recipe('Test Recipe')
-        self.logout()
+        self.logout_user()
         urn = self.mongo.db.recipes.find_one({}).get('urn')
         response = self.client.get('/edit-recipe/{}'.format(urn))
-        self.assertEquals(response.status_code, 403)
+        self.assertEqual(response.status_code, 403)
         self.create_user('NotTester')
         self.login_user('NotTester')
         response = self.client.get('/edit-recipe/{}'.format(urn))
-        self.assertEquals(response.status_code, 403)
+        self.assertEqual(response.status_code, 403)
+
+    def test_page_user_logged_in(self):
+        self.create_user('Tester')
+        self.login_user('Tester')
+        self.submit_recipe('Test Recipe')
+        urn = self.mongo.db.recipes.find_one({}).get('urn')
+        response = self.client.get('/edit-recipe/{}'.format(urn))
+        self.assertEqual(response.status_code, 200)
 
 
 class TestRecipes(TestClient):

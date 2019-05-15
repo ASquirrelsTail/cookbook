@@ -153,6 +153,11 @@ def add_recipe():
     return render_template('add-recipe.html', recipe=recipe_data, username=session.get('username'), tags=all_tags, meals=all_meals)
 
 
+@app.route('/edit-recipe/<urn>', methods=['POST', 'GET'])
+def edit_recipe(urn):
+    return abort(403)
+
+
 @app.route('/recipes')
 def recipes():
     query = {}
