@@ -517,12 +517,21 @@ class TestEditRecipe(TestClient):
         self.assertEqual(response.status_code, 403)
 
     def test_page_user_logged_in(self):
+        '''
+        A logged in user that is author for the recipe should be able to access the edit-recipe page
+        '''
         self.create_user('Tester')
         self.login_user('Tester')
         self.submit_recipe('Test Recipe')
         urn = self.mongo.db.recipes.find_one({}).get('urn')
         response = self.client.get('/edit-recipe/{}'.format(urn))
         self.assertEqual(response.status_code, 200)
+
+    def test_page_recipe_not_found(self):
+        self.create_user('Tester')
+        self.login_user('Tester')
+        response = self.client.get('/edit-recipe/not-a-recipe')
+        self.assertEqual(response.status_code, 404)
 
 
 class TestRecipes(TestClient):
