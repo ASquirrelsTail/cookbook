@@ -536,7 +536,7 @@ class TestEditRecipe(TestClient):
         response = self.client.get('/edit-recipe/not-a-recipe')
         self.assertEqual(response.status_code, 404)
 
-    def test_edit_recipe_contains_recipe(self):
+    def test_edit_recipe_page_contains_recipe(self):
         '''
         The edit-recipe page should contain the recipe details
         '''
@@ -552,6 +552,29 @@ class TestEditRecipe(TestClient):
         self.assertIn(str.encode(escape('Mac & Cheese')), response.data)
         self.assertIn(b'Milk', response.data)
         self.assertIn(b'Once mixture thickens add boiled macaroni.', response.data)
+
+    def test_edit_recipe_changes_original_recipe(self):
+        '''
+        Editing a recipe should change the rescipe
+        '''
+        self.create_user()
+        self.login_user()
+        recipe_title = 'Mac & Cheese'
+        recipe_ingredients = ['Flour', 'Butter', 'Milk', 'Cheese', 'Macaroni']
+        recipe_methods = ['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.',
+                          'Once mixture thickens add boiled macaroni.']
+        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
+        urn = self.mongo.db.recipes.find_one({}).get('urn')
+        self.client.post('/edit-recipe/{}'.format(urn),
+                         data={'title': recipe_title,
+                               'ingredients': '\n'.join(['Flour', 'Butter', 'Milk', 'Cheese', 'Macaroni']),
+                               'methods': '\n'.join(['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.',
+                                                     'Add cheese to sauce.', 'Once mixture thickens add boiled macaroni.']),
+                               'prep-time': '00:10', 'cook-time': '00:20'})
+        recipe_entry = self.mongo.db.recipes.find_one({'urn': urn})
+        self.assertIn('Add cheese to sauce.', recipe_entry['methods'])
+        self.assertEqual(recipe_entry['prep-time'], '00:10')
+        self.assertEqual(recipe_entry['cook-time'], '00:20')
 
 
 class TestRecipes(TestClient):
