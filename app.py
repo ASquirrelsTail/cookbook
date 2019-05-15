@@ -164,6 +164,12 @@ def edit_recipe(urn):
     elif session.get('username') == recipe_data['username']:
         all_tags = mongo.db.tags.find()
         all_meals = mongo.db.meals.find()
+        recipe_data['prep-time'] = recipe_data['prep-time'].split(':')
+        recipe_data['cook-time'] = recipe_data['cook-time'].split(':')
+        if recipe_data.get('tags', '') != '':
+            recipe_data['tags'] = '/'.join(recipe_data['tags'])
+        if recipe_data.get('meals', '') != '':
+            recipe_data['meals'] = '/'.join(recipe_data['meals'])
         return render_template('add-recipe.html', action='Edit', recipe=recipe_data, username=session.get('username'), tags=all_tags, meals=all_meals)
     else:
         abort(403)
