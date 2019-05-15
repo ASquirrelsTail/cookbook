@@ -156,7 +156,9 @@ def add_recipe():
 @app.route('/edit-recipe/<urn>', methods=['POST', 'GET'])
 def edit_recipe(urn):
     recipe = mongo.db.recipes.find_one({'urn': urn})
-    if session.get('username') == recipe['username']:
+    if recipe is None:
+        abort(404)
+    elif session.get('username') == recipe['username']:
         return 'edit recipe'
     else:
         abort(403)

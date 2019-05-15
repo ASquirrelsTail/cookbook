@@ -528,10 +528,30 @@ class TestEditRecipe(TestClient):
         self.assertEqual(response.status_code, 200)
 
     def test_page_recipe_not_found(self):
+        '''
+        Attempting to edit a recipe that doesn't exist should return 404
+        '''
         self.create_user('Tester')
         self.login_user('Tester')
         response = self.client.get('/edit-recipe/not-a-recipe')
         self.assertEqual(response.status_code, 404)
+
+    def test_edit_recipe_contains_recipe(self):
+        '''
+        The edit-recipe page should contain the recipe details
+        '''
+        self.create_user()
+        self.login_user()
+        recipe_title = 'Mac & Cheese'
+        recipe_ingredients = ['Flour', 'Butter', 'Milk', 'Cheese', 'Macaroni']
+        recipe_methods = ['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.',
+                          'Once mixture thickens add boiled macaroni.']
+        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
+        urn = self.mongo.db.recipes.find_one({}).get('urn')
+        response = self.client.get('/edit-recipe/{}'.format(urn))
+        self.assertIn(str.encode(escape('Mac & Cheese.')), response.data)
+        self.assertIn(b'Milk.', response.data)
+        self.assertIn(b'Once mixture thickens add boiled macaroni.', response.data)
 
 
 class TestRecipes(TestClient):
