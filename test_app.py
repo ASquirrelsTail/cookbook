@@ -491,9 +491,35 @@ class TestAddRecipe(TestClient):
         self.assertEqual(response.status_code, 302)
 
 
+class TestEditRecipe(TestClient):
+    '''
+    Class for testing the edit_recipe page
+    '''
+    def setUp(self):
+        self.mongo.db.logins.delete_many({})
+        # Delete all records from the recipe collection
+        self.mongo.db.recipes.delete_many({})
+
+    def test_page_not_user(self):
+        '''
+        The edit recipe page should return 403 forbidden if the user is not the user that created the recipe
+        '''
+        self.create_user('Tester')
+        self.login_user('Tester')
+        self.submit_recipe('Test Recipe')
+        self.logout()
+        urn = self.mongo.db.recipes.find_one({}).get('urn')
+        response = self.client.get('/edit-recipe/{}'.format(urn))
+        self.assertEquals(response.status_code, 403)
+        self.create_user('NotTester')
+        self.login_user('NotTester')
+        response = self.client.get('/edit-recipe/{}'.format(urn))
+        self.assertEquals(response.status_code, 403)
+
+
 class TestRecipes(TestClient):
     '''
-    Class for testing the add-recipe page
+    Class for testing individual recipes pages
     '''
     def setUp(self):
         # Delete all records from the user collection and create test user
