@@ -88,6 +88,7 @@ def add_recipe():
     if session.get('username') is None:
         return abort(403)
 
+    action = 'Add'
     if request.method == 'POST':
         recipe_data = request.form.to_dict()
         if (recipe_data.get('title', '') != '' and
@@ -131,6 +132,7 @@ def add_recipe():
         else:
             flash('Failed to add recipe!')
     elif request.args.get('fork') is not None:
+        action = 'Fork'
         parent = request.args.get('fork')
         recipe_data = mongo.db.recipes.find_one({'urn': parent},
                                                 {'title': 1, 'ingredients': 1, 'methods': 1, 'tags': 1,
@@ -150,16 +152,19 @@ def add_recipe():
 
     all_tags = mongo.db.tags.find()
     all_meals = mongo.db.meals.find()
-    return render_template('add-recipe.html', recipe=recipe_data, username=session.get('username'), tags=all_tags, meals=all_meals)
+    return render_template('add-recipe.html', action=action, recipe=recipe_data, username=session.get('username'), tags=all_tags, meals=all_meals)
 
 
 @app.route('/edit-recipe/<urn>', methods=['POST', 'GET'])
 def edit_recipe(urn):
-    recipe = mongo.db.recipes.find_one({'urn': urn})
-    if recipe is None:
+    recipe_data = mongo.db.recipes.find_one({'urn': urn}, {'title': 1, 'username': 1, 'ingredients': 1, 'methods': 1,
+                                                           'prep-time': 1, 'cook-time': 1, 'tags': 1, 'meals': 1})
+    if recipe_data is None:
         abort(404)
-    elif session.get('username') == recipe['username']:
-        return 'edit recipe'
+    elif session.get('username') == recipe_data['username']:
+        all_tags = mongo.db.tags.find()
+        all_meals = mongo.db.meals.find()
+        return render_template('add-recipe.html', action='Edit', recipe=recipe_data, username=session.get('username'), tags=all_tags, meals=all_meals)
     else:
         abort(403)
 

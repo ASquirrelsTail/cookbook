@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Add Recipe</h1>
+<h1>{{ action }} Recipe</h1>
 <form action="" method="POST" id="create-recipe">
     <div class="input-field col s12">
         <label for="title"><i class="material-icons left">title</i>Title</label><input type="text" name="title" maxlength="100" value="{{ recipe['title'] }}">

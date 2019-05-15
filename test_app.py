@@ -549,8 +549,8 @@ class TestEditRecipe(TestClient):
         self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods)
         urn = self.mongo.db.recipes.find_one({}).get('urn')
         response = self.client.get('/edit-recipe/{}'.format(urn))
-        self.assertIn(str.encode(escape('Mac & Cheese.')), response.data)
-        self.assertIn(b'Milk.', response.data)
+        self.assertIn(str.encode(escape('Mac & Cheese')), response.data)
+        self.assertIn(b'Milk', response.data)
         self.assertIn(b'Once mixture thickens add boiled macaroni.', response.data)
 
 
