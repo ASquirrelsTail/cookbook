@@ -162,15 +162,32 @@ def edit_recipe(urn):
     if recipe_data is None:
         abort(404)
     elif session.get('username') == recipe_data['username']:
-        all_tags = mongo.db.tags.find()
-        all_meals = mongo.db.meals.find()
-        recipe_data['prep-time'] = recipe_data['prep-time'].split(':')
-        recipe_data['cook-time'] = recipe_data['cook-time'].split(':')
-        if recipe_data.get('tags', '') != '':
-            recipe_data['tags'] = '/'.join(recipe_data['tags'])
-        if recipe_data.get('meals', '') != '':
-            recipe_data['meals'] = '/'.join(recipe_data['meals'])
-        return render_template('add-recipe.html', action='Edit', recipe=recipe_data, username=session.get('username'), tags=all_tags, meals=all_meals)
+        if request.method == 'POST':
+            updated_recipe = request.form.to_dict()
+            if (updated_recipe.get('title', '') != '' and
+                    updated_recipe.get('ingredients', '') != '' and
+                    updated_recipe.get('methods', '') != '' and
+                    updated_recipe.get('prep-time', '') != '' and
+                    updated_recipe.get('cook-time', '') != ''):
+                updated_recipe['tags'] = updated_recipe.get('tags', '').split('/')
+                updated_recipe['meals'] = updated_recipe.get('meals', '').split('/')
+                mongo.db.recipes.update_one({'urn': urn},
+                                            {'$set': {'title': updated_recipe['title'], 'ingredients': updated_recipe['ingredients'],
+                                                      'methods': updated_recipe['methods'], 'prep-time': updated_recipe['prep-time'],
+                                                      'cook-time': updated_recipe['cook-time'], 'tags': updated_recipe['tags'],
+                                                      'meals': updated_recipe['meals']}})
+                flash('Successfully edited recipe!')
+                return redirect(url_for('recipe', urn=urn))
+        else:
+            all_tags = mongo.db.tags.find()
+            all_meals = mongo.db.meals.find()
+            recipe_data['prep-time'] = recipe_data['prep-time'].split(':')
+            recipe_data['cook-time'] = recipe_data['cook-time'].split(':')
+            if recipe_data.get('tags', '') != '':
+                recipe_data['tags'] = '/'.join(recipe_data['tags'])
+            if recipe_data.get('meals', '') != '':
+                recipe_data['meals'] = '/'.join(recipe_data['meals'])
+            return render_template('add-recipe.html', action='Edit', recipe=recipe_data, username=session.get('username'), tags=all_tags, meals=all_meals)
     else:
         abort(403)
 
