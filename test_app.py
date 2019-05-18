@@ -53,7 +53,8 @@ class TestClient(unittest.TestCase):
 
     @classmethod
     def submit_recipe(cls, title='Test Recipe', ingredients=['Test ingredient 1', 'Test ingredient 2'],
-                      methods=['Add one to two.', 'Enjoy'], tags='', meals='', prep_time='00:01', cook_time='00:01', parent=None):
+                      methods=['Add one to two.', 'Enjoy'], tags='', meals='', prep_time='00:01', cook_time='00:01',
+                      image='', parent=None):
         '''
         Helper function to create a recipe.
         '''
@@ -66,7 +67,7 @@ class TestClient(unittest.TestCase):
         return cls.client.post('/add-recipe', follow_redirects=True,
                                data={'title': title, 'ingredients': join_if_array(ingredients), 'methods': join_if_array(methods),
                                      'tags': join_if_array(tags, '/'), 'meals': join_if_array(meals, '/'), 'prep-time': prep_time,
-                                     'cook-time': cook_time, 'parent': parent})
+                                     'cook-time': cook_time, 'parent': parent, 'image': image})
 
     def test_home(self):
         '''
@@ -309,6 +310,15 @@ class TestAddRecipe(TestClient):
         self.assertNotEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('date'), None)
         self.assertRegex(self.mongo.db.recipes.find_one({'title': recipe_title}).get('date', ''),
                          '[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}')
+
+    def test_submit_recipe_has_image_url(self):
+        '''
+        Recipes with an image should contain an image url
+        '''
+        self.create_user()
+        with open('tests/test-image.jpg', 'rb') as file:
+            self.submit_recipe(image=file.read())
+        self.assertRegex(self.mongo.db.recipes.find_one({}).get('image'), '.+\.jpg$')
 
     def test_submit_recipe_missing_fields(self):
         '''
