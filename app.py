@@ -261,7 +261,7 @@ def recipes():
     if page != 1 and offset >= no_recipes:
         abort(404)
     if no_recipes > 0:
-        recipes = mongo.db.recipes.find(query, {'urn': 1, 'title': 1, 'username': 1}).sort('views', -1).skip(offset).limit(10)
+        recipes = mongo.db.recipes.find(query, {'urn': 1, 'title': 1, 'username': 1, 'image': 1}).sort('views', -1).skip(offset).limit(10)
     else:
         recipes = []
 
