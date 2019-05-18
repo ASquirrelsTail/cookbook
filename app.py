@@ -101,6 +101,8 @@ def add_recipe():
                 recipe_data['tags'] = recipe_data['tags'].split('/')
             if recipe_data.get('meals', '') != '':
                 recipe_data['meals'] = recipe_data['meals'].split('/')
+            if recipe_data.get('image', '') != '':
+                recipe_data['image'] = 'image.jpg'
             count = mongo.db.recipes.count_documents({'urn': {'$regex': '^' + recipe_data['urn'] + '[0-9]*'}})
             if count != 0:
                 recipe_data['urn'] += '{}'.format(count)

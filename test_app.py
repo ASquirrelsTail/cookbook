@@ -320,6 +320,15 @@ class TestAddRecipe(TestClient):
             self.submit_recipe(image=file.read())
         self.assertRegex(self.mongo.db.recipes.find_one({}).get('image'), '.+\.jpg$')
 
+    def test_submit_recipe_has_no_image_url_if_file_not_image(self):
+        '''
+        If the uploaded file is not a jpg image, the image url should not be created
+        '''
+        self.create_user()
+        with open('tests/not-test-image.txt', 'rb') as file:
+            self.submit_recipe(image=file.read())
+        self.assertEqual(self.mongo.db.recipes.find_one({}).get('image'), None)
+
     def test_submit_recipe_missing_fields(self):
         '''
         Submitted recipes without a title, ingredients or methods should should not be added
