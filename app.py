@@ -3,6 +3,9 @@ from re import match, findall, sub, split, escape as re_escape
 from datetime import datetime
 from flask import Flask, render_template, request, flash, session, redirect, url_for, abort
 from flask_pymongo import PyMongo
+from PIL import Image
+from base64 import b64decode
+from io import BytesIO
 
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = 'cookbook'
@@ -102,7 +105,17 @@ def add_recipe():
             if recipe_data.get('meals', '') != '':
                 recipe_data['meals'] = recipe_data['meals'].split('/')
             if recipe_data.get('image', '') != '':
-                recipe_data['image'] = 'image.jpg'
+                imageBytes = b64decode(recipe_data['image'])
+                try:
+                    image = Image.open(BytesIO(imageBytes))
+                    if image.format == 'JPEG':
+                        recipe_data['image'] = 'image.jpg'
+                    else:
+                        flash('Failed to upload image.')
+                except IOError:
+                    recipe_data.pop('image', '')
+                    flash('Failed to upload image, incorrectly formatted file.')
+
             count = mongo.db.recipes.count_documents({'urn': {'$regex': '^' + recipe_data['urn'] + '[0-9]*'}})
             if count != 0:
                 recipe_data['urn'] += '{}'.format(count)

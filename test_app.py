@@ -4,6 +4,7 @@ import app
 import datetime
 from flask import escape
 from re import findall
+import base64
 
 
 def flask_test_client():
@@ -317,8 +318,17 @@ class TestAddRecipe(TestClient):
         '''
         self.create_user()
         with open('tests/test-image.jpg', 'rb') as file:
-            self.submit_recipe(image=file.read())
+            self.submit_recipe(image=base64.b64encode(file.read()))
         self.assertRegex(self.mongo.db.recipes.find_one({}).get('image'), '.+\.jpg$')
+
+    def test_submit_recipe_has_no_image_url_if_file_not_correct_dimensions(self):
+        '''
+        If the uploaded file is not a of the correct dimensions, the image url should not be created
+        '''
+        self.create_user()
+        with open('tests/too-small-test-image.jpg', 'rb') as file:
+            self.submit_recipe(image=base64.b64encode(file.read()))
+        self.assertEqual(self.mongo.db.recipes.find_one({}).get('image'), None)
 
     def test_submit_recipe_has_no_image_url_if_file_not_image(self):
         '''
@@ -326,7 +336,7 @@ class TestAddRecipe(TestClient):
         '''
         self.create_user()
         with open('tests/not-test-image.txt', 'rb') as file:
-            self.submit_recipe(image=file.read())
+            self.submit_recipe(image=base64.b64encode(file.read()))
         self.assertEqual(self.mongo.db.recipes.find_one({}).get('image'), None)
 
     def test_submit_recipe_missing_fields(self):
