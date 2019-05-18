@@ -3,6 +3,13 @@
 <div class="row">
     <div class="col s12">
         <h1>{{ recipe['title'] }}</h1>
+    </div>
+    {% if recipe['image'] %}
+    <div class="col s12">
+        <img src="{{ recipe['image'] }}" alt="{{ recipe['title'] }}" class="col s12">
+    </div>
+    {% endif %}
+    <div class="col s12">
         By {{ recipe['username'] }} on {{ recipe['date'] }} 
         {% if recipe['forks'] %}
         with {{ recipe['forks'] }} forks. 

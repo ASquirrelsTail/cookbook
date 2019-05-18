@@ -7,7 +7,10 @@
     <div class="row">
     {% for recipe in recipes %}
         <div class="col s12 m6">
-            <a href="{{ url_for('recipe', urn=recipe['urn']) }}">{{ recipe['title']}}</a> by {{ recipe['username'] }}
+            {% if recipe['image'] %}
+            <img src="{{ recipe['image'] }}" alt="{{ recipe['title'] }}">
+            {% endif %}
+            <a href="{{ url_for('recipe', urn=recipe['urn']) }}">{{ recipe['title'] }}</a> by {{ recipe['username'] }}
         </div>
     {% endfor %}
     </div>

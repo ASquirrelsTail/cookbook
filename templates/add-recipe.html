@@ -2,9 +2,29 @@
 {% block content %}
 <h1>{{ action }} Recipe</h1>
 <form action="" method="POST" id="create-recipe">
-    <div class="input-field col s12">
+    <div class="input-field col s12" style="margin-bottom: 0">
         <label for="title"><i class="material-icons left">title</i>Title</label><input type="text" name="title" maxlength="100" value="{{ recipe['title'] }}">
     </div>
+    <div class="col s12" style="position: relative; line-height: 0">
+        <canvas id="input-canvas" style="height: 0px; transition: height 0.5s"></canvas>
+        <div id="canvas-overlay" style='position: absolute; top: 10px; right: 10px; opacity: 0; transition: opacity 0.7s'>
+            <a class="btn-floating btn-large waves-effect waves-light red" id="image-delete" style="margin-bottom: 10px"><i class="material-icons">delete</i></a>
+            <br>
+            <a class="btn-floating btn-large waves-effect waves-light"><i class="material-icons">crop</i></a>
+            <!-- <a class="btn-floating btn-large waves-effect waves-light red"><i class="material-icons">thumb_up</i></a> -->
+        </div>
+    </div>
+    <div class="file-field input-field col s12">
+        <div class="btn-small">
+            <span>Select Image<i class="material-icons right">image</i></span>
+            <input type="file" id="image-upload" accept="image/*">
+        </div>
+        <div class="file-path-wrapper">
+            <input class="file-path validate" type="text">
+        </div>
+    </div>
+    <canvas id="output-canvas" width="1200" height="700" style="display: none"></canvas>
+    <input type="hidden" name="image" id="image-data" value="">
     <div class="input-field col s12">
         <label for="ingredients"><i class="material-icons left">list</i>Ingredients</label>
         <textarea name="ingredients" class="materialize-textarea">{{ recipe['ingredients'] }}</textarea>

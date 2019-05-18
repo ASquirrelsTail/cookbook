@@ -66,4 +66,45 @@ $(function() {
         let chipInstance = M.Chips.getInstance($('#' + $(this).parent().parent().attr('data-target'))[0]);
         chipInstance.addChip({ tag: tagName });
     });
+
+    $('#image-delete').on('click', function () {
+        $('#image-upload').parent().parent().find('.file-path').val('');
+        $('#input-canvas').css({height: '0px'});
+        $('#canvas-overlay').css({opacity: 0})
+        $('#image-data').val(null);
+    })
+
+    $('#image-upload').on('change', () => {
+            if ($('#image-upload').val() != '' && $('#image-upload').val() != null) {
+
+                let reader = new FileReader();
+                reader.readAsDataURL($('#image-upload')[0].files[0]);
+                reader.onload = () => {
+                    let image = new Image();
+                    image.src = reader.result;
+                    image.addEventListener('load', () => {
+                        console.log("File loaded")
+                        $('#input-canvas')[0].width = $('#input-canvas').parent().width();
+                        $('#input-canvas')[0].height = 7 / 12 * $('#input-canvas').parent().width();
+                        let inputCtx = $('#input-canvas')[0].getContext('2d');
+                        inputCtx.resetTransform();
+                        inputCtx.scale($('#input-canvas').parent().width() / image.width, $('#input-canvas').parent().width() / image.width);
+                        inputCtx.drawImage(image, 0, 0);
+                        inputCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                        inputCtx.fillRect(0, 7 / 12 * image.width, image.width, image.height - (7 / 12 * image.width));
+                        $('#input-canvas').css({height: (7 / 12 * $('#input-canvas').parent().width()) + 'px'});
+                        $('#canvas-overlay').css({opacity: 1})
+                        $('#output-canvas')[0].getContext('2d').resetTransform();
+                        $('#output-canvas')[0].getContext('2d').scale(1200 / image.width, 1200 / image.width);
+                        $('#output-canvas')[0].getContext('2d').drawImage(image, 0, 0);
+                        $('#image-data').val($('#output-canvas')[0].toDataURL('image/jpeg', 0.5).split(',')[1]);
+                    }, false);
+                };
+            }else{
+                $('#image-upload').parent().parent().find('.file-path').val('');
+                $('#input-canvas').css({height: '0px'});
+                $('#canvas-overlay').css({opacity: 0})
+                $('#image-data').val(null);
+            }
+        });
 });
