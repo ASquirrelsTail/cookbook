@@ -6,6 +6,11 @@ from flask_pymongo import PyMongo
 from PIL import Image
 from base64 import b64decode
 from io import BytesIO
+import boto3
+import botocore
+
+s3 = boto3.client('s3')
+s3_bucket = os.getenv('AWS_BUCKET')
 
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = 'cookbook'
@@ -108,9 +113,15 @@ def add_recipe():
                 imageBytes = b64decode(recipe_data['image'])
                 try:
                     image = Image.open(BytesIO(imageBytes))
-                    if image.format == 'JPEG':
-                        recipe_data['image'] = 'image.jpg'
+                    if image.format == 'JPEG' and image.size == (1200, 700):
+                        filename = recipe_data['urn'] + '.jpg'
+                        s3.upload_fileobj(BytesIO(imageBytes), s3_bucket, filename)
+                        config = s3._client_config
+                        config.signature_version = botocore.UNSIGNED
+
+                        recipe_data['image'] = boto3.client('s3', config=config).generate_presigned_url('get_object', ExpiresIn=0, Params={'Bucket': s3_bucket, 'Key': filename})
                     else:
+                        recipe_data.pop('image', '')
                         flash('Failed to upload image.')
                 except IOError:
                     recipe_data.pop('image', '')
