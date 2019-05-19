@@ -126,7 +126,9 @@ def add_recipe():
                 except IOError:
                     recipe_data.pop('image', '')
                     flash('Failed to upload image, incorrectly formatted file.')
-
+            elif recipe_data.get('old-image', '') != '':
+                recipe_data['image'] = recipe_data['old-image']
+                recipe_data.pop('old-image', '')
             count = mongo.db.recipes.count_documents({'urn': {'$regex': '^' + recipe_data['urn'] + '[0-9]*'}})
             if count != 0:
                 recipe_data['urn'] += '{}'.format(count)
@@ -162,7 +164,7 @@ def add_recipe():
         parent = request.args.get('fork')
         recipe_data = mongo.db.recipes.find_one({'urn': parent},
                                                 {'title': 1, 'ingredients': 1, 'methods': 1, 'tags': 1,
-                                                'meals': 1, 'prep-time': 1, 'cook-time': 1})
+                                                'meals': 1, 'prep-time': 1, 'cook-time': 1, 'image': 1})
         if recipe_data is not None:
             recipe_data['parent'] = parent
             recipe_data['prep-time'] = recipe_data['prep-time'].split(':')
@@ -171,6 +173,8 @@ def add_recipe():
                 recipe_data['tags'] = '/'.join(recipe_data['tags'])
             if recipe_data.get('meals', '') != '':
                 recipe_data['meals'] = '/'.join(recipe_data['meals'])
+            if recipe_data.get('image') is not None:
+                recipe_data['old-image'] = recipe_data['image']
         else:
             flash('Could not fork recipe. Failed to find parent!')
     else:
@@ -184,7 +188,7 @@ def add_recipe():
 @app.route('/edit-recipe/<urn>', methods=['POST', 'GET'])
 def edit_recipe(urn):
     recipe_data = mongo.db.recipes.find_one({'urn': urn}, {'title': 1, 'username': 1, 'ingredients': 1, 'methods': 1,
-                                                           'prep-time': 1, 'cook-time': 1, 'tags': 1, 'meals': 1})
+                                                           'prep-time': 1, 'cook-time': 1, 'tags': 1, 'meals': 1, 'image': 1})
     if recipe_data is None:
         abort(404)
     elif session.get('username') == recipe_data['username']:
@@ -195,13 +199,41 @@ def edit_recipe(urn):
                     updated_recipe.get('methods', '') != '' and
                     updated_recipe.get('prep-time', '') != '' and
                     updated_recipe.get('cook-time', '') != ''):
-                updated_recipe['tags'] = updated_recipe.get('tags', '').split('/')
-                updated_recipe['meals'] = updated_recipe.get('meals', '').split('/')
+                if updated_recipe['tags'] == '':
+                    updated_recipe['tags'] = None
+                else:
+                    updated_recipe['tags'] = updated_recipe.get('tags', '').split('/')
+                if updated_recipe['meals'] == '':
+                    updated_recipe['meals'] = None
+                else:
+                    updated_recipe['meals'] = updated_recipe.get('meals', '').split('/')
+                if updated_recipe.get('image', '') != '':
+                    imageBytes = b64decode(updated_recipe['image'])
+                    try:
+                        image = Image.open(BytesIO(imageBytes))
+                        if image.format == 'JPEG' and image.size == (1200, 700):
+                            filename = urn + '.jpg'
+                            s3.upload_fileobj(BytesIO(imageBytes), s3_bucket, filename)
+                            config = s3._client_config
+                            config.signature_version = botocore.UNSIGNED
+
+                            updated_recipe['image'] = boto3.client('s3', config=config).generate_presigned_url('get_object', ExpiresIn=0, Params={'Bucket': s3_bucket, 'Key': filename})
+                        else:
+                            updated_recipe.pop('image', '')
+                            flash('Failed to upload image.')
+                    except IOError:
+                        updated_recipe.pop('image', '')
+                        flash('Failed to upload image, incorrectly formatted file.')
+                elif updated_recipe.get('old-image', '') != '':
+                    updated_recipe['image'] = updated_recipe['old-image']
+                else:
+                    updated_recipe['image'] = None
+
                 mongo.db.recipes.update_one({'urn': urn},
                                             {'$set': {'title': updated_recipe['title'], 'ingredients': updated_recipe['ingredients'],
                                                       'methods': updated_recipe['methods'], 'prep-time': updated_recipe['prep-time'],
                                                       'cook-time': updated_recipe['cook-time'], 'tags': updated_recipe['tags'],
-                                                      'meals': updated_recipe['meals']}})
+                                                      'meals': updated_recipe['meals'], 'image': updated_recipe['image']}})
                 flash('Successfully edited recipe!')
                 return redirect(url_for('recipe', urn=urn))
         else:
@@ -213,6 +245,8 @@ def edit_recipe(urn):
                 recipe_data['tags'] = '/'.join(recipe_data['tags'])
             if recipe_data.get('meals', '') != '':
                 recipe_data['meals'] = '/'.join(recipe_data['meals'])
+            if recipe_data.get('image', '') != '':
+                recipe_data['old-image'] = recipe_data['image']
             return render_template('add-recipe.html', action='Edit', recipe=recipe_data, username=session.get('username'), tags=all_tags, meals=all_meals)
     else:
         abort(403)

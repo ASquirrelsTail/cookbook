@@ -5,6 +5,16 @@
     <div class="input-field col s12" style="margin-bottom: 0">
         <label for="title"><i class="material-icons left">title</i>Title</label><input type="text" name="title" maxlength="100" value="{{ recipe['title'] }}">
     </div>
+    {% if recipe['old-image'] %}
+        <div class="col s12" id="old-image-container" style="position: relative;">
+            <img src="{{ recipe['old-image'] }}" alt="{{ recipe['title'] }}" class="responsive-img" style="transition: height 0.5s" id="old-imag-img">
+            <div id="old-image-overlay" style='position: absolute; top: 10px; right: 10px;'>
+                <a class="btn-floating btn-large waves-effect waves-light red scale-transition" id="old-image-delete">
+                    <i class="material-icons">delete</i></a>
+            </div>
+        </div>
+        <input type="hidden" name="old-image" id="old-image" value="{{ recipe['old-image'] }}">
+    {% endif %}
     <div class="col s12" style="position: relative; line-height: 0">
         <canvas id="input-canvas" style="height: 0px; transition: height 0.5s"></canvas>
         <div id="canvas-overlay" style='position: absolute; top: 10px; right: 10px;'>
@@ -18,7 +28,8 @@
     </div>
     <div class="file-field input-field col s12">
         <div class="btn-small">
-            <span>Select Image<i class="material-icons right">image</i></span>
+            {% if recipe['old-image'] %}<span>Replace Image<i class="material-icons right">image</i></span>
+            {% else %}<span>Select Image<i class="material-icons right">image</i></span>{% endif %}
             <input type="file" id="image-upload" accept="image/*">
         </div>
         <div class="file-path-wrapper">

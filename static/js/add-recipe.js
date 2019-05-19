@@ -49,9 +49,13 @@ function updateTimeInput(target) {
     $(target + '-input').val(hours.toString().padStart(2, '0') + ':' + minutes.toString().padStart(2, '0'));
 }
 
+function deleteOldImage() {
+    $('#old-image-container').remove();
+    $('#old-image').remove();
+}
+
 function loadImage() {
     if ($('#image-upload').val() != '' && $('#image-upload').val() != null) {
-
         let reader = new FileReader();
         reader.readAsDataURL($('#image-upload')[0].files[0]);
         reader.onload = () => {
@@ -59,6 +63,7 @@ function loadImage() {
             let image = window.image;
             image.src = reader.result;
             image.addEventListener('load', function() {
+                deleteOldImage();
                 inputCanvas.setImage(window.image);
                 $('#image-delete').addClass('scale-in');
                 $('#image-crop').addClass('scale-in');
@@ -96,6 +101,8 @@ $(function() {
         let chipInstance = M.Chips.getInstance($('#' + $(this).parent().parent().attr('data-target'))[0]);
         chipInstance.addChip({ tag: tagName });
     });
+
+    $('#old-image-delete').on('click', deleteOldImage);
 
     $('#image-delete').on('click', resetFileInput);
 
