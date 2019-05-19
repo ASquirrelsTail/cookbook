@@ -7,10 +7,12 @@
     </div>
     <div class="col s12" style="position: relative; line-height: 0">
         <canvas id="input-canvas" style="height: 0px; transition: height 0.5s"></canvas>
-        <div id="canvas-overlay" style='position: absolute; top: 10px; right: 10px; opacity: 0; transition: opacity 0.7s'>
-            <a class="btn-floating btn-large waves-effect waves-light red" id="image-delete" style="margin-bottom: 10px"><i class="material-icons">delete</i></a>
+        <div id="canvas-overlay" style='position: absolute; top: 10px; right: 10px;'>
+            <a class="btn-floating btn-large waves-effect waves-light red scale-transition scale-out" id="image-delete" style="margin-bottom: 10px"><i class="material-icons">delete</i></a>
             <br>
-            <a class="btn-floating btn-large waves-effect waves-light"><i class="material-icons">crop</i></a>
+            <a class="btn-floating btn-large waves-effect waves-light scale-transition scale-out" id="image-crop" style="margin-bottom: 10px"><i class="material-icons">crop</i></a>
+            <br>
+            <a class="btn-floating btn-large waves-effect waves-light scale-transition scale-out" id="image-reset"><i class="material-icons">refresh</i></a>
             <!-- <a class="btn-floating btn-large waves-effect waves-light red"><i class="material-icons">thumb_up</i></a> -->
         </div>
     </div>

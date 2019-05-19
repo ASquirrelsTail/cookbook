@@ -49,7 +49,38 @@ function updateTimeInput(target) {
     $(target + '-input').val(hours.toString().padStart(2, '0') + ':' + minutes.toString().padStart(2, '0'));
 }
 
+function loadImage() {
+    if ($('#image-upload').val() != '' && $('#image-upload').val() != null) {
+
+        let reader = new FileReader();
+        reader.readAsDataURL($('#image-upload')[0].files[0]);
+        reader.onload = () => {
+            window.image = new Image();
+            let image = window.image;
+            image.src = reader.result;
+            image.addEventListener('load', function() {
+                inputCanvas.setImage(window.image);
+                $('#image-delete').addClass('scale-in');
+                $('#image-crop').addClass('scale-in');
+            }, false);
+        };
+    }else resetFileInput();
+}
+
+function resetFileInput() {
+    $('#image-upload').parent().parent().find('.file-path').val('');
+    $('#input-canvas').css({height: '0px'});
+    $('#image-delete').removeClass('scale-in');
+    $('#image-crop').removeClass('scale-in');
+    $('#image-reset').removeClass('scale-in');
+    $('#image-data').val(null);
+    $('#image-crop i').text('crop');
+}
+
 $(function() {
+
+    inputCanvas.init();
+
     $('#create-recipe').on('submit', function(e) {
         chipsToInput(tagChips, '#tag-input');
         chipsToInput(mealChips, '#meal-input');
@@ -62,49 +93,211 @@ $(function() {
     });
     $('.dropdown-content[data-target] a').on('click', function() {
         let tagName = $(this).attr('data-chip-name');
-        console.log('#' + $(this).parent().parent().attr('data-target'));
         let chipInstance = M.Chips.getInstance($('#' + $(this).parent().parent().attr('data-target'))[0]);
         chipInstance.addChip({ tag: tagName });
     });
 
-    $('#image-delete').on('click', function () {
-        $('#image-upload').parent().parent().find('.file-path').val('');
-        $('#input-canvas').css({height: '0px'});
-        $('#canvas-overlay').css({opacity: 0})
-        $('#image-data').val(null);
-    })
+    $('#image-delete').on('click', resetFileInput);
 
-    $('#image-upload').on('change', () => {
-            if ($('#image-upload').val() != '' && $('#image-upload').val() != null) {
+    $('#image-crop').on('click', function () {
+        if (inputCanvas.crop){
+            inputCanvas.showOutput();
+            $('#image-reset').removeClass('scale-in');
+            $('#image-crop i').text('crop');
+            inputCanvas.crop = false;
+            inputCanvas.$elem.css({cursor: 'auto'});
+        }else{
+            $('#image-crop i').text('check');
+            $('#image-reset').addClass('scale-in');
+            inputCanvas.crop = true;
+            inputCanvas.$elem.css({cursor: 'move'});
+            inputCanvas.showAll();
+        }
+    });
 
-                let reader = new FileReader();
-                reader.readAsDataURL($('#image-upload')[0].files[0]);
-                reader.onload = () => {
-                    let image = new Image();
-                    image.src = reader.result;
-                    image.addEventListener('load', () => {
-                        console.log("File loaded")
-                        $('#input-canvas')[0].width = $('#input-canvas').parent().width();
-                        $('#input-canvas')[0].height = 7 / 12 * $('#input-canvas').parent().width();
-                        let inputCtx = $('#input-canvas')[0].getContext('2d');
-                        inputCtx.resetTransform();
-                        inputCtx.scale($('#input-canvas').parent().width() / image.width, $('#input-canvas').parent().width() / image.width);
-                        inputCtx.drawImage(image, 0, 0);
-                        inputCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-                        inputCtx.fillRect(0, 7 / 12 * image.width, image.width, image.height - (7 / 12 * image.width));
-                        $('#input-canvas').css({height: (7 / 12 * $('#input-canvas').parent().width()) + 'px'});
-                        $('#canvas-overlay').css({opacity: 1})
-                        $('#output-canvas')[0].getContext('2d').resetTransform();
-                        $('#output-canvas')[0].getContext('2d').scale(1200 / image.width, 1200 / image.width);
-                        $('#output-canvas')[0].getContext('2d').drawImage(image, 0, 0);
-                        $('#image-data').val($('#output-canvas')[0].toDataURL('image/jpeg', 0.5).split(',')[1]);
-                    }, false);
-                };
-            }else{
-                $('#image-upload').parent().parent().find('.file-path').val('');
-                $('#input-canvas').css({height: '0px'});
-                $('#canvas-overlay').css({opacity: 0})
-                $('#image-data').val(null);
+    $('#image-reset').on('click', function () {
+        inputCanvas.autoCrop();
+        inputCanvas.showAll();
+    });
+
+    $('#image-upload').on('change', loadImage);
+});
+
+let inputCanvas = {
+    elem: $('#input-canvas')[0],
+    $elem: $('#input-canvas'),
+    ctx: $('#input-canvas')[0].getContext('2d'),
+    height: $('#input-canvas')[0].height,
+    width: $('#input-canvas')[0].width,
+    aspect: 7 / 12,
+    crop: false,
+    mouse: false,
+    cropStart: {x: 100, y: 100},
+    cropSize: {x: 120, y: 70},
+    init() {
+        let that = this;
+        this.$elem.on('mousedown', function(e) {
+            e.preventDefault();
+            if (that.crop) {
+                that.mouse = {x: ((e.pageX - $(this).offset().left - (that.width / 2)) / that.scale) + (that.image.width / 2),
+                              y: ((e.pageY - $(this).offset().top - (that.height / 2)) / that.scale) + (that.image.height / 2)};
             }
         });
-});
+        this.$elem.on('mouseup', function() {
+            that.mouse = false;
+        });
+        this.$elem.on('mouseout', function() {
+            that.mouse = false;
+        });
+        this.$elem.on('mousemove', function(e) {
+            if (that.crop) {
+                let newMouse = {x: ((e.pageX - $(this).offset().left - (that.width / 2)) / that.scale) + (that.image.width / 2),
+                                y: ((e.pageY - $(this).offset().top - (that.height / 2)) / that.scale) + (that.image.height / 2)};
+                if (that.mouse) {
+                    let mouseChange = {x: newMouse.x - that.mouse.x, y: newMouse.y - that.mouse.y}
+                    if (that.crop == 'move') {
+                        that.cropStart.x += mouseChange.x;
+                        that.cropStart.y += mouseChange.y;
+                    }else if (that.crop == 'nw-resize') {
+                        let change = mouseChange.x;
+                        if (that.cropStart.x < -change) change = -that.cropStart.x;
+                        if (that.cropStart.y < -change * that.aspect) change = -that.cropStart.y / that.aspect;
+                        that.cropStart.x += change;
+                        that.cropStart.y += change * that.aspect;
+                        that.cropSize.x -= change;
+                        that.cropSize.y -= change * that.aspect;
+                    }else if (that.crop == 'se-resize') {
+                        let change = mouseChange.x;
+                        if (that.image.width - (that.cropStart.x + that.cropSize.x) < change) change = that.image.width - (that.cropStart.x + that.cropSize.x);
+                        if (that.image.height - (that.cropStart.y + that.cropSize.y) < change * that.aspect) change = (that.image.height - (that.cropStart.y + that.cropSize.y)) / that.aspect;
+                        that.cropSize.x += change;
+                        that.cropSize.y += change * that.aspect;
+                    }else if (that.crop == 'ne-resize') {
+                        let change = mouseChange.x;
+                        if (that.image.width - (that.cropStart.x + that.cropSize.x) < change) change = that.image.width - (that.cropStart.x + that.cropSize.x);
+                        if (that.cropStart.y < change * that.aspect) change = -that.cropStart.y / that.aspect;
+                        that.cropStart.y -= change * that.aspect;
+                        that.cropSize.x += change;
+                        that.cropSize.y += change * that.aspect;
+                    }else if (that.crop == 'sw-resize') {
+                        let change = mouseChange.x;
+                        if (that.cropStart.x < -change) change = -that.cropStart.x;
+                        if (that.image.height - (that.cropStart.y + that.cropSize.y) < -change * that.aspect) change = (that.image.height - (that.cropStart.y + that.cropSize.y)) / that.aspect;
+                        that.cropStart.x += change;
+                        that.cropSize.x -= change;
+                        that.cropSize.y -= change * that.aspect;
+                    }
+                    if (that.cropStart.x < 0) that.cropStart.x = 0;
+                    else if (that.cropStart.x > that.image.width - that.cropSize.x) that.cropStart.x = that.image.width - that.cropSize.x;
+                    if (that.cropStart.y < 0) that.cropStart.y = 0;
+                    else if (that.cropStart.y > that.image.height - that.cropSize.y) that.cropStart.y = that.image.height - that.cropSize.y;
+                    that.mouse = newMouse;
+                    that.showAll();
+                }else if (newMouse.x > that.cropStart.x + (that.cropSize.x / 5) && newMouse.x < that.cropStart.x + (that.cropSize.x * 0.8) &&
+                          newMouse.y > that.cropStart.y + (that.cropSize.y / 5) && newMouse.y < that.cropStart.y + (that.cropSize.y * 0.8)) {
+                    that.$elem.css({cursor: 'move'});
+                    that.crop = 'move';
+                }else{
+                    if (newMouse.x < that.cropStart.x + (that.cropSize.x / 2)) {
+                        if (newMouse.y < that.cropStart.y + (that.cropSize.y / 2)) that.crop = 'nw-resize';
+                        else that.crop = 'sw-resize';
+                    }else{
+                        if (newMouse.y < that.cropStart.y + (that.cropSize.y / 2)) that.crop = 'ne-resize';
+                        else that.crop = 'se-resize';
+                    }
+                    that.$elem.css({cursor: that.crop});
+                }
+            }
+            
+        });
+    },
+    setImage(image) {
+        this.image = image;
+        this.autoCrop();
+        this.showOutput();
+        this.renderOutput();
+        $('#image-reset').removeClass('scale-in');
+        $('#image-crop i').text('crop');
+        inputCanvas.crop = false;
+    },
+    autoCrop() {
+        let imageAspect = this.image.height / this.image.width;
+        if (imageAspect > this.aspect) {
+            this.cropSize.x = this.image.width;
+            this.cropSize.y = this.cropSize.x * this.aspect;
+            this.cropStart.x = 0;
+            this.cropStart.y = (this.image.height - this.cropSize.y) / 2;
+        }else{
+            this.cropSize.y = this.image.height;
+            this.cropSize.x = this.cropSize.y / this.aspect;
+            this.cropStart.y = 0;
+            this.cropStart.x = (this.image.width - this.cropSize.x) / 2;
+        }
+    },
+    showOutput() {
+        this.width = this.elem.width = this.$elem.parent().width();
+        this.height = this.elem.height = this.width * this.aspect;
+        this.$elem.css({height: this.height + 'px'});
+        this.ctx.resetTransform();
+        this.scale = this.width / this.cropSize.x;
+        this.ctx.scale(this.scale, this.scale);
+        this.ctx.drawImage(this.image, -this.cropStart.x, -this.cropStart.y);
+        this.renderOutput();
+    },
+    showAll() {
+        let imageAspect = this.image.height / this.image.width;
+        if (imageAspect > this.aspect) this.scale = this.height / this.image.height;
+        else this.scale = this.width / this.image.width;
+        this.ctx.resetTransform();
+        this.ctx.clearRect(0, 0, this.width, this.height)
+        this.ctx.translate(this.width /2, this.height /2);
+        this.ctx.scale(this.scale, this.scale);
+        this.ctx.translate(-this.image.width /2, -this.image.height /2);
+        this.ctx.drawImage(this.image, 0, 0);
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        // https://stackoverflow.com/questions/13618844/polygon-with-a-hole-in-the-middle-with-html5s-canvas
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, 0);
+        this.ctx.lineTo(this.image.width, 0);
+        this.ctx.lineTo(this.image.width, this.image.height);
+        this.ctx.lineTo(0, this.image.height);
+        this.ctx.lineTo(0, 0);
+        this.ctx.moveTo(this.cropStart.x, this.cropStart.y);
+        this.ctx.lineTo(this.cropStart.x, this.cropStart.y + this.cropSize.y);
+        this.ctx.lineTo(this.cropStart.x + this.cropSize.x, this.cropStart.y + this.cropSize.y);
+        this.ctx.lineTo(this.cropStart.x + this.cropSize.x, this.cropStart.y);
+        this.ctx.lineTo(this.cropStart.x, this.cropStart.y);
+        this.ctx.closePath();
+        this.ctx.fill();
+        this.ctx.strokeStyle = 'white';
+        this.ctx.lineWidth = 2 / this.scale;
+        this.ctx.strokeRect(this.cropStart.x, this.cropStart.y, this.cropSize.x, this.cropSize.y);
+    },
+    renderOutput() {
+        let target = $('#output-canvas')[0];
+        let width = target.width;
+        let height = target.height;
+        let ctx = target.getContext('2d');
+        ctx.resetTransform();
+        
+        scale = width / this.cropSize.x;
+        ctx.scale(scale, scale);
+        
+        ctx.drawImage(this.image, -this.cropStart.x, -this.cropStart.y);
+        $('#image-data').val(target.toDataURL('image/jpeg', 0.5).split(',')[1]);
+    }
+    // },
+    // drawCrop() {
+    //     this.update();
+    //     ctx = this.ctx;
+
+    //     ctx.scale($('#input-canvas').parent().width() / image.width, $('#input-canvas').parent().width() / image.width);
+
+    //     ctx.resetTransform();
+    //     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    //     ctx.fillRect(0, 0, this.width, this.cropStart[1]);
+    //     ctx.fillRect(0, this.cropStart[1], this.cropStart[0], this.cropSize[1]);
+    //     ctx.fillRect(this.cropStart[0] + this.cropSize[0], this.cropStart[1], this.width - this.cropStart[0] - this.cropSize[0], this.cropSize[1]);
+    //     ctx.fillRect(0, this.cropStart[1] + this.cropSize[1], this.width, this.height - this.cropStart[1] - this.cropSize[1]);
+    // }
+}
