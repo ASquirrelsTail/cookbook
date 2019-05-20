@@ -669,7 +669,7 @@ class TestEditRecipe(TestClient):
         with open('tests/test-image.jpg', 'rb') as file:
             self.submit_recipe(image=base64.b64encode(file.read()))
         urn = self.mongo.db.recipes.find_one({}).get('urn')
-        with open('tests/test-image.jpg', 'rb') as file:
+        with open('tests/test-image-replacement.jpg', 'rb') as file:
             replacement_image_data = file.read()
         self.client.post('/edit-recipe/{}'.format(urn),
                          data={'title': 'Test Recipe',

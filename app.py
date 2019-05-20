@@ -255,11 +255,11 @@ def edit_recipe(urn):
                     updated_recipe.get('methods', '') != '' and
                     updated_recipe.get('prep-time', '') != '' and
                     updated_recipe.get('cook-time', '') != ''):
-                if updated_recipe['tags'] == '':
+                if updated_recipe.get('tags', '') == '':
                     updated_recipe['tags'] = None
                 else:
                     updated_recipe['tags'] = updated_recipe.get('tags', '').split('/')
-                if updated_recipe['meals'] == '':
+                if updated_recipe.get('meals', '') == '':
                     updated_recipe['meals'] = None
                 else:
                     updated_recipe['meals'] = updated_recipe.get('meals', '').split('/')
@@ -323,7 +323,7 @@ def recipe(urn):
     if recipe is None:
         abort(404)
     else:
-        if recipe['username'] != session['username']:
+        if recipe['username'] != session.get('username'):
             mongo.db.recipes.update_one({'urn': urn}, {'$inc': {'views': 1}})
         recipe['ingredients'] = recipe['ingredients'].split('\n')
         recipe['methods'] = recipe['methods'].split('\n')
