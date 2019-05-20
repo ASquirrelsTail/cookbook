@@ -43,9 +43,65 @@ def hours_mins_to_string(hours_mins):
     return string
 
 
+def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, search=None, sort='views', order='-1'):
+    query = {}
+
+    if tags is not None:
+        if ' ' in tags:
+            tags = tags.split(' ')
+            query['tags'] = {'$all': tags}
+        else:
+            query['tags'] = tags
+    if meals is not None:
+        meals = request.args['meals']
+        if ' ' in meals:
+            meals = meals.split(' ')
+            query['meals'] = {'$all': meals}
+        else:
+            query['meals'] = meals
+    if username is not None:
+        query['username'] = username
+    if forks is not None:
+        query['parent'] = forks
+    if search is not None:
+        search_strings = None
+        if '"' in search:
+            search_strings = findall('".+"', search)
+            for search_string in search_strings:
+                search = sub(' *' + re_escape(search_string) + ' *', '', search)
+        if ' ' in search:
+            search = split(' +', search)
+            search = '"' + '" "'.join(search) + '"'
+        if search_strings is not None:
+            search += ' ' + ' '.join(search_strings)
+        query['$text'] = {'$search': search}
+
+    order = int(order)
+    if order != 1 and order != -1:
+        order = -1
+    page = int(page)
+    offset = (page - 1) * 10
+    no_recipes = mongo.db.recipes.count_documents(query)
+    if page < 1 or (page != 1 and offset >= no_recipes):
+        abort(404)  # Out of bounds error
+    if no_recipes > 0:
+        recipes = (
+            mongo.db.recipes.find(query, {'urn': 1, 'title': 1, 'username': 1, 'image': 1})
+            .sort(sort, order)
+            .skip(offset)
+            .limit(10)
+        )
+    else:
+        recipes = []
+
+    return {'recipes': recipes, 'no_recipes': no_recipes, 'page': page}
+
+
 @app.route('/')
 def index():
-    return render_template('index.html', username=session.get('username'))
+    recent_recipes = find_recipes(sort='date', order='-1')
+    current_query = {'sort': 'date', 'order': '-1'}
+    return render_template('index.html', username=session.get('username'), current_query=current_query, **recent_recipes)
 
 
 @app.route('/new-user', methods=['POST', 'GET'])
@@ -254,57 +310,11 @@ def edit_recipe(urn):
 
 @app.route('/recipes')
 def recipes():
-    query = {}
     query_args = request.args.to_dict()
+    results = find_recipes(**query_args)
     query_args.pop('page', '')
-    if request.args.get('tags') is not None:
-        tags = request.args['tags']
-        if ' ' in tags:
-            tags = tags.split(' ')
-            query['tags'] = {'$all': tags}
-        else:
-            query['tags'] = tags
-    if request.args.get('meals') is not None:
-        meals = request.args['meals']
-        if ' ' in meals:
-            meals = meals.split(' ')
-            query['meals'] = {'$all': meals}
-        else:
-            query['meals'] = meals
-    if request.args.get('username') is not None:
-        query['username'] = request.args.get('username')
-    if request.args.get('forks') is not None:
-        query['parent'] = request.args.get('forks')
-    if request.args.get('search') is not None:
-        search = request.args.get('search')
-        search_strings = None
-        if '"' in search:
-            search_strings = findall('".+"', search)
-            for search_string in search_strings:
-                search = sub(' *' + re_escape(search_string) + ' *', '', search)
-        if ' ' in search:
-            search = split(' +', search)
-            search = '"' + '" "'.join(search) + '"'
-        if search_strings is not None:
-            search += ' ' + ' '.join(search_strings)
-        query['$text'] = {'$search': search}
 
-    sort = request.args.get('sort', 'views')
-    order = int(request.args.get('order', '-1'))
-    if order != 1 and order != -1:
-        order = -1
-    page = int(request.args.get('page', '1'))
-    offset = (page - 1) * 10
-    no_recipes = mongo.db.recipes.count_documents(query)
-    if page != 1 and offset >= no_recipes:
-        abort(404)
-    if no_recipes > 0:
-        recipes = mongo.db.recipes.find(query, {'urn': 1, 'title': 1, 'username': 1, 'image': 1}).sort(sort, order).skip(offset).limit(10)
-    else:
-        recipes = []
-
-    return render_template('recipes.html', no_recipes=no_recipes, recipes=recipes, page=page,
-                           current_query=query_args, username=session.get('username'))
+    return render_template('recipes.html', current_query=query_args, username=session.get('username'), **results)
 
 
 @app.route('/recipes/<urn>')
