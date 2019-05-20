@@ -7,6 +7,7 @@ from re import findall
 import base64
 import urllib.request
 import boto3
+from datetime import timedelta, datetime
 
 s3 = boto3.client('s3')
 s3_bucket = os.getenv('AWS_BUCKET')
@@ -964,7 +965,7 @@ class TestRecipesList(TestClient):
         Recipes page should contain links with recipe names
         '''
         response = self.client.get('/recipes?meals=Side')
-        self.assertIn(str.encode('>{}</a>'.format(escape('Alice\'s Apple Coleslaw'))), response.data)
+        self.assertIn(str.encode('{}</a>'.format(escape('Alice\'s Apple Coleslaw'))), response.data)
 
     def test_recipe_author(self):
         '''
@@ -1041,33 +1042,57 @@ class TestRecipesList(TestClient):
         self.assertLess(response.data.decode().index('recipes/ben-s-beef-curry'), response.data.decode().index('recipes/alice-s-apple-pie'))
         self.assertLess(response.data.decode().index('recipes/alice-s-apple-pie'), response.data.decode().index('recipes/charlie-s-cottage-pie'))
 
+    def test_results_sort_by_time(self):
+        '''
+        Sorting by date should return newest recipes first
+        '''
+        old_time = datetime.utcnow() - timedelta(1)
+        new_time = datetime.utcnow() + timedelta(1)
+        self.mongo.db.recipes.update_one({'urn': 'ben-s-beef-curry'}, {'$set': {'date': old_time.strftime("%Y-%m-%d %H:%M:%S")}})
+        self.mongo.db.recipes.update_one({'urn': 'alice-s-anzac-biscuits'}, {'$set': {'date': new_time.strftime("%Y-%m-%d %H:%M:%S")}})
+        response = self.client.get('/recipes?sort=date')
+        self.assertIn(b'alice-s-anzac-biscuits', response.data)
+        self.assertNotIn(b'ben-s-beef-curry', response.data)
+
+    def test_results_sort_order_by(self):
+        '''
+        Sorting by date should return newest recipes first
+        '''
+        old_time = datetime.utcnow() - timedelta(2)
+        new_time = datetime.utcnow() + timedelta(2)
+        self.mongo.db.recipes.update_one({'urn': 'charlie-s-cherry-bakewells'}, {'$set': {'date': old_time.strftime("%Y-%m-%d %H:%M:%S")}})
+        self.mongo.db.recipes.update_one({'urn': 'alice-s-avocado-salad'}, {'$set': {'date': new_time.strftime("%Y-%m-%d %H:%M:%S")}})
+        response = self.client.get('/recipes?sort=date&order=1')
+        self.assertIn(b'charlie-s-cherry-bakewells', response.data)
+        self.assertNotIn(b'alice-s-avocado-salad', response.data)
+
     def test_text_search_ingredients(self):
         '''
         The search queries should return recipes with ingredients that match the query
         '''
         response = self.client.get('/recipes?search=apples')
-        self.assertIn(str.encode('>{}</a>'.format(escape('Alice\'s Apple Coleslaw'))), response.data)
-        self.assertIn(str.encode('>{}</a>'.format(escape('Ben\'s Bannana Smoothie'))), response.data)
+        self.assertIn(str.encode('{}</a>'.format(escape('Alice\'s Apple Coleslaw'))), response.data)
+        self.assertIn(str.encode('{}</a>'.format(escape('Ben\'s Bannana Smoothie'))), response.data)
 
         response = self.client.get('/recipes?search=apples%20flour')
-        self.assertIn(str.encode('>{}</a>'.format(escape('Ben\'s Apple & Blackberry Pie'))), response.data)
-        self.assertNotIn(str.encode('>{}</a>'.format(escape('Alice\'s Apple Coleslaw'))), response.data)
+        self.assertIn(str.encode('{}</a>'.format(escape('Ben\'s Apple & Blackberry Pie'))), response.data)
+        self.assertNotIn(str.encode('{}</a>'.format(escape('Alice\'s Apple Coleslaw'))), response.data)
 
     def test_text_search_titles(self):
         '''
         The search queries should return recipes with titles that match the query
         '''
         response = self.client.get('/recipes?search=salad')
-        self.assertIn(str.encode('>{}</a>'.format(escape('Alice\'s Avocado Salad'))), response.data)
-        self.assertIn(str.encode('>{}</a>'.format(escape('Charlie\'s Chicken Caesar Salad'))), response.data)
+        self.assertIn(str.encode('{}</a>'.format(escape('Alice\'s Avocado Salad'))), response.data)
+        self.assertIn(str.encode('{}</a>'.format(escape('Charlie\'s Chicken Caesar Salad'))), response.data)
 
     def test_text_search_exact_string(self):
         '''
         The search query should return recipes with exact matches to queries surrounded by quote marks
         '''
         response = self.client.get('/recipes?search=%22apple%20pie%22')
-        self.assertIn(str.encode('>{}</a>'.format(escape('Alice\'s Apple Pie'))), response.data)
-        self.assertNotIn(str.encode('>{}</a>'.format(escape('Ben\'s Apple & Blackberry Pie'))), response.data)
+        self.assertIn(str.encode('{}</a>'.format(escape('Alice\'s Apple Pie'))), response.data)
+        self.assertNotIn(str.encode('{}</a>'.format(escape('Ben\'s Apple & Blackberry Pie'))), response.data)
 
     def test_text_search_two_exact_strings(self):
         '''
@@ -1075,8 +1100,8 @@ class TestRecipesList(TestClient):
         contains more than one double quoted string.
         '''
         response = self.client.get('/recipes?search=%2212%20apples%22%20%22stick%20of%20butter%22')
-        self.assertIn(str.encode('>{}</a>'.format(escape('Alice\'s Apple Pie'))), response.data)
-        self.assertIn(str.encode('>{}</a>'.format(escape('Ben\'s Apple & Blackberry Pie'))), response.data)
+        self.assertIn(str.encode('{}</a>'.format(escape('Alice\'s Apple Pie'))), response.data)
+        self.assertIn(str.encode('{}</a>'.format(escape('Ben\'s Apple & Blackberry Pie'))), response.data)
 
     def test_text_search_string_in_page(self):
         '''
