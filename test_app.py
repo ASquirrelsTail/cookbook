@@ -89,7 +89,9 @@ class TestUsers(TestClient):
     Class for testing the user creation and login pages
     '''
     def setUp(self):
+        # Delete all records from the login and user collections
         self.mongo.db.logins.delete_many({})
+        self.mongo.db.users.delete_many({})
         self.logout_user()
 
     def test_new_user_page(self):
@@ -223,8 +225,9 @@ class TestAddRecipe(TestClient):
         s3.delete_object(Bucket=s3_bucket, Key='test-fork-image.jpg')
 
     def setUp(self):
-        # Delete all records from the user collection and create test user
+        # Delete all records from the login and user collections and create test user
         self.mongo.db.logins.delete_many({})
+        self.mongo.db.users.delete_many({})
         self.logout_user()
         self.create_user()
         self.login_user()
@@ -510,7 +513,8 @@ class TestAddRecipe(TestClient):
         '''
         self.create_user()
         with open('tests/test-image.jpg', 'rb') as file:
-            self.submit_recipe(title='Parent recipe', image=base64.b64encode(file.read()))
+            image_data = file.read()
+            self.submit_recipe(title='Parent recipe', image=base64.b64encode(image_data))
         parent_urn = self.mongo.db.recipes.find_one({}).get('urn')
         parent_image = self.mongo.db.recipes.find_one({}).get('image')
         self.submit_recipe(title='Child recipe', parent=parent_urn, old_image=parent_image)
@@ -565,9 +569,12 @@ class TestEditRecipe(TestClient):
     Class for testing the edit_recipe page
     '''
     def setUp(self):
+        # Delete all records from the login and user collections
         self.mongo.db.logins.delete_many({})
+        self.mongo.db.users.delete_many({})
         # Delete all records from the recipe collection
         self.mongo.db.recipes.delete_many({})
+        self.logout_user()
 
     def test_page_not_user(self):
         '''
@@ -687,8 +694,9 @@ class TestRecipes(TestClient):
     Class for testing individual recipes pages
     '''
     def setUp(self):
-        # Delete all records from the user collection and create test user
+        # Delete all records from the login and user collection and create test user
         self.mongo.db.logins.delete_many({})
+        self.mongo.db.users.delete_many({})
         self.logout_user()
         self.create_user()
         self.login_user()
@@ -772,7 +780,7 @@ class TestRecipes(TestClient):
         The returned page should contain the date the recipe was created.
         '''
         self.submit_recipe()
-        today = datetime.date.today()
+        today = datetime.now()
         urn = self.mongo.db.recipes.find_one({}).get('urn')
         response = self.client.get('/recipes/{}'.format(urn))
         self.assertIn(str.encode(escape(today.strftime('%a %d %b \'%y'))), response.data)
@@ -825,6 +833,95 @@ class TestRecipes(TestClient):
         self.assertEqual(0, self.mongo.db.recipes.find_one({'urn': urn}).get('views', 0))
 
 
+class TestFavourite(TestClient):
+    '''
+    Class to test the favourite route
+    '''
+    def setUp(self):
+        # Delete all records from the login and user collection and create test user
+        self.mongo.db.logins.delete_many({})
+        self.mongo.db.users.delete_many({})
+        # Delete all records from the recipe collection
+        self.mongo.db.recipes.delete_many({})
+        self.logout_user()
+        self.create_user()
+        self.login_user()
+        self.submit_recipe()
+        self.logout_user()
+        self.urn = self.mongo.db.recipes.find_one({}).get('urn')
+
+    def test_favourite_user_not_logged_in(self):
+        '''
+        Users that aren't logged in can't favoyrite recipes, should return forbidden.
+        '''
+        response = self.client.get('/recipes/{}/favourite'.format(self.urn))
+        self.assertEqual(response.status_code, 403)
+
+    def test_favourite_not_found(self):
+        '''
+        If recipe doesn't exist return 404
+        '''
+        response = self.client.get('/recipes/not-a-real-recipe/favourite')
+        self.assertEqual(response.status_code, 404)
+
+    def test_favourite_user_is_author(self):
+        '''
+        Users can't favourite their own recipes
+        '''
+        self.login_user()
+        response = self.client.get('/recipes/{}/favourite'.format(self.urn))
+        self.assertEqual(response.status_code, 403)
+
+    def test_page_redirects_to_recipe(self):
+        '''
+        The favourite route should redirect to the recipe itself
+        '''
+        self.create_user('FavouritingUser')
+        self.login_user('FavouritingUser')
+        response = self.client.get('/recipes/{}/favourite'.format(self.urn))
+        self.assertEqual(response.status_code, 302)
+
+    def test_logged_in_users_favourite_recipe(self):
+        '''
+        Logged in users favouriting a recipe increases its favourites by one
+        '''
+        self.create_user('FavouritingUser')
+        self.login_user('FavouritingUser')
+        self.client.get('/recipes/{}/favourite'.format(self.urn))
+        self.assertEqual(self.mongo.db.recipes.find_one({}).get('favourites'), 1)
+
+    def test_user_adds_recipe_to_favourites(self):
+        '''
+        Favourited recipes are added to a users list of favourites
+        '''
+        username = 'FavouritingUser'
+        self.create_user(username)
+        self.login_user(username)
+        self.client.get('/recipes/{}/favourite'.format(self.urn))
+        self.assertEqual(self.mongo.db.users.find_one({'username': username}).get('favourites'), [self.urn])
+
+    def test_user_already_favourited_decreases_favourites(self):
+        '''
+        If a user has already favourited a recipe unfavourite it
+        '''
+        self.create_user('FavouritingUser')
+        self.login_user('FavouritingUser')
+        self.client.get('/recipes/{}/favourite'.format(self.urn))
+        self.client.get('/recipes/{}/favourite'.format(self.urn))
+        self.assertEqual(self.mongo.db.recipes.find_one({}).get('favourites'), 0)
+
+    def test_user_already_favourited_removes_recipe_from_favourites(self):
+        '''
+        If a user has already favourited a recipe remove it from their favourites
+        '''
+        username = 'FavouritingUser'
+        self.create_user(username)
+        self.login_user(username)
+        self.client.get('/recipes/{}/favourite'.format(self.urn))
+        self.client.get('/recipes/{}/favourite'.format(self.urn))
+        self.assertEqual(self.mongo.db.users.find_one({'username': username}).get('favourites'), [])
+
+
 class TestRecipesList(TestClient):
     '''
     Class for testing the /recipes page
@@ -832,8 +929,9 @@ class TestRecipesList(TestClient):
     @classmethod
     def setUpClass(cls):
         super(TestRecipesList, cls).setUpClass()
-        # Delete all records from the user collection and create test user
+        # Delete all records from the login and user collection and create test user
         cls.mongo.db.logins.delete_many({})
+        cls.mongo.db.users.delete_many({})
         # Delete all records from the recipe collection
         cls.mongo.db.recipes.delete_many({})
 

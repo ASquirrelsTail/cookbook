@@ -117,6 +117,7 @@ def new_user():
             flash('Username "{}" is already taken, please choose another.'.format(username))
         else:
             mongo.db.logins.insert_one(request.form.to_dict())
+            mongo.db.users.insert_one({'username': username})
             return redirect(url_for('login'), code=307)
 
     return render_template('new-user.html')
@@ -333,6 +334,24 @@ def recipe(urn):
         if recipe.get('children') is not None:
             recipe['forks'] = len(recipe['children'])
     return render_template('recipe.html', recipe=recipe, username=session.get('username'))
+
+
+@app.route('/recipes/<urn>/favourite')
+def favourite_recipe(urn):
+    recipe = mongo.db.recipes.find_one({'urn': urn}, {'username': 1})
+    if recipe is None:
+        abort(404)
+    username = session.get('username')
+    if username is None or username == recipe.get('username', username):
+        abort(403)
+    else:
+        if urn in mongo.db.users.find_one({'username': username}, {'favourites': 1}).get('favourites', []):
+            mongo.db.recipes.update_one({'urn': urn}, {'$inc': {'favourites': -1}})
+            mongo.db.users.update_one({'username': username}, {'$pull': {'favourites': urn}})
+        else:
+            mongo.db.recipes.update_one({'urn': urn}, {'$inc': {'favourites': 1}})
+            mongo.db.users.update_one({'username': username}, {'$addToSet': {'favourites': urn}})
+    return redirect(url_for('recipe', urn=urn))
 
 
 if __name__ == '__main__':
