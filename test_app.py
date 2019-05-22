@@ -922,6 +922,63 @@ class TestFavourite(TestClient):
         self.assertEqual(self.mongo.db.users.find_one({'username': username}).get('favourites'), [])
 
 
+class TestFeature(TestClient):
+    '''
+    Class for testing featuring recipes
+    '''
+    def setUp(self):
+        # Delete all records from the login and user collection and create test user
+        self.mongo.db.logins.delete_many({})
+        self.mongo.db.users.delete_many({})
+        # Delete all records from the recipe collection
+        self.mongo.db.recipes.delete_many({})
+        self.logout_user()
+        self.create_user()
+        self.login_user()
+        self.submit_recipe()
+        self.logout_user()
+        self.create_user('Admin')
+        self.logout_user()
+        self.urn = self.mongo.db.recipes.find_one({}).get('urn')
+
+    def test_not_admin_cant_feature(self):
+        '''
+        Users that are not Admin can't feature recipes
+        '''
+        self.login_user()
+        response = self.client.get('/recipes/{}/feature'.format(self.urn))
+        self.assertEqual(response.status_code, 403)
+        self.logout_user()
+        response = self.client.get('/recipes/{}/feature'.format(self.urn))
+        self.assertEqual(response.status_code, 403)
+
+    def test_redirects_back_to_recipe(self):
+        '''
+        The page should redirect back to the recipe
+        '''
+        self.login_user('Admin')
+        response = self.client.get('/recipes/{}/feature'.format(self.urn))
+        self.assertEqual(response.status_code, 302)
+
+    def test_adds_featured_date_to_recipe(self):
+        '''
+        The page should add the featured time to the recipe
+        '''
+        self.login_user('Admin')
+        self.client.get('/recipes/{}/feature'.format(self.urn))
+        self.assertRegex(self.mongo.db.recipes.find_one({'urn': self.urn}).get('featured', ''),
+                         '[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}')
+
+    def test_removes_featured_from_featured_recipe(self):
+        '''
+        The page should remove the featured property from a recipe that is already featured
+        '''
+        self.login_user('Admin')
+        self.client.get('/recipes/{}/feature'.format(self.urn))
+        self.client.get('/recipes/{}/feature'.format(self.urn))
+        self.assertEqual(self.mongo.db.recipes.find_one({'urn': self.urn}).get('featured'), None)
+
+
 class TestRecipesList(TestClient):
     '''
     Class for testing the /recipes page
@@ -1163,6 +1220,20 @@ class TestRecipesList(TestClient):
         response = self.client.get('/recipes?sort=date&order=1')
         self.assertIn(b'charlie-s-cherry-bakewells', response.data)
         self.assertNotIn(b'alice-s-avocado-salad', response.data)
+
+    def test_results_featured(self):
+        '''
+        Filtering by featured recipes should return featured recipes
+        '''
+        self.create_user('Admin')
+        self.login_user('Admin')
+        self.client.get('/recipes/charlie-s-cottage-pie/feature')
+        self.client.get('/recipes/ben-s-baked-alaska/feature')
+        self.client.get('/recipes/ben-s-baked-alaska/feature')
+        response = self.client.get('/recipes?featured=1')
+        self.assertIn(b'charlie-s-cottage-pie', response.data)
+        self.assertNotIn(b'ben-s-baked-alaska', response.data)
+        self.assertIn(b'1 recipes', response.data)
 
     def test_text_search_ingredients(self):
         '''

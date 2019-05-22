@@ -43,7 +43,7 @@ def hours_mins_to_string(hours_mins):
     return string
 
 
-def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, search=None, sort='views', order='-1'):
+def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, search=None, featured=None, sort='views', order='-1'):
     query = {}
 
     if tags is not None:
@@ -63,6 +63,8 @@ def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, sea
         query['username'] = username
     if forks is not None:
         query['parent'] = forks
+    if featured is not None:
+        query['featured'] = {'$exists': True}
     if search is not None:
         search_strings = None
         if '"' in search:
@@ -351,6 +353,20 @@ def favourite_recipe(urn):
         else:
             mongo.db.recipes.update_one({'urn': urn}, {'$inc': {'favourites': 1}})
             mongo.db.users.update_one({'username': username}, {'$addToSet': {'favourites': urn}})
+    return redirect(url_for('recipe', urn=urn))
+
+
+@app.route('/recipes/<urn>/feature')
+def feature_recipe(urn):
+    if session.get('username') != 'Admin':
+        abort(403)
+    recipe = mongo.db.recipes.find_one({'urn': urn}, {'featured': 1})
+    if recipe.get('featured') is None:
+        now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        mongo.db.recipes.update_one({'urn': urn}, {'$set': {'featured': now}})
+    else:
+        mongo.db.recipes.update_one({'urn': urn}, {'$unset': {'featured': ''}})
+
     return redirect(url_for('recipe', urn=urn))
 
 
