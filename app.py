@@ -101,9 +101,11 @@ def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, sea
 
 @app.route('/')
 def index():
+    featured_recipes = find_recipes(featured='1', sort='featured', order='-1').get('recipes')
     recent_recipes = find_recipes(sort='date', order='-1')
     current_query = {'sort': 'date', 'order': '-1'}
-    return render_template('index.html', username=session.get('username'), current_query=current_query, **recent_recipes)
+    return render_template('index.html', username=session.get('username'), current_query=current_query,
+                           featured_recipes=featured_recipes, **recent_recipes)
 
 
 @app.route('/new-user', methods=['POST', 'GET'])

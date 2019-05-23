@@ -1,7 +1,6 @@
 import os
 import unittest
 import app
-import datetime
 from flask import escape
 from re import findall
 import base64
