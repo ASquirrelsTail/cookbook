@@ -248,9 +248,10 @@ def add_recipe():
 def edit_recipe(urn):
     recipe_data = mongo.db.recipes.find_one({'urn': urn}, {'title': 1, 'username': 1, 'ingredients': 1, 'methods': 1,
                                                            'prep-time': 1, 'cook-time': 1, 'tags': 1, 'meals': 1, 'image': 1})
+    username = session.get('username')
     if recipe_data is None:
         abort(404)
-    elif session.get('username') == recipe_data['username']:
+    elif username == recipe_data['username'] or username == 'Admin':
         if request.method == 'POST':
             updated_recipe = request.form.to_dict()
             if (updated_recipe.get('title', '') != '' and
@@ -306,7 +307,26 @@ def edit_recipe(urn):
                 recipe_data['meals'] = '/'.join(recipe_data['meals'])
             if recipe_data.get('image', '') != '':
                 recipe_data['old-image'] = recipe_data['image']
-            return render_template('add-recipe.html', action='Edit', recipe=recipe_data, username=session.get('username'), tags=all_tags, meals=all_meals)
+            return render_template('add-recipe.html', action='Edit', recipe=recipe_data, username=username, tags=all_tags, meals=all_meals)
+    else:
+        abort(403)
+
+
+@app.route('/delete-recipe/<urn>', methods=['GET', 'POST'])
+def delete_recipe(urn):
+    recipe_data = mongo.db.recipes.find_one({'urn': urn}, {'title': 1, 'username': 1})
+    username = session.get('username')
+    if recipe_data is None:
+        abort(404)
+    elif username == recipe_data['username'] or username == 'Admin':
+        if request.method == 'POST':
+            if request.form.get('confirm') == recipe_data['title']:
+                mongo.db.recipes.delete_one({'urn': urn})
+                flash('Successfully deleted recipe "{}".'.format(recipe_data['title']))
+                return redirect(url_for('index'))
+            else:
+                flash('Failed to delete recipe "{}".'.format(recipe_data['title']))
+        return render_template('delete-recipe.html', title=recipe_data['title'], urn=urn, username=username)
     else:
         abort(403)
 

@@ -603,6 +603,20 @@ class TestEditRecipe(TestClient):
         response = self.client.get('/edit-recipe/{}'.format(urn))
         self.assertEqual(response.status_code, 200)
 
+    def test_page_admin(self):
+        '''
+        An admin should be able to edit all recipes
+        '''
+        self.create_user('Tester')
+        self.login_user('Tester')
+        self.submit_recipe('Test Recipe')
+        self.logout_user()
+        self.create_user('Admin')
+        self.login_user('Admin')
+        urn = self.mongo.db.recipes.find_one({}).get('urn')
+        response = self.client.get('/edit-recipe/{}'.format(urn))
+        self.assertEqual(response.status_code, 200)
+
     def test_page_recipe_not_found(self):
         '''
         Attempting to edit a recipe that doesn't exist should return 404
@@ -657,6 +671,7 @@ class TestEditRecipe(TestClient):
         Deleting the recipes image should remove its image.
         '''
         self.create_user()
+        self.login_user()
         with open('tests/test-image.jpg', 'rb') as file:
             self.submit_recipe(title='Test Image Replacement', image=base64.b64encode(file.read()))
         urn = self.mongo.db.recipes.find_one({}).get('urn')
@@ -673,6 +688,7 @@ class TestEditRecipe(TestClient):
         Replacing the recipes image should replace its image
         '''
         self.create_user()
+        self.login_user()
         with open('tests/test-image.jpg', 'rb') as file:
             self.submit_recipe(image=base64.b64encode(file.read()))
         urn = self.mongo.db.recipes.find_one({}).get('urn')
@@ -687,6 +703,72 @@ class TestEditRecipe(TestClient):
         url = self.mongo.db.recipes.find_one({}).get('image')
         response = urllib.request.urlopen(url)
         self.assertEqual(replacement_image_data, response.read())
+
+
+class TestDeleteRecipe(TestClient):
+    def setUp(self):
+        self.mongo.db.logins.delete_many({})
+        self.mongo.db.users.delete_many({})
+        # Delete all records from the recipe collection
+        self.mongo.db.recipes.delete_many({})
+
+    def test_page_not_user(self):
+        '''
+        The delete recipe page should return 403 forbidden if the user is not the user that created the recipe
+        '''
+        self.create_user('Tester')
+        self.login_user('Tester')
+        self.submit_recipe('Test Recipe')
+        self.logout_user()
+        urn = self.mongo.db.recipes.find_one({}).get('urn')
+        response = self.client.get('/delete-recipe/{}'.format(urn))
+        self.assertEqual(response.status_code, 403)
+        self.create_user('NotTester')
+        self.login_user('NotTester')
+        response = self.client.get('/delete-recipe/{}'.format(urn))
+        self.assertEqual(response.status_code, 403)
+
+    def test_page_user_logged_in(self):
+        '''
+        A logged in user that is author for the recipe should be able to access the delete-recipe page
+        '''
+        self.create_user('Tester')
+        self.login_user('Tester')
+        self.submit_recipe('Test Recipe')
+        urn = self.mongo.db.recipes.find_one({}).get('urn')
+        response = self.client.get('/delete-recipe/{}'.format(urn))
+        self.assertEqual(response.status_code, 200)
+
+    def test_page_admin(self):
+        '''
+        An admin should be able to access the delete recipe page for all recipes
+        '''
+        self.create_user('Tester')
+        self.login_user('Tester')
+        self.submit_recipe('Test Recipe')
+        self.logout_user()
+        self.create_user('Admin')
+        self.login_user('Admin')
+        urn = self.mongo.db.recipes.find_one({}).get('urn')
+        response = self.client.get('/delete-recipe/{}'.format(urn))
+        self.assertEqual(response.status_code, 200)
+
+    def test_page_recipe_not_found(self):
+        '''
+        Attempting to delete a recipe that doesn't exist should return 404
+        '''
+        self.create_user('Tester')
+        self.login_user('Tester')
+        response = self.client.get('/delete-recipe/not-a-recipe')
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_recipe(self):
+        self.create_user('Tester')
+        self.login_user('Tester')
+        self.submit_recipe('Test Recipe')
+        urn = self.mongo.db.recipes.find_one({}).get('urn')
+        self.client.post('/delete-recipe/{}'.format(urn), data={'confirm': 'Test Recipe'})
+        self.assertEqual(self.mongo.db.recipes.find_one({'urn': urn}), None)
 
 
 class TestRecipes(TestClient):

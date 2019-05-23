@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>Delete Recipe - {{ title }}</h2>
+    <form action="" method="POST">
+    	<div class="input-field col s12">
+        <label for="confirm">Enter recipe title to confirm</label><input type="text" name="confirm" maxlength="100" placeholder="{{ title }}">
+        </div>
+        <div class="input-field col s12">
+            <button class="btn waves-effect waves-light red" type="submit" name="action"><i class="material-icons left">delete</i>Delete Recipe</button>
+            <a href="{{url_for('recipe', urn=urn) }}'" class="btn waves-effect waves-light red" name="action"><i class="material-icons left">cancel</i>Cancel</a>
+        </div>
+    </form>
+{% endblock %}
