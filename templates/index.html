@@ -2,6 +2,12 @@
 {% block content %}
 <div class="row">
     <div class="carousel carousel-slider" id="features" style="position: relative">
+        <div class="controls valign-wrapper" style="position: absolute; top: 0; width: 100%; height: 100%;">
+            <div style="width: 100%; padding: 3%;">
+                <a class="btn-floating btn-large waves-effect waves-light left" style="z-index: 100;" id="carousel-left"><i class="material-icons">chevron_left</i></a>
+                <a class="btn-floating btn-large waves-effect waves-light right" style="z-index: 100;" id="carousel-right"><i class="material-icons">chevron_right</i></a>
+            </div>
+        </div>
         {% for recipe in featured_recipes %}
         <div class="carousel-item">
             <div style="position: relative;">
@@ -15,12 +21,6 @@
             </div> 
         </div>
         {% endfor %}
-        <div class="controls valign-wrapper" style="position: absolute; top: 0; width: 100%; height: 100%;">
-            <div style="width: 100%; padding: 3%;">
-                <a class="btn-floating btn-large waves-effect waves-light left" id="carousel-left"><i class="material-icons">chevron_left</i></a>
-                <a class="btn-floating btn-large waves-effect waves-light right" id="carousel-right"><i class="material-icons">chevron_right</i></a>
-            </div>
-        </div>
     </div>
 </div>
 <div class="row">

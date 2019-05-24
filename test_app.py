@@ -1060,6 +1060,93 @@ class TestFeature(TestClient):
         self.assertEqual(self.mongo.db.recipes.find_one({'urn': self.urn}).get('featured'), None)
 
 
+class TestAdmin(TestClient):
+    '''
+    Class for testing /admin page
+    '''
+    def setUp(self):
+        # Delete all records from the login and user collection
+        self.mongo.db.logins.delete_many({})
+        self.mongo.db.users.delete_many({})
+        # Delete all records from the tags and meals collections
+        self.mongo.db.tags.delete_many({})
+        self.mongo.db.meals.delete_many({})
+        self.logout_user()
+        self.create_user('Admin')
+        self.logout_user()
+
+    def test_not_admin_forbidden(self):
+        '''
+        Users not logged in as admin are fobidden from the admin page
+        '''
+        self.create_user('NotAdmin')
+        self.login_user('NotAdmin')
+        response = self.client.get('/admin')
+        self.assertEqual(response.status_code, 403)
+
+    def test_logged_in_admin(self):
+        '''
+        Page returns 200 status code when accessed by Admin
+        '''
+        self.login_user('Admin')
+        response = self.client.get('/admin')
+        self.assertEqual(response.status_code, 200)
+
+    def test_add_tag(self):
+        '''
+        Added tags should be added to the tags collection
+        '''
+        self.login_user('Admin')
+        self.client.post('/admin', data={'add-tag': 'Vegan'})
+        self.assertEqual(self.mongo.db.tags.find_one({}).get('name'), 'Vegan')
+
+    def test_add_meal(self):
+        '''
+        Added meals should be added to the meals collection
+        '''
+        self.login_user('Admin')
+        self.client.post('/admin', data={'add-meal': 'Lunch'})
+        self.assertEqual(self.mongo.db.meals.find_one({}).get('name'), 'Lunch')
+
+    def test_remove_tag(self):
+        '''
+        Removed tags should be removed from the tags collection
+        '''
+        self.login_user('Admin')
+        self.client.post('/admin', data={'add-tag': 'Vegan'})
+        self.client.post('/admin', data={'remove-tag': 'Vegan'})
+        self.assertEqual(self.mongo.db.tags.find_one({}), None)
+
+    def test_remove_meal(self):
+        '''
+        Removed meals should be removed from the meals collection
+        '''
+        self.login_user('Admin')
+        self.client.post('/admin', data={'add-meal': 'Lunch'})
+        self.client.post('/admin', data={'remove-meal': 'Lunch'})
+        self.assertEqual(self.mongo.db.meals.find_one({}), None)
+
+    def test_validate_tag(self):
+        '''
+        Tags should contain only letters and dashes, invalid tags should not be added
+        '''
+        self.login_user('Admin')
+        self.client.post('/admin', data={'add-tag': 'Vegan Food'})
+        self.client.post('/admin', data={'add-tag': 'Vegan<3'})
+        self.client.post('/admin', data={'add-tag': ''})
+        self.assertEqual(self.mongo.db.tags.find_one({}), None)
+
+    def test_validate_meal(self):
+        '''
+        Meals should contain only letters and dashes, invalid meals should not be added
+        '''
+        self.login_user('Admin')
+        self.client.post('/admin', data={'add-meal': 'Afternoon Snack'})
+        self.client.post('/admin', data={'add-meal': 'Brunch;P'})
+        self.client.post('/admin', data={'add-meal': ''})
+        self.assertEqual(self.mongo.db.meals.find_one({}), None)
+
+
 class TestRecipesList(TestClient):
     '''
     Class for testing the /recipes page

@@ -13,12 +13,15 @@
     <header>
         <nav>
             <div class="nav-wrapper">
-                <a href="#" class="brand-logo">Fork.it</a>
+                <a href="{{ url_for('index') }}" class="brand-logo">Fork.it</a>
                 <ul id="nav-mobile" class="right hide-on-med-and-down">
                     {% if username %}
                     <li>Logged in as {{username}}</li>
                     <li><a href="{{ url_for('logout')}}">Log Out</a></li>
                     <li><a href="{{ url_for('add_recipe') }}">Add New Recipe</a></li>
+                    {% if username == 'Admin' %}
+                    <li><a href="{{ url_for('admin')}}"><i class="material-icons left">settings</i>Admin Settings</a></li>
+                    {% endif %}
                     {% else %}
                     <a href="{{ url_for('login')}}">Log In</a>
                     {% endif %}

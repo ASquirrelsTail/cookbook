@@ -143,6 +143,42 @@ def login():
     return render_template('login.html')
 
 
+@app.route('/admin', methods=['POST', 'GET'])
+def admin():
+    if session.get('username') != 'Admin':
+        return abort(403)
+    else:
+        if request.method == 'POST':
+            if request.form.get('add-tag', '') != '':
+                if match('^[A-Za-z-]+$', request.form['add-tag']):
+                    mongo.db.tags.insert_one({'name': request.form['add-tag']})
+                    flash('Added tag "{}"'.format(request.form['add-tag']))
+                else:
+                    flash('Failed to add tag.')
+            if request.form.get('add-meal', '') != '':
+                if match('^[A-Za-z-]+$', request.form['add-meal']):
+                    mongo.db.meals.insert_one({'name': request.form['add-meal']})
+                    flash('Added meal "{}"'.format(request.form['add-meal']))
+                else:
+                    flash('Failed to add meal.')
+            if request.form.get('remove-tag', '') != '':
+                response = mongo.db.tags.delete_one({'name': request.form['remove-tag']}).deleted_count
+                if response == 1:
+                    flash('Deleted tag "{}"'.format(request.form['remove-tag']))
+                else:
+                    flash('Failed to delete tag.')
+            if request.form.get('remove-meal', '') != '':
+                response = mongo.db.meals.delete_one({'name': request.form['remove-meal']}).deleted_count
+                if response == 1:
+                    flash('Deleted meal "{}"'.format(request.form['remove-meal']))
+                else:
+                    flash('Failed to delete meal.')
+
+        all_tags = mongo.db.tags.find()
+        all_meals = mongo.db.meals.find()
+        return render_template('admin.html', username='Admin', tags=all_tags, meals=all_meals)
+
+
 @app.route('/logout')
 def logout():
     if session.get('username') is not None:
