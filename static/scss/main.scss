@@ -1,6 +1,6 @@
 @charset "UTF-8";
 
-// Color
+// Materialize Colors
 @import "materialize/components/color-variables";
 @import "materialize/components/color-classes";
 
@@ -11,7 +11,7 @@
 // Reset
 @import "materialize/components/normalize";
 
-// components
+// Materialize components
 @import "materialize/components/global";
 @import "materialize/components/badges";
 @import "materialize/components/icons-material-design";
@@ -32,3 +32,7 @@
 @import "materialize/components/preloader";
 @import "materialize/components/carousel";
 @import "materialize/components/pulse";
+
+// Custom Components
+@import "custom/components/recipe-cards";
+@import "custom/components/carousel";

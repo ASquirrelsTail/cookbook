@@ -1,0 +1,26 @@
+// Carousel
+
+.carousel {
+	.controls-wrapper {
+		@extend .valign-wrapper;
+		position: absolute;
+		top: 0;
+		width: 100%;
+		height: 100%;
+		
+		.controls {
+			width: 100%;
+			padding: 3%;
+
+			.a {
+				z-index: 100;
+			}
+		}
+	}
+
+	.carousel-item {
+		.responsive-img {
+			width: 100%;
+		}
+	}
+}

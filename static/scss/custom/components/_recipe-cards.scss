@@ -1,0 +1,32 @@
+// Recipe cards
+
+.recipe-card {
+	position: relative;
+	margin-bottom: 1rem;
+
+	.placeholder {
+		width: 100%;
+		padding-top: 58.333%;
+		background-color: color("brown", "lighten-5");
+	}
+
+	.recipe-details {
+		position: absolute;
+		top: 1rem;
+		width: 100%;
+
+		.recipe-title, .recipe-author {
+			@extend .z-depth-1;
+			@extend .truncate;
+			display: inline-block;
+			max-width: 80%;
+			margin: 0 1rem 0.5em 1rem;
+			padding: 0.2em 0.5em;
+			background-color: $recipe-card-bg-color;
+		}
+
+		.recipe-title {
+			font-size: 1.4em;
+		}
+	}
+}

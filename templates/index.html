@@ -2,23 +2,27 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="row">
-    <div class="carousel carousel-slider" id="features" style="position: relative">
-        <div class="controls valign-wrapper" style="position: absolute; top: 0; width: 100%; height: 100%;">
-            <div style="width: 100%; padding: 3%;">
-                <a class="btn-floating btn-large waves-effect waves-light left" style="z-index: 100;" id="carousel-left"><i class="material-icons">chevron_left</i></a>
-                <a class="btn-floating btn-large waves-effect waves-light right" style="z-index: 100;" id="carousel-right"><i class="material-icons">chevron_right</i></a>
+    <div class="carousel carousel-slider" id="features">
+        <div class="controls-wrapper">
+            <div class="controls">
+                <a class="btn-floating btn-large waves-effect waves-light left" id="carousel-left"><i class="material-icons">chevron_left</i></a>
+                <a class="btn-floating btn-large waves-effect waves-light right" id="carousel-right"><i class="material-icons">chevron_right</i></a>
             </div>
         </div>
         {% for recipe in featured_recipes %}
         <div class="carousel-item">
-            <div style="position: relative;">
+            <div class="recipe-card">
                 <a href="{{ url_for('recipe', urn=recipe['urn']) }}">
-                    <img src="{{ recipe['image'] }}" alt="{{ recipe['title'] }}" class="responsive-img" style="width: 100%;">
-                    <div style="position: absolute; top: 0px; left: 0px;">
-                        <h2>{{ recipe['title'] }}</h2>
-                        <h3>By {{ recipe['username'] }}</h3>
-                    </div>
+                    <img src="{{ recipe['image'] }}" alt="{{ recipe['title'] }}" class="responsive-img">
                 </a>
+                <div class="recipe-details">
+                    <div class="recipe-title">
+                        <a href="{{ url_for('recipe', urn=recipe['urn']) }}">{{ recipe['title'] }}</a>
+                    </div><br>
+                    <div class="recipe-author">
+                        by <a href="{{ url_for('recipes', username=recipe['username']) }}">{{ recipe['username'] }}</a>
+                    </div>
+                </div>
             </div> 
         </div>
         {% endfor %}

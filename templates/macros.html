@@ -38,12 +38,27 @@
 {# Macro to create styled recipe lists #}
 <div class="row">
     {% for recipe in recipes %}
-    <div class="col s12 m6">
-        <a href="{{ url_for('recipe', urn=recipe['urn']) }}">
-            {% if recipe['image'] %}
-            <img src="{{ recipe['image'] }}" alt="{{ recipe['title'] }}" class="responsive-img">
-            {% endif %}
-            {{ recipe['title'] }}</a> by {{ recipe['username'] }}
+    <div class="col s12 m6 recipe-card">
+    	
+    		
+	        <a href="{{ url_for('recipe', urn=recipe['urn']) }}">
+	        	{% if recipe['image'] %}
+	            <img src="{{ recipe['image'] }}" alt="{{ recipe['title'] }} by {{ recipe['username'] }}" class="responsive-img">
+	            {% else %}
+	            <img src="https://ci-cookbook.s3.amazonaws.com/pancakes.jpg" alt="{{ recipe['title'] }} by {{ recipe['username'] }}" class="responsive-img">
+	        	{% endif %}
+	        </a>
+	        
+	        
+	        <div class="recipe-details">
+	            <div class="recipe-title">
+	            	<a href="{{ url_for('recipe', urn=recipe['urn']) }}">{{ recipe['title'] }}</a>
+	            </div><br>
+	            <div class="recipe-author">
+	            	by <a href="{{ url_for('recipes', username=recipe['username']) }}">{{ recipe['username'] }}</a>
+	            </div>
+	        </div>
+    	
     </div>
     {% endfor %}
 </div>
