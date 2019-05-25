@@ -7296,7 +7296,6 @@ h1 {
 .recipe-card {
   position: relative;
   margin-bottom: 1rem;
-  z-index: 1;
 }
 .recipe-card .placeholder {
   width: 100%;
@@ -7307,7 +7306,7 @@ h1 {
   position: absolute;
   top: 1rem;
   width: 100%;
-  z-index: 0;
+  height: 0px;
 }
 .recipe-card .recipe-details .recipe-title, .recipe-card .recipe-details .recipe-author {
   display: inline-block;
