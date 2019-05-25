@@ -3292,19 +3292,19 @@ table span.badge {
   font-feature-settings: "liga";
 }
 
-.container {
+.container, .container-m {
   margin: 0 auto;
   max-width: 1280px;
   width: 90%;
 }
 
 @media only screen and (min-width : 601px) {
-  .container {
+  .container, .container-m {
     width: 85%;
   }
 }
 @media only screen and (min-width : 993px) {
-  .container {
+  .container, .container-m {
     width: 70%;
   }
 }
@@ -7162,10 +7162,95 @@ input[type=range]::-ms-thumb {
     transform: scale(1.5);
   }
 }
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, h5, h6, .btn, .btn-large, .btn-small {
   font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
   letter-spacing: 0.07em;
   font-weight: bold;
+}
+
+h1 {
+  margin: 1rem;
+}
+
+.chip {
+  font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+  font-size: 1rem;
+  border-radius: 0px;
+}
+.chip a {
+  color: black;
+  text-decoration: underline;
+}
+
+@media only screen and (max-width : 992px) {
+  .container-m {
+    width: 100%;
+  }
+}
+
+.ingredients {
+  font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+}
+@media only screen and (min-width : 1201px) {
+  .ingredients {
+    float: left;
+    margin: 0 2rem 2rem 0;
+    max-width: 50%;
+  }
+  .ingredients thead {
+    border: 2px solid rgba(242, 242, 242, 0.5);
+  }
+}
+.ingredients tbody {
+  border: 2px solid rgba(242, 242, 242, 0.5);
+}
+.ingredients h2 {
+  margin: 0;
+  font-size: 3rem;
+}
+.ingredients ::after {
+  position: absolute;
+  display: block;
+  top: 0;
+  right: 0;
+  width: 1px;
+  height: 100%;
+  border-right: 1px solid #e0e0e0;
+}
+
+.method-header {
+  margin: 15px 0;
+  font-size: 3rem;
+}
+
+.method {
+  list-style: none;
+  counter-reset: method-counter;
+  padding-left: 0;
+}
+.method li {
+  min-height: 3rem;
+  padding-top: 0.5rem;
+}
+.method li::before {
+  content: counter(method-counter);
+  counter-increment: method-counter;
+  font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+  font-weight: bold;
+  font-size: 1.5rem;
+  text-align: center;
+  float: left;
+  width: 2.6rem;
+  height: 2.6rem;
+  line-height: 2.4rem;
+  margin-right: 1rem;
+  border: 3px solid black;
+  border-radius: 50%;
+}
+
+.tags h3 {
+  margin: 1rem 0 0.5rem;
+  font-size: 2rem;
 }
 
 .recipe-card {

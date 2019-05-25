@@ -1,12 +1,17 @@
 {% import 'macros.html' as macro %}
 {% extends "base.html" %}
+{% block title %}
+Recipes - Fork.it
+{% endblock %}
 {% block content %}
-<div class="row">
-	{% if current_query['search'] %}
-	Ingredient search: {{ current_query['search']}} <br>
-	{% endif %}
-    Found {{ no_recipes }} recipes.
-</div>
-{{ macro.recipe_list(recipes) }}
-{{ macro.pagination('recipes', page, no_recipes, **current_query)}}
+<section class="container">
+    <div class="row">
+        {% if current_query['search'] %}
+        Ingredient search: {{ current_query['search']}} <br>
+        {% endif %}
+        Found {{ no_recipes }} recipes.
+    </div>
+    {{ macro.recipe_list(recipes) }}
+    {{ macro.pagination('recipes', page, no_recipes, **current_query)}}
+</section>
 {% endblock %}

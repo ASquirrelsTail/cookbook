@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css')}}" type="text/css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <title>Fork.it</title>
+    <title>{% block title %}{% endblock %}</title>
 </head>
 
 <body>
@@ -30,11 +30,11 @@
             </div>
         </nav>
     </header>
-    <section class="container">
+    <section>
     {% block content %}
     {% endblock %}
-    </section>
     {% if not username %}
+    </section>
     <div id="login-modal" class="modal">
         <div class="modal-content">
             <h4>Log In</h4>

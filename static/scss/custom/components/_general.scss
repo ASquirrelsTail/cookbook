@@ -1,6 +1,28 @@
 
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, h5, h6, .btn {
 	font-family: $secondary-font-stack;
 	letter-spacing: 0.07em;
 	font-weight: bold;
+}
+
+h1 {
+	margin: 1rem;
+}
+
+.chip {
+	font-family: $secondary-font-stack;
+	font-size: 1rem;
+	border-radius: 0px;
+
+	a {
+		color: black;
+		text-decoration: underline;
+	}
+}
+
+.container-m {
+    @extend .container;
+    @media #{$medium-and-down} {
+	    width: 100%;
+    }
 }

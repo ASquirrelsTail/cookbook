@@ -1,7 +1,10 @@
 {% import 'macros.html' as macro %}
 {% extends "base.html" %}
+{% block title %}
+Fork.it
+{% endblock %}
 {% block content %}
-<div class="row">
+<div class="container-m">
     <div class="carousel carousel-slider" id="features">
         <div class="controls-wrapper">
             <div class="controls">
@@ -23,39 +26,41 @@
                         by <a href="{{ url_for('recipes', username=recipe['username']) }}">{{ recipe['username'] }}</a>
                     </div>
                 </div>
-            </div> 
+            </div>
         </div>
         {% endfor %}
     </div>
 </div>
-<div class="row">
-    <div class="col s12">
-      <ul class="tabs" id="tabs">
-        <li class="tab col s3"><a class="active" href="#test1">Recent Recipes</a></li>
-        <li class="tab col s3"><a href="#test2">Popular Recipes</a></li>
-        <li class="tab col s3"><a href="#test3">About Fork.it</a></li>
-      </ul>
+<div class="container">
+    <div class="row">
+        <div class="col s12">
+            <ul class="tabs" id="tabs">
+                <li class="tab col s3"><a class="active" href="#test1">Recent Recipes</a></li>
+                <li class="tab col s3"><a href="#test2">Popular Recipes</a></li>
+                <li class="tab col s3"><a href="#test3">About Fork.it</a></li>
+            </ul>
+        </div>
+        <div id="test1" class="col s12">
+            {{ macro.recipe_list(recipes) }}
+            {{ macro.pagination('recipes', page, no_recipes, **current_query)}}
+        </div>
+        <div id="test2" class="col s12">Test 2</div>
+        <div id="test3" class="col s12">Test 3</div>
     </div>
-    <div id="test1" class="col s12">
-        {{ macro.recipe_list(recipes) }}
-        {{ macro.pagination('recipes', page, no_recipes, **current_query)}}
-    </div>
-    <div id="test2" class="col s12">Test 2</div>
-    <div id="test3" class="col s12">Test 3</div>
 </div>
 {% endblock %}
 {% block javascript %}
 <script>
-    const $ = cash;
-    $(function() {
-        M.Tabs.init($('#tabs'));
-        let features = M.Carousel.init($('#features')[0], {fullWidth: true, dist: 0, indicators: true, dist: 0});
-        $('#carousel-left').on('click', function() {
-            features.prev();
-        });
-        $('#carousel-right').on('click', function() {
-            features.next();
-        });
+const $ = cash;
+$(function() {
+    M.Tabs.init($('#tabs'));
+    let features = M.Carousel.init($('#features')[0], { fullWidth: true, dist: 0, indicators: true, dist: 0 });
+    $('#carousel-left').on('click', function() {
+        features.prev();
     });
+    $('#carousel-right').on('click', function() {
+        features.next();
+    });
+});
 </script>
 {% endblock %}
