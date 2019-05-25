@@ -7,5 +7,10 @@ $primary-color: color("brown", "lighten-2");
 
 $secondary-color: color("deep-orange", "lighten-1");
 
+// Fonts
+
+$font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+$secondary-font-stack: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+
 // Recipe cards
 $recipe-card-bg-color: #fff;

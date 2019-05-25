@@ -129,6 +129,7 @@ def new_user():
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
+    target = None
     if session.get('username') is not None:
         return redirect(url_for('index'))
     elif request.method == 'POST':
@@ -136,11 +137,14 @@ def login():
         if username != '' and mongo.db.logins.find_one({'username': username}):
             session['username'] = username
             flash('Successfully logged in as "{}".'.format(username))
+            if request.form.get('target') is not None:
+                return redirect(request.form.get('target'))
             return redirect(url_for('index'))
         else:
             flash("Failed to log in, invalid username.")
+            target = request.form.get('target')
 
-    return render_template('login.html')
+    return render_template('login.html', target=target)
 
 
 @app.route('/admin', methods=['POST', 'GET'])

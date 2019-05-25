@@ -7162,6 +7162,12 @@ input[type=range]::-ms-thumb {
     transform: scale(1.5);
   }
 }
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+  letter-spacing: 0.07em;
+  font-weight: bold;
+}
+
 .recipe-card {
   position: relative;
   margin-bottom: 1rem;
@@ -7182,8 +7188,15 @@ input[type=range]::-ms-thumb {
   margin: 0 1rem 0.5em 1rem;
   padding: 0.2em 0.5em;
   background-color: #fff;
+  z-index: 99;
+}
+.recipe-card .recipe-details .recipe-title a, .recipe-card .recipe-details .recipe-author a {
+  color: #000;
+  font-weight: bold;
 }
 .recipe-card .recipe-details .recipe-title {
+  font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+  letter-spacing: 0.07em;
   font-size: 1.4em;
 }
 
@@ -7202,6 +7215,11 @@ input[type=range]::-ms-thumb {
 }
 .carousel .carousel-item .responsive-img {
   width: 100%;
+}
+@media only screen and (min-width : 601px) {
+  .carousel .carousel-item .recipe-details {
+    font-size: 1.6em;
+  }
 }
 
 /*# sourceMappingURL=main.css.map */

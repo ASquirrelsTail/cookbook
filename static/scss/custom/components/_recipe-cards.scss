@@ -23,9 +23,17 @@
 			margin: 0 1rem 0.5em 1rem;
 			padding: 0.2em 0.5em;
 			background-color: $recipe-card-bg-color;
+			z-index: 99;
+
+			a {
+				color: #000;
+				font-weight: bold;
+			}
 		}
 
 		.recipe-title {
+			font-family: $secondary-font-stack;
+			letter-spacing: 0.07em;
 			font-size: 1.4em;
 		}
 	}

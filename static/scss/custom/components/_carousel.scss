@@ -22,5 +22,10 @@
 		.responsive-img {
 			width: 100%;
 		}
+		@media #{$medium-and-up} {
+			.recipe-details {
+				font-size: 1.6em;
+			}
+		}
 	}
 }

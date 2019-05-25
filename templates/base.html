@@ -23,7 +23,8 @@
                     <li><a href="{{ url_for('admin')}}"><i class="material-icons left">settings</i>Admin Settings</a></li>
                     {% endif %}
                     {% else %}
-                    <a href="{{ url_for('login')}}">Log In</a>
+                    <li><a class="modal-trigger" href="#login-modal"><i class="material-icons left">account_circle</i>Log In</a></li>
+                    <li><a href="{{ url_for('new_user') }}">Sign Up</a></li>
                     {% endif %}
                 </ul>
             </div>
@@ -33,12 +34,29 @@
     {% block content %}
     {% endblock %}
     </section>
+    {% if not username %}
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <h4>Log In</h4>
+            <p>Don't have an account? Create one <a href="{{ url_for('new_user') }}">here</a>.</p>
+            <form action="{{ url_for('login') }}" method="POST">
+                <label for="username">Username</label><input type="text" name="username" maxlength="20" placeholder="Enter Username">
+                <input type="hidden" name="target" value="{{ request.path }}">
+                <button class="btn waves-effect waves-light" type="submit" name="action">Log in</button>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+        </div>
+    </div>
+    {% endif %}
     <script src="{{ url_for('static', filename='js/libs/materialize.min.js')}}"></script>
     {% block javascript %}
     {% endblock %}
     {% with messages = get_flashed_messages() %}
-	    {% if messages %}
+	    {% if messages or not username %}
 		    <script>
+                M.Modal.init(document.querySelectorAll('.modal'));
 		    {% for message in messages %}
 		    	M.toast({ html: '{{ message }}' });
 		    {% endfor %}

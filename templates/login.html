@@ -4,6 +4,7 @@
     <p>Don't have an account? Create one <a href="{{ url_for('new_user') }}">here</a>.</p>
     <form action="" method="POST">
         <label for="username">Username</label><input type="text" name="username" maxlength="20" placeholder="Enter Username">
-        <input type="submit" value="Login">
+        <input type="hidden" name="target" value="{{ target }}">
+        <button class="btn waves-effect waves-light" type="submit" name="action">Log in</button>
     </form>
 {% endblock %}
