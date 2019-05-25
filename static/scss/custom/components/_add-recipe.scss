@@ -1,0 +1,29 @@
+.overlay-container {
+	position: relative;
+	line-height: 0;
+
+	.resize-height {
+		transition: height 0.5s;
+	}
+
+	.overlay {
+		position: absolute;
+		top: 10px;
+		right: 10px;
+		display: flex;
+		flex-direction: column;
+
+		.btn-floating {
+			margin-bottom: 10px;
+		}
+	}
+}
+
+#input-canvas {
+	height: 0px;
+}
+
+#tag-chips, #meal-chips {
+	display: inline;
+	border-bottom: none;
+}

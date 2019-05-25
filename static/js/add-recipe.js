@@ -77,12 +77,19 @@ function resetFileInput() {
     $('#input-canvas').css({height: '0px'});
     $('#image-delete').removeClass('scale-in');
     $('#image-crop').removeClass('scale-in');
+    $('#image-crop').removeClass('green');
     $('#image-reset').removeClass('scale-in');
     $('#image-data').val(null);
     $('#image-crop i').text('crop');
+    inputCanvas.image = null;
 }
 
 $(function() {
+
+    $("label").on('click', function() {
+        let target = $(this).attr('for');
+        if (target) $('[name="' + target + '"]')[0].focus();
+    });
 
     inputCanvas.init();
 
@@ -111,14 +118,25 @@ $(function() {
             inputCanvas.showOutput();
             $('#image-reset').removeClass('scale-in');
             $('#image-crop i').text('crop');
+            $('#image-crop').removeClass('green');
             inputCanvas.crop = false;
             inputCanvas.$elem.css({cursor: 'auto'});
         }else{
             $('#image-crop i').text('check');
+            $('#image-crop').addClass('green');
             $('#image-reset').addClass('scale-in');
             inputCanvas.crop = true;
             inputCanvas.$elem.css({cursor: 'move'});
             inputCanvas.showAll();
+        }
+    });
+
+    $(window).on('resize', function() {
+        if (!inputCanvas.debounce) {
+            inputCanvas.debounce = true;
+            setTimeout(function() {
+                inputCanvas.resizeCanvas();
+            }, 300);
         }
     });
 
@@ -292,19 +310,15 @@ let inputCanvas = {
         
         ctx.drawImage(this.image, -this.cropStart.x, -this.cropStart.y);
         $('#image-data').val(target.toDataURL('image/jpeg', 0.5).split(',')[1]);
+    },
+    resizeCanvas() {
+        this.debounce = false;
+        if (this.image) {
+            this.$elem.removeClass('resize-height');
+            this.showOutput();
+            if (this.crop) this.showAll();
+            this.$elem.addClass('resize-height');
+        }
     }
-    // },
-    // drawCrop() {
-    //     this.update();
-    //     ctx = this.ctx;
-
-    //     ctx.scale($('#input-canvas').parent().width() / image.width, $('#input-canvas').parent().width() / image.width);
-
-    //     ctx.resetTransform();
-    //     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    //     ctx.fillRect(0, 0, this.width, this.cropStart[1]);
-    //     ctx.fillRect(0, this.cropStart[1], this.cropStart[0], this.cropSize[1]);
-    //     ctx.fillRect(this.cropStart[0] + this.cropSize[0], this.cropStart[1], this.width - this.cropStart[0] - this.cropSize[0], this.cropSize[1]);
-    //     ctx.fillRect(0, this.cropStart[1] + this.cropSize[1], this.width, this.height - this.cropStart[1] - this.cropSize[1]);
-    // }
+    
 }

@@ -3,6 +3,30 @@
 {{ recipe['title'] }} - Fork.it
 {% endblock %}
 {% block content %}
+{% if username %}
+<div class="options right">
+    {% if username == recipe['username'] or username == 'Admin' %}
+    <a href="{{ url_for('edit_recipe', urn=recipe['urn']) }}" class="btn-floating btn-large waves-effect waves-light"><i class="material-icons">mode_edit</i></a>
+    {% if username == 'Admin' %}
+    <a href="{{ url_for('feature_recipe', urn=recipe['urn']) }}" class="btn-floating btn-large waves-effect waves-light">
+        {% if recipe['featured'] %}
+        <i class="material-icons">star</i>
+        {% else %}
+        <i class="material-icons">star_border</i>
+        {% endif %}
+    </a>
+    {% endif %}
+    {% else %}
+    <a href="{{ url_for('favourite_recipe', urn=recipe['urn']) }}" class="btn-floating btn-large waves-effect waves-light">
+        {% if favourite %}
+        <i class="material-icons">favorite</i>
+        {% else %}
+        <i class="material-icons">favorite_border</i>
+        {% endif %}
+    </a>
+    {% endif %}
+</div>
+{% endif %}
 <div class="container recipe-header">
     <h1>{{ recipe['title'] }}</h1>
 </div>
@@ -40,7 +64,7 @@
                             </td>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="flow-text">
                         {% for ingredient in recipe['ingredients'] %}
                         <tr>
                             <td>{{ ingredient }}</td>
@@ -52,7 +76,7 @@
             <h2 class="method-header">Method</h2>
             <ol class="method">
                 {% for method in recipe['methods'] %}
-                <li>{{ method }}</li>
+                <li class="flow-text">{{ method }}</li>
                 {% endfor %}
             </ol>
         </div>

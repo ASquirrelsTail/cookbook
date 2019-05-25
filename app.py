@@ -385,11 +385,15 @@ def recipes():
 @app.route('/recipes/<urn>')
 def recipe(urn):
     recipe = mongo.db.recipes.find_one({'urn': urn})
+    favourite = None
     if recipe is None:
         abort(404)
     else:
-        if recipe['username'] != session.get('username'):
+        username = session.get('username')
+        if recipe['username'] != username:
             mongo.db.recipes.update_one({'urn': urn}, {'$inc': {'views': 1}})
+            if username is not None:
+                favourite = mongo.db.users.find_one({'username': username, 'favourites': {'$in': [urn]}}, {'_id': 1})
         recipe['ingredients'] = recipe['ingredients'].split('\n')
         recipe['methods'] = recipe['methods'].split('\n')
         recipe['date'] = datetime.strptime(recipe['date'], "%Y-%m-%d %H:%M:%S").strftime('%a %d %b \'%y')
@@ -397,7 +401,7 @@ def recipe(urn):
         recipe['cook-time'] = hours_mins_to_string(recipe['cook-time'])
         if recipe.get('children') is not None:
             recipe['forks'] = len(recipe['children'])
-    return render_template('recipe.html', recipe=recipe, username=session.get('username'))
+    return render_template('recipe.html', recipe=recipe, username=username, favourite=favourite)
 
 
 @app.route('/recipes/<urn>/favourite')

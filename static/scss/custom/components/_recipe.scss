@@ -71,3 +71,13 @@
 		font-size: 2rem;
 	}
 }
+
+.options {
+	display: flex;
+	flex-direction: column;
+	margin: 1rem;
+
+	.btn-floating {
+		margin-bottom: 0.8rem;
+	}
+}

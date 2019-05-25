@@ -3,6 +3,7 @@
 .recipe-card {
 	position: relative;
 	margin-bottom: 1rem;
+	z-index: 1;
 
 	.placeholder {
 		width: 100%;
@@ -14,6 +15,7 @@
 		position: absolute;
 		top: 1rem;
 		width: 100%;
+		z-index: 0;
 
 		.recipe-title, .recipe-author {
 			@extend .z-depth-1;

@@ -6,28 +6,25 @@ Add Recipe - Fork.it
 <div class="container">
 <h1>{{ action }} Recipe</h1>
 <form action="" method="POST" id="create-recipe">
-    <div class="input-field col s12" style="margin-bottom: 0">
+    <div class="input-field col s12 no-b-margin">
         <label for="title"><i class="material-icons left">title</i>Title</label><input type="text" name="title" maxlength="100" value="{{ recipe['title'] }}">
     </div>
     {% if recipe['old-image'] %}
-        <div class="col s12" id="old-image-container" style="position: relative;">
-            <img src="{{ recipe['old-image'] }}" alt="{{ recipe['title'] }}" class="responsive-img" style="transition: height 0.5s" id="old-imag-img">
-            <div id="old-image-overlay" style="position: absolute; top: 10px; right: 10px;">
+        <div class="col s12 overlay-container" id="old-image-container">
+            <img src="{{ recipe['old-image'] }}" alt="{{ recipe['title'] }}" class="responsive-img resize-height" id="old-imag-img">
+            <div id="old-image-overlay" class="overlay" style="">
                 <a class="btn-floating btn-large waves-effect waves-light red scale-transition" id="old-image-delete">
                     <i class="material-icons">delete</i></a>
             </div>
         </div>
         <input type="hidden" name="old-image" id="old-image" value="{{ recipe['old-image'] }}">
     {% endif %}
-    <div class="col s12" style="position: relative; line-height: 0">
-        <canvas id="input-canvas" style="height: 0px; transition: height 0.5s"></canvas>
-        <div id="canvas-overlay" style='position: absolute; top: 10px; right: 10px;'>
-            <a class="btn-floating btn-large waves-effect waves-light red scale-transition scale-out" id="image-delete" style="margin-bottom: 10px"><i class="material-icons">delete</i></a>
-            <br>
-            <a class="btn-floating btn-large waves-effect waves-light scale-transition scale-out" id="image-crop" style="margin-bottom: 10px"><i class="material-icons">crop</i></a>
-            <br>
+    <div class="col s12 overlay-container">
+        <canvas id="input-canvas" class="resize-height"></canvas>
+        <div id="canvas-overlay" class="overlay">
+            <a class="btn-floating btn-large waves-effect waves-light red scale-transition scale-out" id="image-delete"><i class="material-icons">delete</i></a>
+            <a class="btn-floating btn-large waves-effect waves-light scale-transition scale-out" id="image-crop"><i class="material-icons">crop</i></a>
             <a class="btn-floating btn-large waves-effect waves-light scale-transition scale-out" id="image-reset"><i class="material-icons">refresh</i></a>
-            <!-- <a class="btn-floating btn-large waves-effect waves-light red"><i class="material-icons">thumb_up</i></a> -->
         </div>
     </div>
     <div class="file-field input-field col s12">
@@ -37,10 +34,10 @@ Add Recipe - Fork.it
             <input type="file" id="image-upload" accept="image/*">
         </div>
         <div class="file-path-wrapper">
-            <input class="file-path validate" type="text">
+            <input class="file-path" type="text">
         </div>
     </div>
-    <canvas id="output-canvas" width="1200" height="700" style="display: none"></canvas>
+    <canvas id="output-canvas" width="1200" height="700" class="hide"></canvas>
     <input type="hidden" name="image" id="image-data" value="">
     <div class="input-field col s12">
         <label for="ingredients"><i class="material-icons left">list</i>Ingredients</label>
@@ -112,7 +109,7 @@ Add Recipe - Fork.it
         <p><i class="material-icons left">label_outline</i> Tags:</p>
     </div>
     <div class="col s12">
-        <div id="tag-chips" class="chips" data-add-target="add-tag-button" style="display: inline; border-bottom: none;"></div>
+        <div id="tag-chips" class="chips" data-add-target="add-tag-button"></div>
         <a class="dropdown-trigger btn-small" href="#" data-target="add-tag" id="add-tag-button"><i class="material-icons left">add</i>Add Tag</a>
         <ul id="add-tag" class="dropdown-content" data-target="tag-chips">
             {% for tag in tags %}
@@ -125,7 +122,7 @@ Add Recipe - Fork.it
         <p><i class="material-icons left">restaurant_menu</i> Meals:</p>
     </div>
     <div class="col s12">
-        <div id="meal-chips" class="chips" data-add-target="add-meal-button" style="display: inline; border-bottom: none;"></div>
+        <div id="meal-chips" class="chips" data-add-target="add-meal-button"></div>
         <a class="dropdown-trigger btn-small" href="#" data-target="add-meal" id="add-meal-button"><i class="material-icons left">add</i>Add Meal</a>
         <ul id="add-meal" class="dropdown-content" data-target="meal-chips">
             {% for meal in meals %}
@@ -135,7 +132,11 @@ Add Recipe - Fork.it
     </div>
     <input type="hidden" name="meals" id="meal-input" value="">
     <div class="input-field col s12">
+        {% if action == 'Edit' %}
+        <button class="btn waves-effect waves-light" type="submit" name="action">Update Recipe</button>
+        {% else %}
         <button class="btn waves-effect waves-light" type="submit" name="action">Submit Recipe</button>
+        {% endif %}
     </div>
 </form>
 </div>
