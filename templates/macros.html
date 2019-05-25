@@ -1,0 +1,50 @@
+{% macro pagination(endpoint, page=1, total=0, no_pages=5, step=10) -%}
+{# Macro to create pagination for an endpoint, extra keyword arguments are passed to url_for #}
+<div class="row">
+    <div class="col s12 center">
+        <ul class="pagination">
+            {% set max_page = ((total - 1)/step|round(0,'ceil'))|int %}
+            {% if page > 1 %}
+            <li class="waves-effect">
+            	<a href="{{ url_for(endpoint=endpoint, page=page - 1, **kwargs) }}"><i class="material-icons">chevron_left</i></a>
+            </li>
+            {% else %}
+            <li class="disabled"><a href="#!">
+            	<i class="material-icons">chevron_left</i></a>
+            </li>
+            {% endif %}
+            {% for number in range ([[page -2, max_page - 4]|min, 1]|max, [[page + 2, no_pages]|max, max_page + 1]|min + 1) %}
+            {% if page == number %}
+            <li class="active"><a href="#!">{{ number }}</a></li>
+            {% else %}
+            <li class="waves-effect">
+            	<a href="{{ url_for(endpoint=endpoint, page=number, **kwargs) }}">{{ number }}</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+            {% if page <= max_page %}
+            <li class="waves-effect">
+            	<a href="{{ url_for(endpoint=endpoint, page=page + 1, **kwargs) }}"><i class="material-icons">chevron_right</i></a>
+            </li>
+            {% else %}
+            <li class="disabled"><a href="#!"><i class="material-icons">chevron_right</i></a></li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+{%- endmacro %}
+
+{% macro recipe_list(recipes) -%}
+{# Macro to create styled recipe lists #}
+<div class="row">
+    {% for recipe in recipes %}
+    <div class="col s12 m6">
+        <a href="{{ url_for('recipe', urn=recipe['urn']) }}">
+            {% if recipe['image'] %}
+            <img src="{{ recipe['image'] }}" alt="{{ recipe['title'] }}" class="responsive-img">
+            {% endif %}
+            {{ recipe['title'] }}</a> by {{ recipe['username'] }}
+    </div>
+    {% endfor %}
+</div>
+{%- endmacro %}
