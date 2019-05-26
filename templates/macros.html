@@ -32,6 +32,8 @@
     </div>
 </div>
 {%- endmacro %}
+
+
 {% macro recipe_list(recipes) -%}
 {# Macro to create styled recipe lists #}
 <div class="row">
@@ -55,4 +57,19 @@
     </div>
     {% endfor %}
 </div>
+{%- endmacro %}
+
+
+{% macro about(path) -%}
+{# Macro to embed about page #}
+<article>
+    {% if path == url_for('about') %}
+    <h1>About Fork.it</h1>
+    {% else %}
+    <h3>About Fork.it</h3>
+    {% endif %}
+    <p class="flow-text">Fork.it is a recipe website for sharing recipes. Whether you're looking for something to cook, somewhere to share your recipes or just inspiration, you're in the right place. Using the recipe search and filters you can find exactly what you're looking for, and favourite the best of them to come back to later.</p>
+    <p class="flow-text">If you're more of a creative type you can submit your own recipes, and on Fork.it you can even take other people's recipes and put your own spin on them by 'forking' the recipe.</p>
+    <p class="flow-text">Fork.it was created as part of the Code Institute Full Stack Developer Course for the Data Centric Development Milestone Project. You can find the whole project and a full writeup on <a href="https://github.com/ASquirrelsTail/cookbook" target="_blank">Github</a>.</p>
+</article>
 {%- endmacro %}

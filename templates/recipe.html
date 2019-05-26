@@ -27,72 +27,74 @@
     {% endif %}
 </div>
 {% endif %}
-<div class="container recipe-header">
-    <h1>{{ recipe['title'] }}</h1>
-</div>
-{% if recipe['image'] %}
-<div class="container-m">
-    <img src="{{ recipe['image'] }}" alt="{{ recipe['title'] }}" class="responsive-img">
-</div>
-{% endif %}
-<div class="container">
-    <div class="row">
-        <div class="col s12">
-            By <a href="{{ url_for('recipes', username=recipe['username']) }}">{{ recipe['username'] }}</a> on {{ recipe['date'] }}
-            {% if recipe['forks'] %}
-            with <a href="{{ url_for('recipes', fork=urn) }}">{{ recipe['forks'] }} forks</a>.
-            {% endif %}
-            <i class="material-icons small">access_time</i> Prep-Time: {{ recipe['prep-time'] }}
-            <i class="material-icons small">access_time</i> Cooking-Time: {{ recipe['cook-time'] }}
-            {% if recipe['meals'] %}
-        </div>
-        <div class="col s12 m6">
-            {% for meal in recipe['meals'] %}
-            <div class="chip"><a href="{{ url_for('recipes', meals=meal) }}">{{meal}}</a></div>
-            {% endfor %}
-            {% endif %}
-        </div>
+<article>
+    <div class="container recipe-header">
+        <h1>{{ recipe['title'] }}</h1>
     </div>
-    <div class="row">
-        <div class="col s12">
-            <div class="ingredients">
-                <table class="striped">
-                    <thead>
-                        <tr>
-                            <td>
-                                <h2>Ingredients</h2>
-                            </td>
-                        </tr>
-                    </thead>
-                    <tbody class="flow-text">
-                        {% for ingredient in recipe['ingredients'] %}
-                        <tr>
-                            <td>{{ ingredient }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    {% if recipe['image'] %}
+    <div class="container-m">
+        <img src="{{ recipe['image'] }}" alt="{{ recipe['title'] }}" class="responsive-img">
+    </div>
+    {% endif %}
+    <div class="container">
+        <div class="row">
+            <div class="col s12">
+                By <a href="{{ url_for('recipes', username=recipe['username']) }}">{{ recipe['username'] }}</a> on {{ recipe['date'] }}
+                {% if recipe['forks'] %}
+                with <a href="{{ url_for('recipes', fork=urn) }}">{{ recipe['forks'] }} forks</a>.
+                {% endif %}
+                <i class="material-icons small">access_time</i> Prep-Time: {{ recipe['prep-time'] }}
+                <i class="material-icons small">access_time</i> Cooking-Time: {{ recipe['cook-time'] }}
+                {% if recipe['meals'] %}
             </div>
-            <h2 class="method-header">Method</h2>
-            <ol class="method">
-                {% for method in recipe['methods'] %}
-                <li class="flow-text">{{ method }}</li>
+            <div class="col s12 m6">
+                {% for meal in recipe['meals'] %}
+                <div class="chip"><a href="{{ url_for('recipes', meals=meal) }}">{{meal}}</a></div>
                 {% endfor %}
-            </ol>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s12">
+                <div class="ingredients">
+                    <table class="striped">
+                        <thead>
+                            <tr>
+                                <td>
+                                    <h2>Ingredients</h2>
+                                </td>
+                            </tr>
+                        </thead>
+                        <tbody class="flow-text">
+                            {% for ingredient in recipe['ingredients'] %}
+                            <tr>
+                                <td>{{ ingredient }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <h2 class="method-header">Method</h2>
+                <ol class="method">
+                    {% for method in recipe['methods'] %}
+                    <li class="flow-text">{{ method }}</li>
+                    {% endfor %}
+                </ol>
+            </div>
+        </div>
+        <div class="row tags">
+            {% if recipe['tags'] %}
+            <div class="col s12">
+                <h3>Tags</h3>
+                {% for tag in recipe['tags'] %}
+                <div class="chip"><a href="{{ url_for('recipes', tags=tag) }}">{{tag}}</a></div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        <div class="row">
+            <a href="{{ url_for('add_recipe', fork=recipe['urn']) }}" class="waves-effect waves-light btn">Fork this recipe</a>
         </div>
     </div>
-    <div class="row tags">
-        {% if recipe['tags'] %}
-        <div class="col s12">
-            <h3>Tags</h3>
-            {% for tag in recipe['tags'] %}
-            <div class="chip"><a href="{{ url_for('recipes', tags=tag) }}">{{tag}}</a></div>
-            {% endfor %}
-        </div>
-        {% endif %}
-    </div>
-    <div class="row">
-        <a href="{{ url_for('add_recipe', fork=recipe['urn']) }}" class="waves-effect waves-light btn">Fork this recipe</a>
-    </div>
-</div>
+</article>
 {% endblock %}

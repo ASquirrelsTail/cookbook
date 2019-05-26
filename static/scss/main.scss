@@ -4,8 +4,10 @@
 @import "materialize/components/color-variables";
 @import "materialize/components/color-classes";
 
-// Variables;
+// Custom Variables
 @import "custom/variables-override";
+
+// Variables;
 @import "materialize/components/variables";
 
 // Reset
@@ -35,6 +37,7 @@
 
 // Custom Components
 @import "custom/components/general";
+@import "custom/components/navbar";
 @import "custom/components/recipe";
 @import "custom/components/add-recipe";
 @import "custom/components/recipe-cards";

@@ -1,5 +1,6 @@
+// General changes to styles, and helper styles
 
-h1, h2, h3, h4, h5, h6, .btn {
+h1, h2, h3, h4, h5, h6, .btn, .pagination {
 	font-family: $secondary-font-stack;
 	letter-spacing: 0.07em;
 	font-weight: bold;
@@ -24,9 +25,59 @@ h1 {
 	}
 }
 
+.tabs {
+	.tab {
+		a {
+			&:hover {
+				background-color: rgba(0,0,0,.1);
+			}
+		}
+		
+		i {
+			line-height: 48px;
+		}
+	}
+}
+
+input:not([type]),
+input[type=text]:not(.browser-default),
+input[type=password]:not(.browser-default),
+input[type=email]:not(.browser-default),
+input[type=url]:not(.browser-default),
+input[type=time]:not(.browser-default),
+input[type=date]:not(.browser-default),
+input[type=datetime]:not(.browser-default),
+input[type=datetime-local]:not(.browser-default),
+input[type=tel]:not(.browser-default),
+input[type=number]:not(.browser-default),
+input[type=search]:not(.browser-default),
+textarea.materialize-textarea {
+	border-bottom: 2px dotted $input-border-color;
+}
+
 .container-m {
-    @extend .container;
-    @media #{$medium-and-down} {
-	    width: 100%;
-    }
+	@extend .container;
+	@media #{$medium-and-down} {
+		width: 100%;
+	}
+}
+
+footer {
+	ul {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		@media #{$small-and-down} {
+			flex-direction: column;
+		}
+		li{
+			display: block;
+			padding: 0.5rem 1rem;
+		}
+	}
+	a {
+		font-family: $secondary-font-stack;
+		color: color("grey", "lighten-4");
+		text-decoration: underline;
+	}
 }

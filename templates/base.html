@@ -6,19 +6,28 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css')}}" type="text/css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
     <title>{% block title %}{% endblock %}</title>
 </head>
 
 <body>
     <header>
-        <nav>
+        <nav class="nav-extended">
             <div class="nav-wrapper">
-                <a href="{{ url_for('index') }}" class="brand-logo">Fork.it</a>
-                <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <a href="{{ url_for('index') }}" class="brand-logo"><img src="{{ url_for('static', filename='images/forkit-white.png') }}" alt="Fork.it"></a>
+                <ul id="nav-desktop" class="right hide-on-med-and-down">
+                    <li>
+                        <form action="{{ url_for('recipes') }}" method="GET">
+                            <div class="input-field">
+                                <input id="search" name="search" type="search" placeholder="Search" required>
+                                <label class="label-icon" for="search"><i class="material-icons">search</i></label>
+                                <i class="material-icons">close</i>
+                            </div>
+                        </form>
+                    </li>
                     {% if username %}
-                    <li>Logged in as {{username}}</li>
-                    <li><a href="{{ url_for('logout')}}">Log Out</a></li>
-                    <li><a href="{{ url_for('add_recipe') }}">Add New Recipe</a></li>
+                    <li><a href="{{ url_for('logout')}}"><i class="material-icons left">account_circle</i>Log Out</a></li>
+                    <!-- <li><a href="{{ url_for('add_recipe') }}">Add New Recipe</a></li> -->
                     {% if username == 'Admin' %}
                     <li><a href="{{ url_for('admin')}}"><i class="material-icons left">settings</i>Admin Settings</a></li>
                     {% endif %}
@@ -28,13 +37,52 @@
                     {% endif %}
                 </ul>
             </div>
+            {% if request.path != url_for('index') %}
+            <div class="nav-content container">
+                <ul class="tabs">
+                    <li class="tab col s3"><a href="{{ url_for('recipes') }}">Recent Recipes</a></li>
+                    <li class="tab col s3"><a href="{{ url_for('recipes', sort='favourites') }}">Popular Recipes</a></li>
+                    <li class="tab col s3"><a href="{{ url_for('about') }}">About Fork.it</a></li>
+                    {% if username %}
+                    <li class="tab col s3"><a href="{{ url_for('add_recipe') }}"><i class="material-icons left">create</i>Add Recipe</a></li>
+                    {% else %}
+                    <li class="tab col s3"><a href="{{ url_for('new_user') }}">Sign Up</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
         </nav>
     </header>
-    <section>
     {% block content %}
     {% endblock %}
+    <footer class="page-footer">
+        <div class="container">
+            <div class="row">
+                {% if username %}
+                    <p>Logged in as {{ username }} - <a href="{{ url_for('logout')}}">Log Out</a></p>
+                {% endif %}
+                <ul>
+                    <li><h6>Links:</h6></li>
+                    <li><a class="grey-text text-lighten-3" href="{{ url_for('new_user') }}">All Recipes</a></li>
+                    {% if not username %}
+                    <li><a class="grey-text text-lighten-3" href="{{ url_for('login') }}">Log In</a></li>
+                    <li><a class="grey-text text-lighten-3" href="{{ url_for('new_user') }}">Sign Up</a></li>
+                    {% else %}
+                    <li><a class="grey-text text-lighten-3" href="{{ url_for('add_recipe') }}">Add Recipe</a></li>
+                    {% endif %}
+                    <li><a class="grey-text text-lighten-3" href="{{ url_for('about') }}">About Fork.it</a></li>
+                    <li><a class="grey-text text-lighten-3" href="{{ url_for('cookies') }}">Cookie Policy</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-copyright">
+            <div class="container">
+                © 2019 Fork.it - All images © their respective owners.
+                <a class="grey-text text-lighten-4 right" href="https://github.com/ASquirrelsTail/cookbook" target="_blank">Github Page</a>
+            </div>
+        </div>
+    </footer>
     {% if not username %}
-    </section>
     <div id="login-modal" class="modal">
         <div class="modal-content">
             <h4>Log In</h4>

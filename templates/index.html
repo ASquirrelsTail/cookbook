@@ -4,56 +4,70 @@
 Fork.it
 {% endblock %}
 {% block content %}
-<div class="container-m">
-    <div class="carousel carousel-slider" id="features">
-        <div class="controls-wrapper">
-            <div class="controls">
-                <a class="btn-floating btn-large waves-effect waves-light left" id="carousel-left"><i class="material-icons">chevron_left</i></a>
-                <a class="btn-floating btn-large waves-effect waves-light right" id="carousel-right"><i class="material-icons">chevron_right</i></a>
+<section class="container-m">
+    <div class="row">
+        <div class="carousel carousel-slider" id="features">
+            <div class="controls-wrapper">
+                <div class="controls">
+                    <a class="btn-floating btn-large waves-effect waves-light left" id="carousel-left"><i class="material-icons">chevron_left</i></a>
+                    <a class="btn-floating btn-large waves-effect waves-light right" id="carousel-right"><i class="material-icons">chevron_right</i></a>
+                </div>
             </div>
-        </div>
-        {% for recipe in featured_recipes %}
-        <div class="carousel-item">
-            <div class="recipe-card">
-                <a href="{{ url_for('recipe', urn=recipe['urn']) }}">
-                    <img src="{{ recipe['image'] }}" alt="{{ recipe['title'] }}" class="responsive-img">
-                </a>
-                <div class="recipe-details">
-                    <div class="recipe-title">
-                        <a href="{{ url_for('recipe', urn=recipe['urn']) }}">{{ recipe['title'] }}</a>
-                    </div><br>
-                    <div class="recipe-author">
-                        by <a href="{{ url_for('recipes', username=recipe['username']) }}">{{ recipe['username'] }}</a>
+            {% for recipe in featured_recipes %}
+            <div class="carousel-item">
+                <div class="recipe-card">
+                    <a href="{{ url_for('recipe', urn=recipe['urn']) }}">
+                        <img src="{{ recipe['image'] }}" alt="{{ recipe['title'] }}" class="responsive-img">
+                    </a>
+                    <div class="recipe-details">
+                        <div class="recipe-title">
+                            <a href="{{ url_for('recipe', urn=recipe['urn']) }}">{{ recipe['title'] }}</a>
+                        </div><br>
+                        <div class="recipe-author">
+                            by <a href="{{ url_for('recipes', username=recipe['username']) }}">{{ recipe['username'] }}</a>
+                        </div>
                     </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
-</div>
-<div class="container">
+</section>
+<section class="container">
     <div class="row">
         <div class="col s12">
             <ul class="tabs" id="tabs">
-                <li class="tab col s3"><a class="active" href="#test1">Recent Recipes</a></li>
-                <li class="tab col s3"><a href="#test2">Popular Recipes</a></li>
-                <li class="tab col s3"><a href="#test3">About Fork.it</a></li>
+                <li class="tab col s3"><a class="active" href="#recent-recipes">Recent Recipes</a></li>
+                <li class="tab col s3"><a href="#popular-recipes">Popular Recipes</a></li>
+                <li class="tab col s3"><a href="#about">About Fork.it</a></li>
+                {% if username %}
+                <li class="tab col s3"><a target="_self" href="{{ url_for('add_recipe') }}"><i class="material-icons left">create</i>Add Recipe</a></li>
+                {% else %}
+                <li class="col s3"><a target="_self" href="{{ url_for('new_user') }}">Sign Up</a></li>
+                {% endif %}
             </ul>
         </div>
-        <div id="test1" class="col s12">
-            {{ macro.recipe_list(recipes) }}
-            {{ macro.pagination('recipes', page, no_recipes, **current_query)}}
-        </div>
-        <div id="test2" class="col s12">Test 2</div>
-        <div id="test3" class="col s12">Test 3</div>
     </div>
-</div>
+    <div class="row">
+        <div id="recent-recipes" class="col s12">
+            {{ macro.recipe_list(recent_recipes['recipes']) }}
+            {{ macro.pagination('recipes', recent_recipes['page'], recent_recipes['no_recipes'], **recent_recipes['query'])}}
+        </div>
+        <div id="popular-recipes" class="col s12">
+            {{ macro.recipe_list(popular_recipes['recipes']) }}
+            {{ macro.pagination('recipes', popular_recipes['page'], popular_recipes['no_recipes'], **popular_recipes['query'])}}
+        </div>
+        <div id="about" class="col s12">
+            {{ macro.about(request.path) }}
+        </div>
+    </div>
+</section>
 {% endblock %}
 {% block javascript %}
 <script>
 const $ = cash;
 $(function() {
-    M.Tabs.init($('#tabs'));
+    let tabs = M.Tabs.init($('#tabs')[0]);
     let features = M.Carousel.init($('#features')[0], { fullWidth: true, dist: 0, indicators: true, dist: 0 });
     $('#carousel-left').on('click', function() {
         features.prev();

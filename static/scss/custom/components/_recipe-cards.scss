@@ -1,13 +1,12 @@
 // Recipe cards
+// Styles for recipe cards with floating title and author links over an image.
 
 .recipe-card {
 	position: relative;
 	margin-bottom: 1rem;
 
-	.placeholder {
-		width: 100%;
-		padding-top: 58.333%;
-		background-color: color("brown", "lighten-5");
+	img {
+		@extend .z-depth-1;
 	}
 
 	.recipe-details {

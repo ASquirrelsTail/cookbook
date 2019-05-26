@@ -103,9 +103,11 @@ def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, sea
 def index():
     featured_recipes = find_recipes(featured='1', sort='featured', order='-1').get('recipes')
     recent_recipes = find_recipes(sort='date', order='-1')
-    current_query = {'sort': 'date', 'order': '-1'}
-    return render_template('index.html', username=session.get('username'), current_query=current_query,
-                           featured_recipes=featured_recipes, **recent_recipes)
+    recent_recipes['query'] = {'sort': 'date', 'order': '-1'}
+    popular_recipes = find_recipes(sort='favourites', order='-1')
+    popular_recipes['query'] = {'sort': 'favourites', 'order': '-1'}
+    return render_template('index.html', username=session.get('username'), featured_recipes=featured_recipes,
+                           recent_recipes=recent_recipes, popular_recipes=popular_recipes)
 
 
 @app.route('/new-user', methods=['POST', 'GET'])
@@ -434,6 +436,16 @@ def feature_recipe(urn):
         mongo.db.recipes.update_one({'urn': urn}, {'$unset': {'featured': ''}})
 
     return redirect(url_for('recipe', urn=urn))
+
+
+@app.route('/cookies')
+def cookies():
+    return render_template('cookies.html', username=session.get('username'))
+
+
+@app.route('/about')
+def about():
+    return render_template('about.html', username=session.get('username'))
 
 
 if __name__ == '__main__':

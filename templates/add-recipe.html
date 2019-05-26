@@ -3,7 +3,7 @@
 Add Recipe - Fork.it
 {% endblock %}
 {% block content %}
-<div class="container">
+<section class="container">
 <h1>{{ action }} Recipe</h1>
 <form action="" method="POST" id="create-recipe">
     <div class="input-field col s12 no-b-margin">
@@ -139,7 +139,7 @@ Add Recipe - Fork.it
         {% endif %}
     </div>
 </form>
-</div>
+</section>
 {% endblock %}
 {% block javascript %}
 <script src="{{ url_for('static', filename='js/add-recipe.js')}}"></script>

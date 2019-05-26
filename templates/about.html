@@ -1,0 +1,7 @@
+{% import 'macros.html' as macro %}
+{% extends "base.html" %}
+{% block content %}
+<article class="container">
+{{ macro.about(request.path) }}
+</article>
+{% endblock %}

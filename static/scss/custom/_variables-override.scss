@@ -4,8 +4,9 @@
 
 // Colors
 $primary-color: color("grey", "darken-1");
-
 $secondary-color: color("grey", "darken-3");
+$bg-color: #fff;
+$link-color: color("grey", "darken-2");
 
 // Fonts
 
@@ -14,3 +15,7 @@ $secondary-font-stack: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida
 
 // Recipe cards
 $recipe-card-bg-color: #fff;
+
+$chip-selected-color: #e4e4e4;
+
+$footer-bg-color: color("grey", "darken-2");

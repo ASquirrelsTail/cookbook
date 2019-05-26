@@ -1,0 +1,55 @@
+nav {
+	background-color: $bg-color;
+	.nav-wrapper {
+		@extend .z-depth-1;
+		background-color: $primary-color;
+
+		.input-field input[type=search] {
+			// Fix materialize bug that makes the searchbar dissapear off screen.
+			height: auto;
+			
+			&:hover:not(:focus) {
+				background-color: rgba(0,0,0,.1);
+			}
+		}
+
+		.brand-logo {
+			@media #{$medium-and-down} {
+				left: 0;
+				transform: none;
+			}
+			img {
+				max-height: $navbar-height;
+				padding: 10px;
+				@media #{$small-and-down} {
+					max-height: $navbar-height-mobile;
+				}
+			}
+		}
+	}
+
+	&.nav-extended {
+		.nav-content {
+			height: 48px;
+
+			.tabs {
+				overflow: visible;
+				background-color: initial;
+
+				a {
+					&:hover {
+						background-color: rgba(0,0,0,.1);
+					}
+
+					.active {
+						text-decoration: underline;
+					}
+				}
+
+				i {
+					line-height: 46px;
+				}
+			}
+		}
+	}
+}
