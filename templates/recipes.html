@@ -5,13 +5,91 @@ Recipes - Fork.it
 {% endblock %}
 {% block content %}
 <section class="container">
-    <div class="row">
-        {% if current_query['search'] %}
-        Ingredient search: {{ current_query['search']}} <br>
-        {% endif %}
-        Found {{ no_recipes }} recipes.
+    <div class="row no-b-margin">
+        <div class="col s12 l3 filters">
+            <div class="col s12">
+                <p class="flow-text no-b-margin">Found {{ no_recipes }} recipes.</p>
+            </div>
+            <form action="" method="GET" id="filters-form">
+                <div class="input-field col s12 m6 l12">
+                    <input type="text" name="search" {% if current_query['search'] %}value="{{ current_query['search'] }}" {% endif %}>
+                    <label><i class="material-icons left">search</i>Search</label>
+                </div>
+                <div class="input-field col s12 m6 l12">
+                    <select name="meals" id="meals">
+                        {% if current_query['meals'] %}
+                        <option value="">All Meals</option>
+                        {% else %}
+                        <option value="" selected>All Meals</option>
+                        {% endif %}
+                        {% for meal in all_meals %}
+                        {% if current_query['meals'] == meal['name'] %}
+	                    <option value="{{ meal['name'] }}" selected>{{ meal['name'] }}</option>
+	                    {% else %}
+	                    <option value="{{ meal['name'] }}">{{ meal['name'] }}</option>
+	                    {% endif %}
+                        {% endfor %}
+                    </select>
+                    <label>Meals</label>
+                </div>
+                <div class="col s12">
+                	<div>Tags</div>
+                	<div id="tag-chips">
+                		{% for tag in all_tags %}
+                        <div class="chip" data-tag="{{ tag['name'] }}"><a href="#!">{{ tag['name'] }}</a></div>
+                        {% endfor %}
+                        <input type="hidden" name='tags' id="tags">
+                	</div>
+                </div>
+            </form>
+        </div>
+        <div class="col s12 l9">
+            {{ macro.pagination('recipes', page, no_recipes, **current_query)}}
+            {{ macro.recipe_list(recipes) }}
+            
+        </div>
     </div>
-    {{ macro.recipe_list(recipes) }}
-    {{ macro.pagination('recipes', page, no_recipes, **current_query)}}
+    <div class="row">
+    	<div class="col s12 l9 offset-l3">
+    		{{ macro.pagination('recipes', page, no_recipes, **current_query)}}
+    	</div>
+    </div>
 </section>
+{% endblock %}
+{% block javascript %}
+<script>
+	const $ = cash;
+	const select = M.FormSelect.init($('select'));
+
+    $(function() {
+    	{% if current_query['tags'] %}
+        let tags = '{{ current_query['tags'] }}'
+        if (tags.indexOf(' ') != -1) tags = tags.split(' ');
+        else tags = [tags];
+        tags.forEach(function(tag) {
+        	if (tag != '') $('#tag-chips').find('[data-tag=' + tag + ']').addClass('active');
+        });
+        {% endif %}
+
+        $('#meals').on('change', function() {
+            $('#filters-form').trigger('submit');
+        });
+
+        $('.chip').on('click', function() {
+            $(this).toggleClass('active');
+            $('#filters-form').trigger('submit');
+        })
+
+        $('#filters-form').on('submit', function() {
+        	let tagsInput = [];
+			$('.chip.active').each(function() {
+				tagsInput.push($(this).data('tag'));
+			});
+			if (tagsInput.length > 0) $('#tags').val(tagsInput.join(' '));
+			else $('#tags').remove();
+			console.log(tagsInput);
+			$('#filters-form')[0].submit();
+        });
+    });
+</script>
 {% endblock %}

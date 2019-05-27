@@ -14,6 +14,13 @@ h1 {
 	margin-bottom: 0;
 }
 
+.filters {
+	#tag-chips {
+		display: flex;
+		flex-wrap: wrap;
+	}
+}
+
 .chip {
 	font-family: $secondary-font-stack;
 	font-size: 1rem;
@@ -22,6 +29,23 @@ h1 {
 	a {
 		color: black;
 		text-decoration: underline;
+	}
+
+	&:focus {
+		color: #000;
+	}
+	&:hover {
+		color: #000;
+	}
+
+	&.active {
+		background-color: $primary-color;
+		color: #fff;
+		order: -1;
+
+		a {
+			color: #fff;
+		}
 	}
 }
 

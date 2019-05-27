@@ -7176,6 +7176,11 @@ h1 {
   margin-bottom: 0;
 }
 
+.filters #tag-chips {
+  display: flex;
+  flex-wrap: wrap;
+}
+
 .chip {
   font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
   font-size: 1rem;
@@ -7184,6 +7189,20 @@ h1 {
 .chip a {
   color: black;
   text-decoration: underline;
+}
+.chip:focus {
+  color: #000;
+}
+.chip:hover {
+  color: #000;
+}
+.chip.active {
+  background-color: #757575;
+  color: #fff;
+  order: -1;
+}
+.chip.active a {
+  color: #fff;
 }
 
 .tabs .tab a:hover {

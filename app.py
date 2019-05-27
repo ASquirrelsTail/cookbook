@@ -46,26 +46,26 @@ def hours_mins_to_string(hours_mins):
 def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, search=None, featured=None, sort='views', order='-1'):
     query = {}
 
-    if tags is not None:
+    if tags is not None and tags != '':
         if ' ' in tags:
             tags = tags.split(' ')
             query['tags'] = {'$all': tags}
         else:
             query['tags'] = tags
-    if meals is not None:
+    if meals is not None and meals != '':
         meals = request.args['meals']
         if ' ' in meals:
             meals = meals.split(' ')
             query['meals'] = {'$all': meals}
         else:
             query['meals'] = meals
-    if username is not None:
+    if username is not None and username != '':
         query['username'] = username
-    if forks is not None:
+    if forks is not None and forks != '':
         query['parent'] = forks
-    if featured is not None:
+    if featured is not None and featured != '':
         query['featured'] = {'$exists': True}
-    if search is not None:
+    if search is not None and search != '':
         search_strings = None
         if '"' in search:
             search_strings = findall('".+"', search)
@@ -381,7 +381,11 @@ def recipes():
     results = find_recipes(**query_args)
     query_args.pop('page', '')
 
-    return render_template('recipes.html', current_query=query_args, username=session.get('username'), **results)
+    all_tags = mongo.db.tags.find()
+    all_meals = mongo.db.meals.find()
+
+    return render_template('recipes.html', current_query=query_args, username=session.get('username'),
+                           all_meals=all_meals, all_tags=all_tags, **results)
 
 
 @app.route('/recipes/<urn>')
