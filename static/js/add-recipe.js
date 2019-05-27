@@ -169,6 +169,10 @@ function addRemoveIngredientLine(e) {
             newTextInput[0].setSelectionRange(0, 0); // Move the caret to the start
             newTextInput[0].focus(); // Focus the new input
             newTextInput.on('keydown', addRemoveIngredientLine); // Add event listener for this function
+            newTextInput.on('blur', function() {
+                if ($('.ingredient').eq(0).val()) $('#ingredient-label').addClass('active');
+            });
+            
         }
     }else if (e.which == 8 && $(this).prop("selectionStart") == 0 && $('.ingredient').length > 1) { // Backspace, and caret is at start of input, and this isn't the only input
         e.preventDefault();
