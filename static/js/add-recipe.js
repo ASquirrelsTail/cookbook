@@ -1,10 +1,12 @@
 const $ = cash;
 
+// Initialise that materialize chips and dropdowns
 const tagChips = M.Chips.init($('#tag-chips')[0], { onChipAdd: addChip, onChipDelete: removeChip });
 $(tagChips.el).find('input').addClass('hide'); // Hide the text input from the chips array, so users can't add custom tags
 const mealChips = M.Chips.init($('#meal-chips')[0], { onChipAdd: addChip, onChipDelete: removeChip });
 $(mealChips.el).find('input').addClass('hide'); // Hide the text input from the chips array, so users can't add custom tags
 M.Dropdown.init($('.dropdown-trigger'));
+
 
 // Whenever a chip is added hide its option in the dropdown
 function addChip($el, renderedChip) {
@@ -16,6 +18,7 @@ function addChip($el, renderedChip) {
     if ($(addDropdown + ' li').not('.hide').length == 0) $addDropdownButton.addClass('disabled');
 }
 
+
 // Whenever a chip is deleted show its option in the dropdown menu
 function removeChip($el, chip) {
     tagName = $(chip).attr('data-chip-name')
@@ -24,6 +27,7 @@ function removeChip($el, chip) {
     $(addDropdown + ' a[data-chip-name="' + tagName + '"]').parent().removeClass('hide');
     $addDropdownButton.removeClass('disabled');
 }
+
 
 // Converts the contents of chips to a string in the input element so they can be submitted
 function chipsToInput(chipInstance, inputElem) {
@@ -34,6 +38,7 @@ function chipsToInput(chipInstance, inputElem) {
         $(inputElem).val(tags.join('/'));
     } else $(inputElem).val('');
 }
+
 
 // Converts the inputs from the time fields into a 00:00 time string to be submitted
 function updateTimeInput(target) {
@@ -49,11 +54,26 @@ function updateTimeInput(target) {
     $(target + '-input').val(hours.toString().padStart(2, '0') + ':' + minutes.toString().padStart(2, '0'));
 }
 
+
+// Combines multiple fields into one, split by newlines for submission.
+function concatFields(selector, target) {
+    let fields = [];
+    $(selector).each(function() {
+        if ($(this).val() != null && $(this).val() != '') fields.push($(this).val());
+    });
+    $(target).val(fields.join('\n'));
+}
+
+
+// Removes the old image from the page along with its hidden url input
 function deleteOldImage() {
     $('#old-image-container').remove();
     $('#old-image').remove();
 }
 
+
+// Loads image and passes it to the inputCanvas, deletes old image
+// Resets file input if input value is blank
 function loadImage() {
     if ($('#image-upload').val() != '' && $('#image-upload').val() != null) {
         let reader = new FileReader();
@@ -72,6 +92,9 @@ function loadImage() {
     }else resetFileInput();
 }
 
+
+// Hides and resets the image input canvas, controls and file upload when the image is removed
+// Clears the file input by replacing it and reattaching the on change event.
 function resetFileInput() {
     $('#image-upload').parent().parent().find('.file-path').val('');
     $('#input-canvas').css({height: '0px'});
@@ -83,20 +106,17 @@ function resetFileInput() {
     $('#image-crop i').text('crop');
     inputCanvas.image = null;
 
-    // let imageUpload = $('#image-upload');
-    // console.log(imageUpload);
-    // let parent = imageUpload.parent();
-    // imageUpload.before('<form id="temp-form></form>');
-    // let tempForm = $('#temp-form');
-    // imageUpload.detatch();
-    // tempForm.append(imageUpload);
-    // tempForm[0].reset();
-    // imageUpload.detatch();
-    // tempForm.remove();
-    // parent.append(imageUpload);
+    let imageUpload = $('#image-upload');
+    let parent = imageUpload.parent();
+    imageUpload.remove();
+    parent.append('<input type="file" id="image-upload" accept="image/*">');
+    $('#image-upload').on('change', loadImage);
 
 }
 
+
+// Adds a new method textarea when user enters a new line, removes the textarea if they backspace the start of it
+// Text before/after the caret is passed to the next textarea
 function addRemoveMethodLine(e) {
     if (e.which == 13) {
         e.preventDefault();
@@ -107,16 +127,16 @@ function addRemoveMethodLine(e) {
             $(this).parent().after('<li><textarea class="materialize-textarea"></textarea></li>');
             let newTextarea = $(this).parent().next().find('textarea');
             newTextarea.val(textAfter); // Set contents to text after newline
-            newTextarea[0].setSelectionRange(0, 0); // Move the carot to the start
+            newTextarea[0].setSelectionRange(0, 0); // Move the caret to the start
             newTextarea[0].focus(); // Focus the textarea
             newTextarea.on('keydown', addRemoveMethodLine); // Add event listener for this function
         }
-    }else if (e.which == 8 && $(this).prop("selectionStart") == 0 && $('.method textarea').length > 1) {
+    }else if (e.which == 8 && $(this).prop("selectionStart") == 0 && $('.method textarea').length > 1) { // Backspace, and caret is at start of input, and this isn't the only textarea
         e.preventDefault();
         let textContent = $(this).val();
         let prevTextarea = $(this).parent().prev().find('textarea');
         console.log(prevTextarea);
-        if (textContent != null) {
+        if (textContent != null) { // If there is content and another textarea before this one move it the previous textarea and delete this one
             textContent = textContent.slice($(this).prop("selectionEnd"))
             if (prevTextarea && prevTextarea.length > 0) {
                 caretPosition = prevTextarea.val().length;
@@ -126,16 +146,18 @@ function addRemoveMethodLine(e) {
                 $(this).parent().remove();
             }
         }else{
-            if (prevTextarea && prevTextarea.length > 0) prevTextarea[0].focus();
+            if (prevTextarea && prevTextarea.length > 0) prevTextarea[0].focus(); // Otherwise move the cursor to the previous input, or the next and delete this one
             else $(this).parent().next().find('textarea')[0].focus();
             $(this).parent().remove();
         }
-        
     }
 }
 
+
+// Adds a new ingredient text input when user enters a new line, removes the input if they backspace the start of it
+// Text before/after the caret is passed to the next input
 function addRemoveIngredientLine(e) {
-    if (e.which == 13) {
+    if (e.which == 13) { // Enter
         e.preventDefault();
         if ($(this).val() != null) {
             let textBefore = $(this).val().slice(0, $(this).prop("selectionStart"));
@@ -143,16 +165,16 @@ function addRemoveIngredientLine(e) {
             $(this).val(textBefore)
             $(this).after('<input class="ingredient" type="text">');
             let newTextInput = $(this).next();
-            newTextInput.val(textAfter); // Set contents to text after newline
-            newTextInput[0].setSelectionRange(0, 0); // Move the carot to the start
-            newTextInput[0].focus(); // Focus the textarea
+            newTextInput.val(textAfter); // Set contents to the text after the newline
+            newTextInput[0].setSelectionRange(0, 0); // Move the caret to the start
+            newTextInput[0].focus(); // Focus the new input
             newTextInput.on('keydown', addRemoveIngredientLine); // Add event listener for this function
         }
-    }else if (e.which == 8 && $(this).prop("selectionStart") == 0 && $('.ingredient').length > 1) {
+    }else if (e.which == 8 && $(this).prop("selectionStart") == 0 && $('.ingredient').length > 1) { // Backspace, and caret is at start of input, and this isn't the only input
         e.preventDefault();
         let textContent = $(this).val();
         let prevTextInput = $(this).prev();
-        if (textContent != null) {
+        if (textContent != null) { // If there is content and another input before this one move it the previous input and delete this one
             textContent = textContent.slice($(this).prop("selectionEnd"))
             if (prevTextInput.hasClass('ingredient')) {
                 caretPosition = prevTextInput.val().length;
@@ -162,24 +184,18 @@ function addRemoveIngredientLine(e) {
                 $(this).remove();
             }
         }else{
-            if (prevTextInput.hasClass('ingredient')) prevTextInput[0].focus();
+            if (prevTextInput.hasClass('ingredient')) prevTextInput[0].focus(); // Otherwise move the cursor to the previous input, or the next and delete this one
             else $(this).next()[0].focus();
             $(this).remove();
         }
-        
     }
 }
 
-function concatFields(selector, target) {
-    let fields = [];
-    $(selector).each(function() {
-        if ($(this).val() != null && $(this).val() != '') fields.push($(this).val());
-    });
-    $(target).val(fields.join('\n'));
-}
 
+// On load attach event listeners
 $(function() {
-
+    
+    // Fix materialize label focus bug
     $("label").on('click', function() {
         let target = $(this).attr('for');
         if (target) $('[name="' + target + '"]')[0].focus();
@@ -233,6 +249,8 @@ $(function() {
     });
 });
 
+
+// inputCanvas stores, manipulates and outputs uploaded images for submission
 let inputCanvas = {
     elem: $('#input-canvas')[0],
     $elem: $('#input-canvas'),
