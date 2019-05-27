@@ -6,17 +6,6 @@ const mealChips = M.Chips.init($('#meal-chips')[0], { onChipAdd: addChip, onChip
 $(mealChips.el).find('input').addClass('hide'); // Hide the text input from the chips array, so users can't add custom tags
 M.Dropdown.init($('.dropdown-trigger'));
 
-
-// Converts the contents of chips to a string in the input element so they can be submitted
-function chipsToInput(chipInstance, inputElem) {
-    if (chipInstance.chipsData.length > 0) {
-        let tags = chipInstance.chipsData.map(function(chip) {
-            return chip.tag;
-        });
-        $(inputElem).val(tags.join('/'));
-    } else $(inputElem).val('');
-}
-
 // Whenever a chip is added hide its option in the dropdown
 function addChip($el, renderedChip) {
     tagName = this.chipsData[this.chipsData.length - 1].tag;
@@ -36,6 +25,17 @@ function removeChip($el, chip) {
     $addDropdownButton.removeClass('disabled');
 }
 
+// Converts the contents of chips to a string in the input element so they can be submitted
+function chipsToInput(chipInstance, inputElem) {
+    if (chipInstance.chipsData.length > 0) {
+        let tags = chipInstance.chipsData.map(function(chip) {
+            return chip.tag;
+        });
+        $(inputElem).val(tags.join('/'));
+    } else $(inputElem).val('');
+}
+
+// Converts the inputs from the time fields into a 00:00 time string to be submitted
 function updateTimeInput(target) {
     let hours = parseInt($(target + ' .hours').val());
     let minutes = parseInt($(target + ' .minutes').val());
@@ -84,6 +84,51 @@ function resetFileInput() {
     inputCanvas.image = null;
 }
 
+function addRemoveMethodLine(e) {
+    if (e.which == 13) {
+        e.preventDefault();
+        if ($(this).val() != null) {
+            let textBefore = $(this).val().slice(0, $(this).prop("selectionStart"));
+            let textAfter = $(this).val().slice($(this).prop("selectionEnd"));
+            $(this).val(textBefore)
+            $(this).parent().after('<li><textarea class="materialize-textarea"></textarea></li>');
+            let newTextarea = $(this).parent().next().find('textarea');
+            newTextarea.val(textAfter); // Set contents to text after newline
+            newTextarea[0].setSelectionRange(0, 0); // Move the carot to the start
+            newTextarea[0].focus(); // Focus the textarea
+            newTextarea.on('keydown', addRemoveMethodLine); // Add event listener for this function
+        }
+    }else if (e.which == 8 && $(this).prop("selectionStart") == 0 && $('.method textarea').length > 1) {
+        e.preventDefault();
+        let textContent = $(this).val();
+        let prevTextarea = $(this).parent().prev().find('textarea');
+        console.log(prevTextarea);
+        if (textContent != null) {
+            textContent = textContent.slice($(this).prop("selectionEnd"))
+            if (prevTextarea && prevTextarea.length > 0) {
+                caretPosition = prevTextarea.val().length;
+                prevTextarea.val(prevTextarea.val() + textContent);
+                prevTextarea.prop("selectionStart", caretPosition).prop("selectionEnd", caretPosition);
+                prevTextarea[0].focus();
+                $(this).parent().remove();
+            }
+        }else{
+            if (prevTextarea && prevTextarea.length > 0) prevTextarea[0].focus();
+            else $(this).parent().next().find('textarea')[0].focus();
+            $(this).parent().remove();
+        }
+        
+    }
+}
+
+function concatFields(selector, target) {
+    let fields = [];
+    $(selector).each(function() {
+        if ($(this).val() != null && $(this).val() != '') fields.push($(this).val());
+    });
+    $(target).val(fields.join('\n'));
+}
+
 $(function() {
 
     $("label").on('click', function() {
@@ -94,15 +139,13 @@ $(function() {
     inputCanvas.init();
 
     $('#create-recipe').on('submit', function(e) {
+        concatFields('.method textarea', '#methods');
+        updateTimeInput('#prep-time');
+        updateTimeInput('#cook-time');
         chipsToInput(tagChips, '#tag-input');
         chipsToInput(mealChips, '#meal-input');
     });
-    $('#prep-time input').on('change', function() {
-        updateTimeInput('#prep-time');
-    });
-    $('#cook-time input').on('change', function() {
-        updateTimeInput('#cook-time');
-    });
+
     $('.dropdown-content[data-target] a').on('click', function() {
         let tagName = $(this).attr('data-chip-name');
         let chipInstance = M.Chips.getInstance($('#' + $(this).parent().parent().attr('data-target'))[0]);
@@ -113,23 +156,7 @@ $(function() {
 
     $('#image-delete').on('click', resetFileInput);
 
-    $('#image-crop').on('click', function () {
-        if (inputCanvas.crop){
-            inputCanvas.showOutput();
-            $('#image-reset').removeClass('scale-in');
-            $('#image-crop i').text('crop');
-            $('#image-crop').removeClass('green');
-            inputCanvas.crop = false;
-            inputCanvas.$elem.css({cursor: 'auto'});
-        }else{
-            $('#image-crop i').text('check');
-            $('#image-crop').addClass('green');
-            $('#image-reset').addClass('scale-in');
-            inputCanvas.crop = true;
-            inputCanvas.$elem.css({cursor: 'move'});
-            inputCanvas.showAll();
-        }
-    });
+    $('#image-crop').on('click', inputCanvas.toggleCrop);
 
     $(window).on('resize', function() {
         if (!inputCanvas.debounce) {
@@ -146,6 +173,8 @@ $(function() {
     });
 
     $('#image-upload').on('change', loadImage);
+
+    $('.method textarea').on('keydown', addRemoveMethodLine);
 });
 
 let inputCanvas = {
@@ -235,6 +264,23 @@ let inputCanvas = {
             }
             
         });
+    },
+    toggleCrop() {
+        if (inputCanvas.crop){
+            inputCanvas.showOutput();
+            $('#image-reset').removeClass('scale-in');
+            $('#image-crop i').text('crop');
+            $('#image-crop').removeClass('green');
+            inputCanvas.crop = false;
+            inputCanvas.$elem.css({cursor: 'auto'});
+        }else{
+            $('#image-crop i').text('check');
+            $('#image-crop').addClass('green');
+            $('#image-reset').addClass('scale-in');
+            inputCanvas.crop = true;
+            inputCanvas.$elem.css({cursor: 'move'});
+            inputCanvas.showAll();
+        }
     },
     setImage(image) {
         this.image = image;

@@ -1,4 +1,5 @@
-// Individual Recipe Page
+// Individual recipe page and add-recipe page
+
 .ingredients {
 	font-family: $secondary-font-stack;
 
@@ -37,6 +38,24 @@
 	font-size: 3rem;
 }
 
+.input-field .method-label {
+    position: static;
+}
+
+.input-field {
+    ol {
+        li {
+            display: flex;
+        }
+
+        li::before {
+            border-color: $input-border-color;
+            color: $input-border-color;
+            float: none;
+        }
+    }
+}
+
 .method {
     list-style: none;
     counter-reset: method-counter;
@@ -45,10 +64,15 @@
     li {
 		min-height: 3rem;
 		padding-top: 0.5rem;
-		// padding-left: 1rem;
+
+        textarea {
+            display: block;
+            width: 90%;
+        }
     }
 
     li::before {
+        display: inline-block;
         content: counter(method-counter);
         counter-increment: method-counter;
         font-family: $secondary-font-stack;

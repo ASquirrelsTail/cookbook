@@ -272,9 +272,9 @@ def add_recipe():
             recipe_data['parent'] = parent
             recipe_data['prep-time'] = recipe_data['prep-time'].split(':')
             recipe_data['cook-time'] = recipe_data['cook-time'].split(':')
-            if recipe_data.get('tags', '') != '':
+            if recipe_data.get('tags', '') != '' and isinstance(recipe_data['tags'], list):
                 recipe_data['tags'] = '/'.join(recipe_data['tags'])
-            if recipe_data.get('meals', '') != '':
+            if recipe_data.get('meals', '') != '' and isinstance(recipe_data['meals'], list):
                 recipe_data['meals'] = '/'.join(recipe_data['meals'])
             if recipe_data.get('image') is not None:
                 recipe_data['old-image'] = recipe_data['image']
@@ -345,9 +345,9 @@ def edit_recipe(urn):
             all_meals = mongo.db.meals.find()
             recipe_data['prep-time'] = recipe_data['prep-time'].split(':')
             recipe_data['cook-time'] = recipe_data['cook-time'].split(':')
-            if recipe_data.get('tags', '') != '':
+            if recipe_data.get('tags', '') != '' and isinstance(recipe_data['tags'], list):
                 recipe_data['tags'] = '/'.join(recipe_data['tags'])
-            if recipe_data.get('meals', '') != '':
+            if recipe_data.get('meals', '') != '' and isinstance(recipe_data['meals'], list):
                 recipe_data['meals'] = '/'.join(recipe_data['meals'])
             if recipe_data.get('image', '') != '':
                 recipe_data['old-image'] = recipe_data['image']

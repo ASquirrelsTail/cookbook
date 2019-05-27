@@ -7314,6 +7314,19 @@ nav.nav-extended .nav-content .tabs i {
   font-size: 3rem;
 }
 
+.input-field .method-label {
+  position: static;
+}
+
+.input-field ol li {
+  display: flex;
+}
+.input-field ol li::before {
+  border-color: #9e9e9e;
+  color: #9e9e9e;
+  float: none;
+}
+
 .method {
   list-style: none;
   counter-reset: method-counter;
@@ -7323,7 +7336,12 @@ nav.nav-extended .nav-content .tabs i {
   min-height: 3rem;
   padding-top: 0.5rem;
 }
+.method li textarea {
+  display: block;
+  width: 90%;
+}
 .method li::before {
+  display: inline-block;
   content: counter(method-counter);
   counter-increment: method-counter;
   font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;

@@ -43,9 +43,19 @@ Add Recipe - Fork.it
         <label for="ingredients"><i class="material-icons left">list</i>Ingredients</label>
         <textarea name="ingredients" class="materialize-textarea">{{ recipe['ingredients'] }}</textarea>
     </div>
+    
     <div class="input-field col s12">
-        <label for="methods"><i class="material-icons left">mode_edit</i>Method</label>
-        <textarea name="methods" class="materialize-textarea">{{ recipe['methods'] }}</textarea>
+        <label class="method-label"><i class="material-icons left">mode_edit</i>Method</label>
+        <ol class="method">
+            {% if recipe['methods'] %}
+            {% for method in recipe['methods'].split('\n') %}
+            <li><textarea class="materialize-textarea">{{ method.strip() }}</textarea></li>
+            {% endfor %}
+            {% else %}
+            <li><textarea class="materialize-textarea"></textarea></li>
+            {% endif %}
+        </ol>
+        <input type="hidden" name="methods" id='methods'>
     </div>
     <div class="row">
         <div class="col s12">
