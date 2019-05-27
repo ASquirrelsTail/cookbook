@@ -12,8 +12,8 @@ Recipes - Fork.it
             </div>
             <form action="" method="GET" id="filters-form">
                 <div class="input-field col s12 m6 l12">
-                    <input type="text" name="search" {% if current_query['search'] %}value="{{ current_query['search'] }}" {% endif %}>
-                    <label><i class="material-icons left">search</i>Search</label>
+                    <input type="text" name="filter-search" id="filter-search" {% if current_query['search'] %}value="{{ current_query['search'] }}" {% endif %}>
+                    <label for="filter-search"><i class="material-icons left">search</i>Search</label>
                 </div>
                 <div class="input-field col s12 m6 l12">
                     <select name="meals" id="meals">
@@ -78,7 +78,11 @@ Recipes - Fork.it
         $('.chip').on('click', function() {
             $(this).toggleClass('active');
             $('#filters-form').trigger('submit');
-        })
+        });
+
+        $('#filter-search').on('keydown', function(e) {
+        	if (e.which == 13 && $(this).val() != null) $('#filters-form').trigger('submit');
+        });
 
         $('#filters-form').on('submit', function() {
         	let tagsInput = [];
@@ -87,7 +91,7 @@ Recipes - Fork.it
 			});
 			if (tagsInput.length > 0) $('#tags').val(tagsInput.join(' '));
 			else $('#tags').remove();
-			console.log(tagsInput);
+			$('#filter-search').attr('name', 'search');
 			$('#filters-form')[0].submit();
         });
     });
