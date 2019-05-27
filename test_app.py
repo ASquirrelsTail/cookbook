@@ -1302,14 +1302,14 @@ class TestRecipesList(TestClient):
         The page should display ten or less recipes per page
         '''
         response = self.client.get('/recipes')
-        self.assertLess(response.data.decode().count('href="/recipes/'), 11)
+        self.assertLess(response.data.decode().count('recipe-card'), 11)
 
     def test_pagination(self):
         '''
         The page should display the correct number of reuslts for the page
         '''
         response = self.client.get('/recipes?username=Alice&page=3')
-        self.assertEqual(response.data.decode().count('href="/recipes/'), 5)
+        self.assertEqual(response.data.decode().count('recipe-card'), 5)
 
     def test_pagination_beyond_range(self):
         '''
@@ -1339,10 +1339,9 @@ class TestRecipesList(TestClient):
         '''
         Pagination links should preserve the current query
         '''
-        response = self.client.get('/recipes?username=Alice&page=1')
-        links = findall('/recipes\?.+?"', response.data.decode())
-        self.assertIn('page=2', links[0])
-        self.assertIn('username=Alice', links[0])
+        response = self.client.get('/recipes?username=Alice&')
+        self.assertRegex(response.data.decode(), '/recipes\?.*page=2')
+        self.assertRegex(response.data.decode(), '/recipes\?.*username=Alice')
 
     def test_results_should_be_ordered_by_views(self):
         '''
