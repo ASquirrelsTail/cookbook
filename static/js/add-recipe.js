@@ -82,6 +82,19 @@ function resetFileInput() {
     $('#image-data').val(null);
     $('#image-crop i').text('crop');
     inputCanvas.image = null;
+
+    // let imageUpload = $('#image-upload');
+    // console.log(imageUpload);
+    // let parent = imageUpload.parent();
+    // imageUpload.before('<form id="temp-form></form>');
+    // let tempForm = $('#temp-form');
+    // imageUpload.detatch();
+    // tempForm.append(imageUpload);
+    // tempForm[0].reset();
+    // imageUpload.detatch();
+    // tempForm.remove();
+    // parent.append(imageUpload);
+
 }
 
 function addRemoveMethodLine(e) {
@@ -121,6 +134,42 @@ function addRemoveMethodLine(e) {
     }
 }
 
+function addRemoveIngredientLine(e) {
+    if (e.which == 13) {
+        e.preventDefault();
+        if ($(this).val() != null) {
+            let textBefore = $(this).val().slice(0, $(this).prop("selectionStart"));
+            let textAfter = $(this).val().slice($(this).prop("selectionEnd"));
+            $(this).val(textBefore)
+            $(this).after('<input class="ingredient" type="text">');
+            let newTextInput = $(this).next();
+            newTextInput.val(textAfter); // Set contents to text after newline
+            newTextInput[0].setSelectionRange(0, 0); // Move the carot to the start
+            newTextInput[0].focus(); // Focus the textarea
+            newTextInput.on('keydown', addRemoveIngredientLine); // Add event listener for this function
+        }
+    }else if (e.which == 8 && $(this).prop("selectionStart") == 0 && $('.ingredient').length > 1) {
+        e.preventDefault();
+        let textContent = $(this).val();
+        let prevTextInput = $(this).prev();
+        if (textContent != null) {
+            textContent = textContent.slice($(this).prop("selectionEnd"))
+            if (prevTextInput.hasClass('ingredient')) {
+                caretPosition = prevTextInput.val().length;
+                prevTextInput.val(prevTextInput.val() + textContent);
+                prevTextInput.prop("selectionStart", caretPosition).prop("selectionEnd", caretPosition);
+                prevTextInput[0].focus();
+                $(this).remove();
+            }
+        }else{
+            if (prevTextInput.hasClass('ingredient')) prevTextInput[0].focus();
+            else $(this).next()[0].focus();
+            $(this).remove();
+        }
+        
+    }
+}
+
 function concatFields(selector, target) {
     let fields = [];
     $(selector).each(function() {
@@ -139,6 +188,7 @@ $(function() {
     inputCanvas.init();
 
     $('#create-recipe').on('submit', function(e) {
+        concatFields('.ingredient', '#ingredients');
         concatFields('.method textarea', '#methods');
         updateTimeInput('#prep-time');
         updateTimeInput('#cook-time');
@@ -175,6 +225,12 @@ $(function() {
     $('#image-upload').on('change', loadImage);
 
     $('.method textarea').on('keydown', addRemoveMethodLine);
+
+    $('.ingredient').on('keydown', addRemoveIngredientLine);
+
+    $('#ingredient-label').on('click', function() {
+        $(this).next()[0].focus();
+    });
 });
 
 let inputCanvas = {

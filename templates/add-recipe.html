@@ -7,7 +7,8 @@ Add Recipe - Fork.it
 <h1>{{ action }} Recipe</h1>
 <form action="" method="POST" id="create-recipe">
     <div class="input-field col s12 no-b-margin">
-        <label for="title"><i class="material-icons left">title</i>Title</label><input type="text" name="title" maxlength="100" value="{{ recipe['title'] }}">
+        <label for="title"><i class="material-icons left">title</i>Title</label>
+        <input type="text" name="title" maxlength="100" value="{{ recipe['title'] }}">
     </div>
     {% if recipe['old-image'] %}
         <div class="col s12 overlay-container" id="old-image-container">
@@ -40,8 +41,15 @@ Add Recipe - Fork.it
     <canvas id="output-canvas" width="1200" height="700" class="hide"></canvas>
     <input type="hidden" name="image" id="image-data" value="">
     <div class="input-field col s12">
-        <label for="ingredients"><i class="material-icons left">list</i>Ingredients</label>
-        <textarea name="ingredients" class="materialize-textarea">{{ recipe['ingredients'] }}</textarea>
+        <label id='ingredient-label'><i class="material-icons left">list</i>Ingredients</label>
+        {% if recipe['ingredients'] %}
+        {% for ingredient in recipe['ingredients'].split('\n') %}
+        <input class="ingredient" type="text" value="{{ ingredient.strip() }}">
+        {% endfor %}
+        {% else %}
+        <input class="ingredient" type="text">
+        {% endif %}
+        <input type="hidden" name="ingredients" id="ingredients">
     </div>
     
     <div class="input-field col s12">
