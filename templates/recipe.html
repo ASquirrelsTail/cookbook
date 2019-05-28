@@ -39,10 +39,18 @@
     <div class="container">
         <div class="row">
             <div class="col s12">
-                By <a href="{{ url_for('recipes', username=recipe['username']) }}">{{ recipe['username'] }}</a> on {{ recipe['date'] }}
+                By <a href="{{ url_for('recipes', username=recipe['username']) }}">{{ recipe['username'] }}</a> on {{ recipe['date'] }}.
+                {% if recipe['parent-title'] %}
+                It's a fork of <a href="{{ url_for('recipe', urn=recipe['parent']) }}">{{ parent_title }}</a>
                 {% if recipe['forks'] %}
-                with <a href="{{ url_for('recipes', fork=urn) }}">{{ recipe['forks'] }} forks</a>.
+                and has <a href="{{ url_for('recipes', forks=urn) }}">{{ recipe['forks'] }} forks</a> of it's own.
                 {% endif %}
+                {% else %}
+                {% if recipe['forks'] %}
+                It has <a href="{{ url_for('recipes', forks=urn) }}">{{ recipe['forks'] }} forks</a>.
+                {% endif %}
+                {% endif %}
+                
                 <i class="material-icons small">access_time</i> Prep-Time: {{ recipe['prep-time'] }}
                 <i class="material-icons small">access_time</i> Cooking-Time: {{ recipe['cook-time'] }}
                 {% if recipe['meals'] %}
@@ -92,9 +100,11 @@
             </div>
             {% endif %}
         </div>
+        {% if username %}
         <div class="row">
             <a href="{{ url_for('add_recipe', fork=recipe['urn']) }}" class="waves-effect waves-light btn">Fork this recipe</a>
         </div>
+        {% endif %}
     </div>
 </article>
 {% endblock %}

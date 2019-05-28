@@ -239,6 +239,7 @@ def add_recipe():
                 parent = mongo.db.recipes.find_one({'urn': recipe_data['parent']}, {'title': 1})
                 if parent is not None:
                     parent_title = parent.get('title')
+                    recipe_data['parent-title'] = parent.get('title')
                     if parent_title == recipe_data['title']:
                         flash('Forked recipes must have a different title.')
                         all_tags = mongo.db.tags.find()
@@ -411,7 +412,7 @@ def recipe(urn):
         recipe['cook-time'] = hours_mins_to_string(recipe['cook-time'])
         if recipe.get('children') is not None:
             recipe['forks'] = len(recipe['children'])
-    return render_template('recipe.html', recipe=recipe, username=username, favourite=favourite)
+    return render_template('recipe.html', recipe=recipe, urn=urn, username=username, favourite=favourite)
 
 
 @app.route('/recipes/<urn>/favourite')
