@@ -30,7 +30,7 @@ Recipes - Fork.it
 	                    {% endif %}
                         {% endfor %}
                     </select>
-                    <label>Meals</label>
+                    <label for="meals">Meal</label>
                 </div>
                 <div class="col s12">
                 	<div>Tags</div>
@@ -40,6 +40,26 @@ Recipes - Fork.it
                         {% endfor %}
                         <input type="hidden" name='tags' id="tags">
                 	</div>
+                </div>
+                <div class="input-field col s12 m6 l12">
+                    <select name="sort" id="sort">
+                    	{% if not current_query['sort'] or current_query['sort'] == 'views' %}
+                        <option value="views" selected>Most Viewed</option>
+                        {% else %}
+                        <option value="views">Most Viewed</option>
+                        {% endif %}
+                        {% if current_query['sort'] == 'date'%}
+                        <option value="date" selected>Most Recent</option>
+                        {% else %}
+                        <option value="date">Most Recent</option>
+                        {% endif %}
+                        {% if current_query['sort'] == 'favourites'%}
+                        <option value="favourites" selected>Most Favourited</option>
+                        {% else %}
+                        <option value="favourites">Most Favourited</option>
+                        {% endif %}
+                    </select>
+                    <label for="sort">Order by</label>
                 </div>
             </form>
         </div>
@@ -71,7 +91,7 @@ Recipes - Fork.it
         });
         {% endif %}
 
-        $('#meals').on('change', function() {
+        $('.input-field select').on('change', function() {
             $('#filters-form').trigger('submit');
         });
 
