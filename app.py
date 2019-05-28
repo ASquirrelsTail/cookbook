@@ -380,12 +380,16 @@ def recipes():
     query_args = request.args.to_dict()
     results = find_recipes(**query_args)
     query_args.pop('page', '')
+    if query_args.get('forks', '') != '':
+        parent_title = mongo.db.recipes.find_one({'urn': query_args['forks']}, {'title': 1}).get('title')
+    else:
+        parent_title = None
 
     all_tags = mongo.db.tags.find()
     all_meals = mongo.db.meals.find()
 
     return render_template('recipes.html', current_query=query_args, username=session.get('username'),
-                           all_meals=all_meals, all_tags=all_tags, **results)
+                           parent_title=parent_title, all_meals=all_meals, all_tags=all_tags, **results)
 
 
 @app.route('/recipes/<urn>')

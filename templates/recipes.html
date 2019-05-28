@@ -7,10 +7,13 @@ Recipes - Fork.it
 <section class="container">
     <div class="row no-b-margin">
         <div class="col s12 l3 filters">
-            <div class="col s12">
-                <p class="flow-text no-b-margin">Found {{ no_recipes }} recipes.</p>
-            </div>
-            <form action="" method="GET" id="filters-form">
+        	<form action="" method="GET" id="filters-form">
+	            <div class="col s12">
+	                <p class="flow-text no-b-margin">Found {{ no_recipes }} 
+	                {% if parent_title %} forks of {{ parent_title }}{% else %}recipes{% endif %}{% if current_query['username'] %} by {{ current_query['username'] }}{% endif %}.</p>
+	                {% if current_query['username'] %}<input type="hidden" name="username" value="{{ current_query['username'] }}">{% endif %}
+	                {% if parent_title %}<input type="hidden" name="forks" value="{{ current_query['forks'] }}">{% endif %}
+	            </div>
                 <div class="input-field col s12 m6 l12">
                     <input type="text" name="filter-search" id="filter-search" {% if current_query['search'] %}value="{{ current_query['search'] }}" {% endif %}>
                     <label for="filter-search"><i class="material-icons left">search</i>Search</label>
