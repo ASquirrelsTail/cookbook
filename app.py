@@ -446,10 +446,14 @@ def feature_recipe(urn):
     if recipe.get('featured') is None:
         now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         mongo.db.recipes.update_one({'urn': urn}, {'$set': {'featured': now}})
+        feature = True
     else:
         mongo.db.recipes.update_one({'urn': urn}, {'$unset': {'featured': ''}})
-
-    return redirect(url_for('recipe', urn=urn))
+        feature = False
+    if request.is_json:
+        return jsonify(feature=feature)
+    else:
+        return redirect(url_for('recipe', urn=urn))
 
 
 @app.route('/cookies')

@@ -8,7 +8,7 @@
     {% if username == recipe['username'] or username == 'Admin' %}
     <a href="{{ url_for('edit_recipe', urn=recipe['urn']) }}" class="btn-floating btn-large waves-effect waves-light"><i class="material-icons">mode_edit</i></a>
     {% if username == 'Admin' %}
-    <a href="{{ url_for('feature_recipe', urn=recipe['urn']) }}" class="btn-floating btn-large waves-effect waves-light">
+    <a href="{{ url_for('feature_recipe', urn=recipe['urn']) }}" class="btn-floating btn-large waves-effect waves-light" id="feature-btn">
         {% if recipe['featured'] %}
         <i class="material-icons">star</i>
         {% else %}
@@ -138,10 +138,29 @@
         }
     }
 
+    function updateFeature() {
+        if (this.readyState == 4) {
+            if (this.status == 200) {
+                let response = JSON.parse(this.responseText);
+                if (response.feature === true) {
+                    $('#feature-btn i').text('star');
+                    M.toast({ html: '<i class="material-icons left">star</i> Recipe featured!' });
+                }else if (response.feature === false) {
+                    $('#feature-btn i').text('star_border');
+                    M.toast({ html: 'Recipe removed from features.' });
+                }
+            }else M.toast({ html: 'Oops. Something went wrong.' });
+        }
+    }
+
     $(function() {
         $('#fav-btn').on('click', function(e) {
             e.preventDefault();
             jsonGet($(this).attr('href'), updateFavourite);
+        });
+        $('#feature-btn').on('click', function(e) {
+            e.preventDefault();
+            jsonGet($(this).attr('href'), updateFeature);
         });
     });
 

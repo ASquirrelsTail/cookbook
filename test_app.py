@@ -1023,7 +1023,7 @@ class TestFavourite(TestClient):
 
     def test_json_request_returns_favourite_false(self):
         '''
-        Json response to successful favourite should be favourite: true
+        Json response to successful unfavourite should be favourite: false
         '''
         self.create_user('FavouritingUser')
         self.login_user('FavouritingUser')
@@ -1087,6 +1087,31 @@ class TestFeature(TestClient):
         self.client.get('/recipes/{}/feature'.format(self.urn))
         self.client.get('/recipes/{}/feature'.format(self.urn))
         self.assertEqual(self.mongo.db.recipes.find_one({'urn': self.urn}).get('featured'), None)
+
+    def test_json_request_returns_200(self):
+        '''
+        If the request is made for json, the response is 200
+        '''
+        self.login_user('Admin')
+        response = self.client.get('/recipes/{}/feature'.format(self.urn), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+    def test_json_request_returns_favourite_true(self):
+        '''
+        Json response to successful feature should be feature: true
+        '''
+        self.login_user('Admin')
+        response = self.client.get('/recipes/{}/feature'.format(self.urn), content_type='application/json')
+        self.assertEqual(json.loads(response.get_data(as_text=True)).get('feature'), True)
+
+    def test_json_request_returns_favourite_false(self):
+        '''
+        Json response to successful unfeature should be feature: false
+        '''
+        self.login_user('Admin')
+        self.client.get('/recipes/{}/feature'.format(self.urn))
+        response = self.client.get('/recipes/{}/feature'.format(self.urn), content_type='application/json')
+        self.assertEqual(json.loads(response.get_data(as_text=True)).get('feature'), False)
 
 
 class TestAdmin(TestClient):
