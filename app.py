@@ -1,7 +1,7 @@
 import os
 from re import match, findall, sub, split, escape as re_escape
 from datetime import datetime
-from flask import Flask, render_template, request, flash, session, redirect, url_for, abort
+from flask import Flask, render_template, request, flash, session, redirect, url_for, abort, jsonify
 from flask_pymongo import PyMongo
 from PIL import Image
 from base64 import b64decode
@@ -427,10 +427,15 @@ def favourite_recipe(urn):
         if urn in mongo.db.users.find_one({'username': username}, {'favourites': 1}).get('favourites', []):
             mongo.db.recipes.update_one({'urn': urn}, {'$inc': {'favourites': -1}})
             mongo.db.users.update_one({'username': username}, {'$pull': {'favourites': urn}})
+            favourite = False
         else:
             mongo.db.recipes.update_one({'urn': urn}, {'$inc': {'favourites': 1}})
             mongo.db.users.update_one({'username': username}, {'$addToSet': {'favourites': urn}})
-    return redirect(url_for('recipe', urn=urn))
+            favourite = True
+    if request.is_json:
+        return jsonify(favourite=favourite)
+    else:
+        return redirect(url_for('recipe', urn=urn))
 
 
 @app.route('/recipes/<urn>/feature')

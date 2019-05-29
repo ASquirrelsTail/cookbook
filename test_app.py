@@ -7,6 +7,7 @@ import base64
 import urllib.request
 import boto3
 from datetime import timedelta, datetime
+import json
 
 s3 = boto3.client('s3')
 s3_bucket = os.getenv('AWS_BUCKET')
@@ -1001,6 +1002,34 @@ class TestFavourite(TestClient):
         self.client.get('/recipes/{}/favourite'.format(self.urn))
         self.client.get('/recipes/{}/favourite'.format(self.urn))
         self.assertEqual(self.mongo.db.users.find_one({'username': username}).get('favourites'), [])
+
+    def test_json_request_returns_200(self):
+        '''
+        If the request is made for json, the response is 200
+        '''
+        self.create_user('FavouritingUser')
+        self.login_user('FavouritingUser')
+        response = self.client.get('/recipes/{}/favourite'.format(self.urn), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+    def test_json_request_returns_favourite_true(self):
+        '''
+        Json response to successful favourite should be favourite: true
+        '''
+        self.create_user('FavouritingUser')
+        self.login_user('FavouritingUser')
+        response = self.client.get('/recipes/{}/favourite'.format(self.urn), content_type='application/json')
+        self.assertEqual(json.loads(response.get_data(as_text=True)).get('favourite'), True)
+
+    def test_json_request_returns_favourite_false(self):
+        '''
+        Json response to successful favourite should be favourite: true
+        '''
+        self.create_user('FavouritingUser')
+        self.login_user('FavouritingUser')
+        self.client.get('/recipes/{}/favourite'.format(self.urn))
+        response = self.client.get('/recipes/{}/favourite'.format(self.urn), content_type='application/json')
+        self.assertEqual(json.loads(response.get_data(as_text=True)).get('favourite'), False)
 
 
 class TestFeature(TestClient):
