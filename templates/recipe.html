@@ -17,7 +17,7 @@
     </a>
     {% endif %}
     {% else %}
-    <a href="{{ url_for('favourite_recipe', urn=recipe['urn']) }}" class="btn-floating btn-large waves-effect waves-light">
+    <a href="{{ url_for('favourite_recipe', urn=recipe['urn']) }}" class="btn-floating btn-large waves-effect waves-light" id="fav-btn">
         {% if favourite %}
         <i class="material-icons">favorite</i>
         {% else %}
@@ -107,4 +107,44 @@
         {% endif %}
     </div>
 </article>
+{% endblock %}
+{% block javascript %}
+<script>
+    const $ = cash;
+
+    function jsonGet(url, callback) {
+        let xhr = new XMLHttpRequest();
+
+        xhr.open("GET", url, true); //Filter by postcodes, lat and lng as these are the only things we need
+        xhr.setRequestHeader("Content-Type", "application/json");
+
+        xhr.onreadystatechange = callback;
+
+        xhr.send(); 
+    }
+
+    function updateFavourite() {
+        if (this.readyState == 4) {
+            if (this.status == 200) {
+                let response = JSON.parse(this.responseText);
+                if (response.favourite === true) {
+                    $('#fav-btn i').text('favorite');
+                    M.toast({ html: '<i class="material-icons left">favorite</i> Recipe added to favorites!' });
+                }else if (response.favourite === false) {
+                    $('#fav-btn i').text('favorite_border');
+                    M.toast({ html: 'Recipe removed from favourites.' });
+                }
+            }else M.toast({ html: 'Oops. Something went wrong.' });
+        }
+    }
+
+    $(function() {
+        $('#fav-btn').on('click', function(e) {
+            e.preventDefault();
+            jsonGet($(this).attr('href'), updateFavourite);
+        });
+    });
+
+
+</script>
 {% endblock %}
