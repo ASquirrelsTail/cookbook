@@ -51,19 +51,29 @@ Recipes - Fork.it
                         {% else %}
                         <option value="views">Most Viewed</option>
                         {% endif %}
-                        {% if current_query['sort'] == 'date'%}
+                        {% if current_query['sort'] == 'date' %}
                         <option value="date" selected>Most Recent</option>
                         {% else %}
                         <option value="date">Most Recent</option>
                         {% endif %}
-                        {% if current_query['sort'] == 'favourites'%}
+                        {% if current_query['sort'] == 'favourites' %}
                         <option value="favourites" selected>Most Favourited</option>
                         {% else %}
                         <option value="favourites">Most Favourited</option>
                         {% endif %}
+                        {% if current_query['sort'] == 'total-time' and current_query['order'] == '1' %}
+                        <option value="total-time" selected>Quickest</option>
+                        {% else %}
+                        <option value="total-time">Quickest</option>
+                        {% endif %}
                     </select>
                     <label for="sort">Order by</label>
                 </div>
+                {% if current_query['order'] == '1' %}
+                <input type="hidden" name='order' id="order" value="1">
+                {% else %}
+                <input type="hidden" name='order' id="order" value="-1">
+                {% endif %}
             </form>
         </div>
         <div class="col s12 l9">
@@ -114,6 +124,7 @@ Recipes - Fork.it
 			});
 			if (tagsInput.length > 0) $('#tags').val(tagsInput.join(' '));
 			else $('#tags').remove();
+            if ($('#sort').val() == 'total-time') $('#order').val('1');
 			$('#filter-search').attr('name', 'search');
 			$('#filters-form')[0].submit();
         });
