@@ -276,6 +276,16 @@ class TestAddRecipe(TestClient):
         self.assertEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('prep-time'), '00:05')
         self.assertEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('cook-time'), '00:05')
 
+    def test_submit_recipe_has_total_time(self):
+        recipe_title = 'Pancakes'
+        recipe_ingredients = ['Flour', 'Eggs', 'Milk', 'Vegetable Oil']
+        recipe_methods = ['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
+                          'Cook until golden.']
+        recipe_prep_time = '00:05'
+        recipe_cook_time = '00:05'
+        self.submit_recipe(recipe_title, recipe_ingredients, recipe_methods, prep_time=recipe_prep_time, cook_time=recipe_cook_time)
+        self.assertEqual(self.mongo.db.recipes.find_one({'title': recipe_title}).get('total-time'), '00:10')
+
     def test_submit_recipe_has_tags_array(self):
         '''
         Submitted recipes with tags should store them as an array
@@ -660,11 +670,12 @@ class TestEditRecipe(TestClient):
                                'ingredients': '\n'.join(['Flour', 'Butter', 'Milk', 'Cheese', 'Macaroni']),
                                'methods': '\n'.join(['Boil macaroni in a pan.', 'Melt butter in a pan and whisk in flour before adding milk.',
                                                      'Add cheese to sauce.', 'Once mixture thickens add boiled macaroni.']),
-                               'prep-time': '00:10', 'cook-time': '00:20'})
+                               'prep-time': '00:10', 'cook-time': '00:55'})
         recipe_entry = self.mongo.db.recipes.find_one({'urn': urn})
         self.assertIn('Add cheese to sauce.', recipe_entry['methods'])
         self.assertEqual(recipe_entry['prep-time'], '00:10')
-        self.assertEqual(recipe_entry['cook-time'], '00:20')
+        self.assertEqual(recipe_entry['cook-time'], '00:55')
+        self.assertEqual(recipe_entry['total-time'], '01:05')
 
     def test_edit_recipe_delete_image(self):
         '''

@@ -208,6 +208,14 @@ def add_recipe():
             recipe_data['username'] = session.get('username')
             recipe_data['date'] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
             recipe_data['urn'] = '-'.join(findall('[a-z-]+', recipe_data['title'].lower()))
+            if recipe_data.get('prep-time', '') != '' and recipe_data.get('cook-time', '') != '':
+                prep_time = recipe_data['prep-time'].split(':')
+                cook_time = recipe_data['cook-time'].split(':')
+                mins = int(prep_time[1]) + int(cook_time[1])
+                hours = int(prep_time[0]) + int(cook_time[0])
+                hours += mins // 60
+                mins = mins % 60
+                recipe_data['total-time'] = "{:0>2}:{:0>2}".format(hours, mins)
             if recipe_data.get('tags', '') != '':
                 recipe_data['tags'] = recipe_data['tags'].split('/')
             if recipe_data.get('meals', '') != '':
@@ -304,6 +312,13 @@ def edit_recipe(urn):
                     updated_recipe.get('methods', '') != '' and
                     updated_recipe.get('prep-time', '') != '' and
                     updated_recipe.get('cook-time', '') != ''):
+                prep_time = updated_recipe['prep-time'].split(':')
+                cook_time = updated_recipe['cook-time'].split(':')
+                mins = int(prep_time[1]) + int(cook_time[1])
+                hours = int(prep_time[0]) + int(cook_time[0])
+                hours += mins // 60
+                mins = mins % 60
+                updated_recipe['total-time'] = "{:0>2}:{:0>2}".format(hours, mins)
                 if updated_recipe.get('tags', '') == '':
                     updated_recipe['tags'] = None
                 else:
@@ -337,8 +352,9 @@ def edit_recipe(urn):
                 mongo.db.recipes.update_one({'urn': urn},
                                             {'$set': {'title': updated_recipe['title'], 'ingredients': updated_recipe['ingredients'],
                                                       'methods': updated_recipe['methods'], 'prep-time': updated_recipe['prep-time'],
-                                                      'cook-time': updated_recipe['cook-time'], 'tags': updated_recipe['tags'],
-                                                      'meals': updated_recipe['meals'], 'image': updated_recipe['image']}})
+                                                      'cook-time': updated_recipe['cook-time'], 'total-time': updated_recipe['total-time'],
+                                                      'tags': updated_recipe['tags'], 'meals': updated_recipe['meals'],
+                                                      'image': updated_recipe['image']}})
                 flash('Successfully edited recipe!')
                 return redirect(url_for('recipe', urn=urn))
         else:
