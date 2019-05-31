@@ -213,6 +213,111 @@ class TestUsers(TestClient):
             self.assertEqual(session.get('username'), None)
 
 
+class TestPreferences(TestClient):
+    '''
+    Class for testing the preferences.
+    '''
+    def setUp(self):
+        # Delete all records from the login and user collections and create test user
+        self.mongo.db.logins.delete_many({})
+        self.mongo.db.users.delete_many({})
+        self.logout_user()
+        self.create_user()
+        self.login_user()
+        # Delete all records from the recipe collection
+        self.mongo.db.recipes.delete_many({})
+
+    def test_preferences_not_logged_in(self):
+        '''
+        The preferences page should be forbidden to users who are not logged in
+        '''
+        self.logout_user()
+        response = self.client.get('/preferences', follow_redirects=False)
+        self.assertEqual(response.status_code, 403)
+
+    def test_preferences_logged_in(self):
+        '''
+        The preferences page should retrurn status 200 to logged in users.
+        '''
+        self.login_user()
+        response = self.client.get('/preferences', follow_redirects=False)
+        self.assertEqual(response.status_code, 200)
+
+    def test_set_preferences(self):
+        '''
+        Set preferences should be added to the users document
+        '''
+        self.login_user()
+        self.client.post('/preferences', data={'tags': 'Vegan Gluten-Free'})
+        self.assertEqual(self.mongo.db.users.find_one({}).get('preferences'), 'Vegan Gluten-Free')
+
+    def test_preferences_saved_to_session(self):
+        '''
+        Preferences should be saved to the session cookie
+        '''
+        self.login_user()
+        self.client.post('/preferences', data={'tags': 'Vegan Gluten-Free'})
+        with self.client.session_transaction() as session:
+            self.assertEqual(session.get('preferences'), 'Vegan Gluten-Free')
+
+    def test_preferences_cleared_on_logout(self):
+        '''
+        Preferences should be cleared from the session cookie when a user logs out
+        '''
+        self.login_user()
+        self.client.post('/preferences', data={'tags': 'Vegan Gluten-Free'})
+        self.logout_user()
+        with self.client.session_transaction() as session:
+            self.assertEqual(session.get('preferences'), None)
+
+    def test_preferences_reloaded_to_session_on_login(self):
+        '''
+        User preferences should be retrieved on login
+        '''
+        self.login_user()
+        self.client.post('/preferences', data={'tags': 'Vegan Gluten-Free'})
+        self.logout_user()
+        self.login_user()
+        with self.client.session_transaction() as session:
+            self.assertEqual(session.get('preferences'), 'Vegan Gluten-Free')
+
+    def test_preferences_applied_to_recipes_route(self):
+        '''
+        User preferences should automatically be applied on searches
+        '''
+        self.logout_user()
+        self.create_user('RecipeAuthor')
+        self.login_user('RecipeAuthor')
+        self.submit_recipe(title='Meaty GF Recipe', tags=['Gluten-Free', 'Low-Fat'])
+        self.submit_recipe(title='Vegan Recipe', tags=['Vegan', 'Vegetarian', 'Low-Fat'])
+        self.submit_recipe(title='Vegan GF Recipe', tags=['Vegan', 'Vegetarian', 'Gluten-Free', 'Low-Fat'])
+        self.logout_user()
+        self.create_user('VeganGFUser')
+        self.login_user('VeganGFUser')
+        self.client.post('/preferences', data={'tags': 'Vegan Gluten-Free'})
+        response = self.client.get('/recipes?tags=Low-Fat')
+        self.assertIn(b'Vegan GF Recipe', response.data)
+        self.assertNotIn(b'Vegan Recipe', response.data)
+        self.assertNotIn(b'Meaty GF Recipe', response.data)
+
+    def test_preferences_added_to_recipes_route_queries(self):
+        '''
+        User preferences should automatically be applied on searches
+        '''
+        self.logout_user()
+        self.create_user('RecipeAuthor')
+        self.login_user('RecipeAuthor')
+        self.submit_recipe(title='Meaty GF Recipe', tags=['Gluten-Free', 'Low-Fat'])
+        self.submit_recipe(title='Vegan Recipe', tags=['Vegan', 'Vegetarian', 'Low-Fat'])
+        self.submit_recipe(title='Vegan GF Recipe', tags=['Vegan', 'Vegetarian', 'Gluten-Free', 'Low-Fat'])
+        self.logout_user()
+        self.create_user('VeganGFUser')
+        self.login_user('VeganGFUser')
+        self.client.post('/preferences', data={'tags': 'Vegan Gluten-Free'})
+        response = self.client.get('/recipes?tags=Low-Fat')
+        self.assertIn(b'Vegan Gluten-Free', response.data)
+
+
 class TestAddRecipe(TestClient):
     '''
     Class for testing the add-recipe page
@@ -1272,65 +1377,65 @@ class TestRecipesList(TestClient):
         Recipes page should show how many recipes match the query
         '''
         response = self.client.get('/recipes')
-        self.assertIn(b'60 recipes', response.data)
+        self.assertIn(b'Found 60', response.data)
 
     def test_number_of_tagged_recipes(self):
         '''
         Recipes page should show how many recipes have the requested tag
         '''
         response = self.client.get('/recipes?tags=Vegetarian')
-        self.assertIn(b'11 recipes', response.data)
+        self.assertIn(b'Found 11', response.data)
         response2 = self.client.get('/recipes?tags=Vegan')
-        self.assertIn(b'2 recipes', response2.data)
+        self.assertIn(b'Found 2', response2.data)
 
     def test_number_of_multiple_tags(self):
         '''
         Recipes page should show how many recipes have the requested tags
         '''
         response = self.client.get('/recipes?tags=Vegetarian%20Vegan')
-        self.assertIn(b'2 recipes', response.data)
+        self.assertIn(b'Found 2', response.data)
 
     def test_number_of_recipes_by_author(self):
         '''
         Recipes page should show how many recipes by the requested user
         '''
         response = self.client.get('/recipes?username=Alice')
-        self.assertIn(b'25 recipes', response.data)
+        self.assertIn(b'Found 25', response.data)
 
     def test_number_of_recipes_by_author_and_tags(self):
         '''
         Recipes page should show how many recipes by the requested user, with requested tags
         '''
         response = self.client.get('/recipes?username=Alice&tags=Vegetarian')
-        self.assertIn(b'4 recipes', response.data)
+        self.assertIn(b'Found 4', response.data)
 
     def test_number_of_recipes_by_meal(self):
         '''
         Recipes page should show how many recipes are the requested meal
         '''
         response = self.client.get('/recipes?meals=Snack')
-        self.assertIn(b'4 recipes', response.data)
+        self.assertIn(b'Found 4', response.data)
 
     def test_number_of_recipes_by_author_and_tags_and_meal(self):
         '''
         Recipes page should show how many recipes by the requested user, with requested tags
         '''
         response = self.client.get('/recipes?username=Alice&tags=Vegetarian&meals=Snack%20Lunch')
-        self.assertIn(b'1 recipes', response.data)
+        self.assertIn(b'Found 1', response.data)
 
     def test_number_of_recipes_by_fork(self):
         '''
         Recipes page should show how many forked recipes are returned.
         '''
         response = self.client.get('/recipes?forks=alice-s-apple-pie')
-        self.assertIn(b'1 recipes', response.data)
+        self.assertIn(b'Found 1', response.data)
 
     def test_no_recipes(self):
         '''
         Test to show number of recipes when none found
         '''
         response = self.client.get('/recipes?forks=alice-s-apple-pie&meals=breakfast')
-        self.assertIn(b'0 recipes', response.data)
+        self.assertIn(b'Found 0', response.data)
 
     def test_links_to_recipes(self):
         '''
@@ -1465,7 +1570,7 @@ class TestRecipesList(TestClient):
         response = self.client.get('/recipes?featured=1')
         self.assertIn(b'charlie-s-cottage-pie', response.data)
         self.assertNotIn(b'ben-s-baked-alaska', response.data)
-        self.assertIn(b'1 recipes', response.data)
+        self.assertIn(b'Found 1', response.data)
 
     def test_text_search_ingredients(self):
         '''

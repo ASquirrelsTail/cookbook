@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="container">
+    <div class="row">
+        <div class="col s12">
+            <h1>Preferences</h1>
+            <p class="flow-text">Select tags from the list below, such as dietary preferences, to show only recipes containing those tags on the front page and during searches.</p>
+        </div>
+    </div>
+    <form action="" method="POST" id="preferences-form">
+    <div class="col s12">
+        <h2>Tags</h2>
+        <div id="tag-chips">
+            {% for tag in all_tags %}
+            <div class="chip" data-tag="{{ tag['name'] }}"><a href="#!">{{ tag['name'] }}</a></div>
+            {% endfor %}
+            <input type="hidden" name='tags' id="tags">
+        </div>
+    </div>
+    <div class="input-field col s12">
+        <button class="btn waves-effect waves-light" type="submit" name="action">Update Preferences</button>
+    </div>
+    </form>
+</section>
+{% endblock %}
+{% block javascript %}
+<script>
+	const $ = cash;
+	const select = M.FormSelect.init($('select'));
+
+	$('.chip').on('click', function() {
+            $(this).toggleClass('active');
+        });
+
+    $(function() {
+    	{% if preferences %}
+        let tags = '{{ preferences }}'
+        if (tags.indexOf(' ') != -1) tags = tags.split(' ');
+        else tags = [tags];
+        tags.forEach(function(tag) {
+        	if (tag != '') $('#tag-chips').find('[data-tag=' + tag + ']').addClass('active');
+        });
+        {% endif %}
+
+        $('#preferences-form').on('submit', function() {
+        	let tagsInput = [];
+			$('.chip.active').each(function() {
+				tagsInput.push($(this).data('tag'));
+			});
+			if (tagsInput.length > 0) $('#tags').val(tagsInput.join(' '));
+        });
+    });
+</script>
+{% endblock %}

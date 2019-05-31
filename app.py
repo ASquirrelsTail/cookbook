@@ -43,15 +43,21 @@ def hours_mins_to_string(hours_mins):
     return string
 
 
-def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, search=None, featured=None, sort='views', order='-1'):
+def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, search=None, featured=None,
+                 sort='views', order='-1', preferences=None):
     query = {}
-
+    preferences = session.get('preferences')
+    if tags is not None and tags != '' and preferences is not None and preferences != '':
+            tags = tags + ' ' + preferences
+    elif preferences is not None and preferences != '':
+        tags = preferences
     if tags is not None and tags != '':
         if ' ' in tags:
             tags = tags.split(' ')
             query['tags'] = {'$all': tags}
         else:
             query['tags'] = tags
+
     if meals is not None and meals != '':
         meals = request.args['meals']
         if ' ' in meals:
@@ -101,10 +107,10 @@ def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, sea
 
 @app.route('/')
 def index():
-    featured_recipes = find_recipes(featured='1', sort='featured', order='-1').get('recipes')
-    recent_recipes = find_recipes(sort='date', order='-1')
+    featured_recipes = find_recipes(featured='1', sort='featured', order='-1', preferences=session.get('preferences')).get('recipes')
+    recent_recipes = find_recipes(sort='date', order='-1', preferences=session.get('preferences'))
     recent_recipes['query'] = {'sort': 'date', 'order': '-1'}
-    popular_recipes = find_recipes(sort='favourites', order='-1')
+    popular_recipes = find_recipes(sort='favourites', order='-1', preferences=session.get('preferences'))
     popular_recipes['query'] = {'sort': 'favourites', 'order': '-1'}
     return render_template('index.html', username=session.get('username'), featured_recipes=featured_recipes,
                            recent_recipes=recent_recipes, popular_recipes=popular_recipes)
@@ -138,6 +144,7 @@ def login():
         username = request.form.get('username', '')
         if username != '' and mongo.db.logins.find_one({'username': username}):
             session['username'] = username
+            session['preferences'] = mongo.db.users.find_one({'username': username}, {'preferences': 1}).get('preferences', None)
             flash('Successfully logged in as "{}".'.format(username))
             if request.form.get('target') is not None:
                 return redirect(request.form.get('target'))
@@ -189,9 +196,25 @@ def admin():
 def logout():
     if session.get('username') is not None:
         session['username'] = None
+        session['preferences'] = None
         flash("Successfully logged out.")
         return redirect(url_for('index'))
     return abort(403)
+
+
+@app.route('/preferences', methods=['GET', 'POST'])
+def preferences():
+    username = session.get('username')
+    if session.get('username') is not None:
+        all_tags = mongo.db.tags.find()
+        if request.method == 'POST':
+            tags = request.form.get('tags')
+            if tags is not None:
+                mongo.db.users.update_one({'username': username}, {'$set': {'preferences': tags}})
+                session['preferences'] = tags
+        all_tags = mongo.db.tags.find()
+        return render_template('preferences.html', username=username, all_tags=all_tags, preferences=session['preferences'])
+    abort(403)
 
 
 @app.route('/add-recipe', methods=['POST', 'GET'])
@@ -394,9 +417,17 @@ def delete_recipe(urn):
 
 @app.route('/recipes')
 def recipes():
+    preferences = session.get('preferences', '')
     query_args = request.args.to_dict()
-    results = find_recipes(**query_args)
+    results = find_recipes(preferences=preferences, **query_args)
     query_args.pop('page', '')
+    if preferences is not None and preferences != '':
+        tags = query_args.pop('tags', '')
+        if tags != '':
+            tags += ' ' + preferences
+        else:
+            tags = preferences
+        query_args['tags'] = tags
     if query_args.get('forks', '') != '':
         parent_title = mongo.db.recipes.find_one({'urn': query_args['forks']}, {'title': 1}).get('title')
     else:
