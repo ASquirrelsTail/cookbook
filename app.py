@@ -44,7 +44,7 @@ def hours_mins_to_string(hours_mins):
 
 
 def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, search=None, featured=None,
-                 sort='views', order='-1', preferences=None):
+                 sort='views', order='-1'):
     query = {}
     preferences = session.get('preferences')
     if tags is not None and tags != '' and preferences is not None and preferences != '':
@@ -107,10 +107,10 @@ def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, sea
 
 @app.route('/')
 def index():
-    featured_recipes = find_recipes(featured='1', sort='featured', order='-1', preferences=session.get('preferences')).get('recipes')
-    recent_recipes = find_recipes(sort='date', order='-1', preferences=session.get('preferences'))
+    featured_recipes = find_recipes(featured='1', sort='featured', order='-1').get('recipes')
+    recent_recipes = find_recipes(sort='date', order='-1')
     recent_recipes['query'] = {'sort': 'date', 'order': '-1'}
-    popular_recipes = find_recipes(sort='favourites', order='-1', preferences=session.get('preferences'))
+    popular_recipes = find_recipes(sort='favourites', order='-1')
     popular_recipes['query'] = {'sort': 'favourites', 'order': '-1'}
     return render_template('index.html', username=session.get('username'), featured_recipes=featured_recipes,
                            recent_recipes=recent_recipes, popular_recipes=popular_recipes)
@@ -213,7 +213,7 @@ def preferences():
                 mongo.db.users.update_one({'username': username}, {'$set': {'preferences': tags}})
                 session['preferences'] = tags
         all_tags = mongo.db.tags.find()
-        return render_template('preferences.html', username=username, all_tags=all_tags, preferences=session['preferences'])
+        return render_template('preferences.html', username=username, all_tags=all_tags)
     abort(403)
 
 
@@ -419,7 +419,7 @@ def delete_recipe(urn):
 def recipes():
     preferences = session.get('preferences', '')
     query_args = request.args.to_dict()
-    results = find_recipes(preferences=preferences, **query_args)
+    results = find_recipes(**query_args)
     query_args.pop('page', '')
     if preferences is not None and preferences != '':
         tags = query_args.pop('tags', '')
