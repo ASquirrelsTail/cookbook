@@ -1230,6 +1230,148 @@ class TestFeature(TestClient):
         self.assertEqual(json.loads(response.get_data(as_text=True)).get('feature'), False)
 
 
+class TestComments(TestClient):
+    '''
+    Class for testing comments on recipes.
+    '''
+    def setUp(self):
+        # Delete all records from the login and user collection and create test user
+        self.mongo.db.logins.delete_many({})
+        self.mongo.db.users.delete_many({})
+        # Delete all records from the recipe collection
+        self.mongo.db.recipes.delete_many({})
+        self.logout_user()
+        self.create_user()
+        self.login_user()
+        self.submit_recipe()
+        self.logout_user()
+        self.urn = self.mongo.db.recipes.find_one({}).get('urn')
+
+    def test_recipe_comments_page(self):
+        '''
+        The comments page should return 200 status.
+        '''
+        response = self.client.get('/recipes/{}/comments'.format(self.urn))
+        self.assertEqual(response.status_code, 200)
+
+    def test_recipe_comments_page_doesnt_exist(self):
+        '''
+        The comments page should return 404 status if the recipe doesn't exist.
+        '''
+        response = self.client.get('/recipes/{}/comments'.format('not-a-recipe'))
+        self.assertEqual(response.status_code, 404)
+
+    def test_add_comment_not_logged_in(self):
+        '''
+        Users that aren't logged in should not be allowed to add comments.
+        '''
+        response = self.client.post('/recipes/{}/comments'.format(self.urn), data={'comment': 'Great recipe!'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_add_comment_logged_in(self):
+        '''
+        Users that are logged in can add comments.
+        '''
+        self.create_user('Commenter')
+        self.login_user('Commenter')
+        self.client.post('/recipes/{}/comments'.format(self.urn), data={'comment': 'Great recipe!'})
+        self.assertEqual(len(self.mongo.db.recipes.find_one({'urn': self.urn}).get('comments')), 1)
+
+    def test_posted_comment_contains_data(self):
+        '''
+        Posted comments must contain a comment data to be added.
+        '''
+        self.create_user('Commenter')
+        self.login_user('Commenter')
+        self.client.post('/recipes/{}/comments'.format(self.urn), data={'comment': ''})
+        self.client.post('/recipes/{}/comments'.format(self.urn))
+        self.assertEqual(len(self.mongo.db.recipes.find_one({'urn': self.urn}).get('comments', [])), 0)
+
+    def test_comments_contain_username_time_comment(self):
+        '''
+        Comments should contain username, time and the comment.
+        '''
+        self.create_user('Commenter')
+        self.login_user('Commenter')
+        self.client.post('/recipes/{}/comments'.format(self.urn), data={'comment': 'Great recipe!'})
+        comment_doc = self.mongo.db.recipes.find_one({'urn': self.urn}).get('comments')[0]
+        self.assertEqual(comment_doc.get('username'), 'Commenter')
+        self.assertEqual(comment_doc.get('comment'), 'Great recipe!')
+        self.assertRegex(comment_doc.get('time', ''), '[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}')
+
+    def test_posted_comments_increase_comment_count(self):
+        '''
+        Posted comments should increase the comment count for a recipe.
+        '''
+        self.create_user('Commenter')
+        self.login_user('Commenter')
+        self.client.post('/recipes/{}/comments'.format(self.urn), data={'comment': 'Great recipe!'})
+        self.client.post('/recipes/{}/comments'.format(self.urn), data={'comment': 'Great recipe!'})
+        self.client.post('/recipes/{}/comments'.format(self.urn), data={'comment': 'Great recipe!'})
+        self.assertEqual(self.mongo.db.recipes.find_one({'urn': self.urn}).get('comment-count'), 3)
+
+    def test_comments_on_page(self):
+        '''
+        Posted comments should appear on comments page in the order they were posted.
+        '''
+        self.create_user('Commenter')
+        self.login_user('Commenter')
+        self.client.post('/recipes/{}/comments'.format(self.urn), data={'comment': 'First!'})
+        self.client.post('/recipes/{}/comments'.format(self.urn), data={'comment': 'Second!'})
+        self.client.post('/recipes/{}/comments'.format(self.urn), data={'comment': 'Third!'})
+        response = self.client.get('/recipes/{}/comments'.format(self.urn))
+        self.assertLess(response.data.decode().index('First!'), response.data.decode().index('Second!'))
+        self.assertLess(response.data.decode().index('Second!'), response.data.decode().index('Third!'))
+
+    def test_comments_line_breaks(self):
+        '''
+        Posted comments should have lines seperated into paragraphs
+        '''
+        self.create_user('Commenter')
+        self.login_user('Commenter')
+        self.client.post('/recipes/{}/comments'.format(self.urn), data={'comment': 'Great recipe!\nI really enjoyed it!'})
+        response = self.client.get('/recipes/{}/comments'.format(self.urn))
+        self.assertRegex(response.data.decode(), 'Great recipe!</p>[ \t\n]*<p>I really enjoyed it!')
+
+    def test_json_request_returns_comments(self):
+        '''
+        Json response to get recipes should contain comments
+        '''
+        self.create_user('Commenter')
+        self.login_user('Commenter')
+        self.client.post('/recipes/{}/comments'.format(self.urn), data={'comment': 'Great recipe!'})
+        response = self.client.get('/recipes/{}/comments'.format(self.urn), content_type='application/json')
+        self.assertEqual(json.loads(response.get_data(as_text=True)).get('comments')[0].get('comment'), 'Great recipe!')
+
+    def test_json_response_should_be_escaped(self):
+        '''
+        Json response to should be escaped to avoid code insertion
+        '''
+        self.create_user('Commenter')
+        self.login_user('Commenter')
+        self.client.post('/recipes/{}/comments'.format(self.urn), data={'comment': '<script>Bad stuff</script>'})
+        response = self.client.get('/recipes/{}/comments'.format(self.urn), content_type='application/json')
+        self.assertNotRegex(json.loads(response.get_data(as_text=True)).get('comments')[0].get('comment'), '[<>]+')
+
+    def test_json_response_to_post_comment_success(self):
+        '''
+        Json response to posting a comment should include success: True
+        '''
+        self.create_user('Commenter')
+        self.login_user('Commenter')
+        response = self.client.post('/recipes/{}/comments'.format(self.urn), data=json.dumps({'comment': 'Great recipe!'}), content_type='application/json')
+        self.assertEqual(json.loads(response.get_data(as_text=True)).get('success'), True)
+
+    def test_json_response_to_post_comment_failiure(self):
+        '''
+        Json response to failing to post a comment should include success: False
+        '''
+        self.create_user('Commenter')
+        self.login_user('Commenter')
+        response = self.client.post('/recipes/{}/comments'.format(self.urn), data=json.dumps({'comment': ''}), content_type='application/json')
+        self.assertEqual(json.loads(response.get_data(as_text=True)).get('success'), False)
+
+
 class TestAdmin(TestClient):
     '''
     Class for testing /admin page

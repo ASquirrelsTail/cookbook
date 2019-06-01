@@ -1,7 +1,7 @@
 import os
 from re import match, findall, sub, split, escape as re_escape
 from datetime import datetime
-from flask import Flask, render_template, request, flash, session, redirect, url_for, abort, jsonify
+from flask import Flask, render_template, request, flash, session, redirect, url_for, abort, jsonify, escape, get_flashed_messages
 from flask_pymongo import PyMongo
 from PIL import Image
 from base64 import b64decode
@@ -501,6 +501,47 @@ def feature_recipe(urn):
         return jsonify(feature=feature)
     else:
         return redirect(url_for('recipe', urn=urn))
+
+
+@app.route('/recipes/<urn>/comments', methods=['POST', 'GET'])
+def comments(urn):
+    recipe = mongo.db.recipes.find_one({'urn': urn}, {'username': 1, 'title': 1, 'comment-count': 1, 'comments': 1})
+    username = session.get('username')
+    if recipe is None:
+        abort(404)
+    if request.method == 'POST':
+        if username is None:
+            abort(403)
+        else:
+            if request.is_json:
+                comment = request.json.get('comment', '')
+            else:
+                comment = request.form.get('comment', '')
+            if comment != '':
+                now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                comment_doc = {'username': username, 'time': now, 'comment': comment}
+                mongo.db.recipes.update_one({'urn': urn}, {'$addToSet': {'comments': comment_doc},
+                                                           '$inc': {'comment-count': 1}})
+                success = True
+                if isinstance(recipe.get('comment-count'), int):
+                    recipe['comment-count'] += 1
+                else:
+                    recipe['comment-count'] = 1
+                if not isinstance(recipe.get('comments'), list):
+                    recipe['comments'] = []
+                recipe['comments'].append(comment_doc)
+                flash('Added comment to {}'.format(recipe['title']))
+            else:
+                flash('Failed to add comment to {}'.format(recipe['title']))
+                success = False
+    else:
+        success = None
+    if request.is_json:
+        for comment in recipe.get('comments', []):
+            comment['comment'] = escape(comment['comment'])
+        return jsonify(comments=recipe.get('comments', []), success=success, messages=get_flashed_messages())
+    else:
+        return render_template('comments.html', username=username, recipe=recipe)
 
 
 @app.route('/cookies')

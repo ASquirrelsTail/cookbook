@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Comments for {{ recipe['title'] }} - Fork.it{% endblock %}
+{% block content %}
+<article class="container">
+	<div class="row">
+		<h1>Comments for {{ recipe['title'] }}</h1>
+		{% if recipe['comment-count'] %}
+		<p class="flow-text">{{ recipe['comment-count'] }} comments:</p>
+		{% for comment in recipe['comments'] %}
+		    <p>By {{ comment['username'] }} at {{ comment['time'] }}</p>
+		    <blockquote>
+		    {% set lines = comment['comment'].split('\n') %}
+		    {% for line in lines %}
+		        <p>{{ line }}</p>
+		    {% endfor %}
+		    </blockquote>
+		{% endfor %}
+		{% else %}
+		<p class="flow-text">No comments!</p>
+		{% endif %}
+	</div>
+	{% if username %}
+	<div class="row">
+		<form action="" method="POST">
+			<div class="col s12">
+				<p>Commenting as {{username}}</p>
+			</div>
+			<div class="input-field col s12">
+		          <textarea id="comment" name="comment" class="materialize-textarea"></textarea>
+		          <label for="comment">Textarea</label>
+	        </div>
+	        <div class="col s12">
+	        	<button class="btn waves-effect waves-light" type="submit" name="action">Post Comment</button>
+	        </div>
+		</form>
+	</div>
+	{% endif %}
+</article>
+{% endblock %}
