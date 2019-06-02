@@ -1758,6 +1758,20 @@ class TestRecipesList(TestClient):
         response = self.client.get('/recipes?search=%22apple%20pie%22')
         self.assertIn(str.encode(escape('"apple pie"')), response.data)
 
+    def test_show_following(self):
+        '''
+        Filtering by following should show recipes from those you follow.
+        '''
+        self.logout_user()
+        self.create_user('Follower')
+        self.login_user('Follower')
+        self.client.get('/follow/Benjamin')
+        self.client.get('/follow/Charlie')
+        response = self.client.get('/recipes?tags=Vegetarian&following=1')
+        self.assertNotIn(b'Alice', response.data)
+        self.assertIn(b'Benjamin', response.data)
+        self.assertIn(b'Charlie', response.data)
+
 
 class TestFollowUser(TestClient):
     '''

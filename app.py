@@ -44,7 +44,7 @@ def hours_mins_to_string(hours_mins):
 
 
 def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, search=None, featured=None,
-                 sort='views', order='-1'):
+                 sort='views', order='-1', **kwargs):
     query = {}
     preferences = session.get('preferences')
     if tags is not None and tags != '' and preferences is not None and preferences != '':
@@ -65,7 +65,9 @@ def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, sea
             query['meals'] = {'$all': meals}
         else:
             query['meals'] = meals
-    if username is not None and username != '':
+    if isinstance(username, list):
+        query['username'] = {'$in': username}
+    elif username is not None and username != '':
         query['username'] = username
     if forks is not None and forks != '':
         query['parent'] = forks
@@ -439,9 +441,17 @@ def delete_recipe(urn):
 
 @app.route('/recipes')
 def recipes():
+    username = session.get('username')
     preferences = session.get('preferences', '')
     query_args = request.args.to_dict()
+    if query_args.get('following') is not None:
+        following = mongo.db.users.find_one({'username': username}, {'following': 1})
+        if following is not None and isinstance(following.get('following'), list):
+            query_args['username'] = following['following']
+            query_args.pop('following', '')
     results = find_recipes(**query_args)
+    if query_args.get('following') is not None:
+        query_args.pop('username', '')
     query_args.pop('page', '')
     if preferences is not None and preferences != '':
         tags = query_args.pop('tags', '')
