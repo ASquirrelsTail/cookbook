@@ -37,13 +37,18 @@ Fork.it
     <div class="row">
         <div class="col s12">
             <ul class="tabs" id="tabs">
-                <li class="tab col s3"><a class="active" href="#recent-recipes">Recent Recipes</a></li>
-                <li class="tab col s3"><a href="#popular-recipes">Popular Recipes</a></li>
-                <li class="tab col s3"><a href="#about">About Fork.it</a></li>
-                {% if username %}
-                <li class="tab col s3"><a target="_self" href="{{ url_for('add_recipe') }}"><i class="material-icons left">create</i>Add Recipe</a></li>
+                {% if following_recipes %}
+                <li class="tab"><a  class="active" href="#following-recipes">My Feed</a></li>
+                <li class="tab"><a class="active" href="#recent-recipes">Recent Recipes</a></li>
                 {% else %}
-                <li class="col s3"><a target="_self" href="{{ url_for('new_user') }}">Sign Up</a></li>
+                <li class="tab"><a class="active" href="#recent-recipes">Recent Recipes</a></li>
+                {% endif %}
+                <li class="tab"><a href="#popular-recipes">Popular Recipes</a></li>
+                <li class="tab"><a href="#about">About Fork.it</a></li>
+                {% if username %}
+                <li class="tab"><a target="_self" href="{{ url_for('add_recipe') }}"><i class="material-icons left">create</i>Add Recipe</a></li>
+                {% else %}
+                <li class="tab"><a target="_self" href="{{ url_for('new_user') }}">Sign Up</a></li>
                 {% endif %}
             </ul>
         </div>
@@ -53,6 +58,12 @@ Fork.it
             {{ macro.recipe_list(recent_recipes['recipes']) }}
             {{ macro.pagination('recipes', recent_recipes['page'], recent_recipes['no_recipes'], **recent_recipes['query'])}}
         </div>
+        {% if following_recipes %}
+        <div id="following-recipes" class="col s12">
+            {{ macro.recipe_list(following_recipes['recipes']) }}
+            {{ macro.pagination('recipes', following_recipes['page'], following_recipes['no_recipes'], **following_recipes['query'])}}
+        </div>
+        {% endif %}
         <div id="popular-recipes" class="col s12">
             {{ macro.recipe_list(popular_recipes['recipes']) }}
             {{ macro.pagination('recipes', popular_recipes['page'], popular_recipes['no_recipes'], **popular_recipes['query'])}}

@@ -1772,6 +1772,15 @@ class TestRecipesList(TestClient):
         self.assertIn(b'Benjamin', response.data)
         self.assertIn(b'Charlie', response.data)
 
+    def test_show_none_following(self):
+        '''
+        Filtering by following should show no recipes if you have no followers
+        '''
+        self.logout_user()
+        self.login_user('Alice')
+        response = self.client.get('/recipes?tags=Vegetarian&following=1')
+        self.assertIn(b'Found 0', response.data)
+
 
 class TestFollowUser(TestClient):
     '''
