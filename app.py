@@ -217,6 +217,28 @@ def preferences():
     abort(403)
 
 
+@app.route('/follow/<user>')
+def follow(user):
+    followee = mongo.db.users.find_one({'username': user}, {'followers': 1})
+    if followee is None:
+        return abort(404)
+    follower = session.get('username')
+    if follower is None:
+        return abort(403)
+    else:
+        if follower not in followee.get('followers', []):
+            mongo.db.users.update_one({'username': user}, {'$inc': {'follower-count': 1}, '$addToSet': {'followers': follower}})
+            mongo.db.users.update_one({'username': follower}, {'$inc': {'following-count': 1}, '$addToSet': {'following': user}})
+            following = True
+        else:
+            mongo.db.users.update_one({'username': user}, {'$inc': {'follower-count': -1}, '$pull': {'followers': follower}})
+            mongo.db.users.update_one({'username': follower}, {'$inc': {'following-count': -1}, '$pull': {'following': user}})
+            following = False
+        if request.is_json:
+            return jsonify(following=following)
+        return redirect(url_for('recipes', username=user))
+
+
 @app.route('/add-recipe', methods=['POST', 'GET'])
 def add_recipe():
     if session.get('username') is None:

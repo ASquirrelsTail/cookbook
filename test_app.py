@@ -1031,9 +1031,9 @@ class TestRecipes(TestClient):
         self.assertEqual(0, self.mongo.db.recipes.find_one({'urn': urn}).get('views', 0))
 
 
-class TestFavourite(TestClient):
+class Testfollowing(TestClient):
     '''
-    Class to test the favourite route
+    Class to test the following route
     '''
     def setUp(self):
         # Delete all records from the login and user collection and create test user
@@ -1048,76 +1048,76 @@ class TestFavourite(TestClient):
         self.logout_user()
         self.urn = self.mongo.db.recipes.find_one({}).get('urn')
 
-    def test_favourite_user_not_logged_in(self):
+    def test_following_user_not_logged_in(self):
         '''
         Users that aren't logged in can't favoyrite recipes, should return forbidden.
         '''
-        response = self.client.get('/recipes/{}/favourite'.format(self.urn))
+        response = self.client.get('/recipes/{}/following'.format(self.urn))
         self.assertEqual(response.status_code, 403)
 
-    def test_favourite_not_found(self):
+    def test_following_not_found(self):
         '''
         If recipe doesn't exist return 404
         '''
-        response = self.client.get('/recipes/not-a-real-recipe/favourite')
+        response = self.client.get('/recipes/not-a-real-recipe/following')
         self.assertEqual(response.status_code, 404)
 
-    def test_favourite_user_is_author(self):
+    def test_following_user_is_author(self):
         '''
-        Users can't favourite their own recipes
+        Users can't following their own recipes
         '''
         self.login_user()
-        response = self.client.get('/recipes/{}/favourite'.format(self.urn))
+        response = self.client.get('/recipes/{}/following'.format(self.urn))
         self.assertEqual(response.status_code, 403)
 
     def test_page_redirects_to_recipe(self):
         '''
-        The favourite route should redirect to the recipe itself
+        The following route should redirect to the recipe itself
         '''
         self.create_user('FavouritingUser')
         self.login_user('FavouritingUser')
-        response = self.client.get('/recipes/{}/favourite'.format(self.urn))
+        response = self.client.get('/recipes/{}/following'.format(self.urn))
         self.assertEqual(response.status_code, 302)
 
-    def test_logged_in_users_favourite_recipe(self):
+    def test_logged_in_users_following_recipe(self):
         '''
-        Logged in users favouriting a recipe increases its favourites by one
+        Logged in users favouriting a recipe increases its followings by one
         '''
         self.create_user('FavouritingUser')
         self.login_user('FavouritingUser')
-        self.client.get('/recipes/{}/favourite'.format(self.urn))
-        self.assertEqual(self.mongo.db.recipes.find_one({}).get('favourites'), 1)
+        self.client.get('/recipes/{}/following'.format(self.urn))
+        self.assertEqual(self.mongo.db.recipes.find_one({}).get('followings'), 1)
 
-    def test_user_adds_recipe_to_favourites(self):
+    def test_user_adds_recipe_to_followings(self):
         '''
-        Favourited recipes are added to a users list of favourites
+        followingd recipes are added to a users list of followings
         '''
         username = 'FavouritingUser'
         self.create_user(username)
         self.login_user(username)
-        self.client.get('/recipes/{}/favourite'.format(self.urn))
-        self.assertEqual(self.mongo.db.users.find_one({'username': username}).get('favourites'), [self.urn])
+        self.client.get('/recipes/{}/following'.format(self.urn))
+        self.assertEqual(self.mongo.db.users.find_one({'username': username}).get('followings'), [self.urn])
 
-    def test_user_already_favourited_decreases_favourites(self):
+    def test_user_already_followingd_decreases_followings(self):
         '''
-        If a user has already favourited a recipe unfavourite it
+        If a user has already followingd a recipe unfollowing it
         '''
         self.create_user('FavouritingUser')
         self.login_user('FavouritingUser')
-        self.client.get('/recipes/{}/favourite'.format(self.urn))
-        self.client.get('/recipes/{}/favourite'.format(self.urn))
-        self.assertEqual(self.mongo.db.recipes.find_one({}).get('favourites'), 0)
+        self.client.get('/recipes/{}/following'.format(self.urn))
+        self.client.get('/recipes/{}/following'.format(self.urn))
+        self.assertEqual(self.mongo.db.recipes.find_one({}).get('followings'), 0)
 
-    def test_user_already_favourited_removes_recipe_from_favourites(self):
+    def test_user_already_followingd_removes_recipe_from_followings(self):
         '''
-        If a user has already favourited a recipe remove it from their favourites
+        If a user has already followingd a recipe remove it from their followings
         '''
         username = 'FavouritingUser'
         self.create_user(username)
         self.login_user(username)
-        self.client.get('/recipes/{}/favourite'.format(self.urn))
-        self.client.get('/recipes/{}/favourite'.format(self.urn))
-        self.assertEqual(self.mongo.db.users.find_one({'username': username}).get('favourites'), [])
+        self.client.get('/recipes/{}/following'.format(self.urn))
+        self.client.get('/recipes/{}/following'.format(self.urn))
+        self.assertEqual(self.mongo.db.users.find_one({'username': username}).get('followings'), [])
 
     def test_json_request_returns_200(self):
         '''
@@ -1125,27 +1125,27 @@ class TestFavourite(TestClient):
         '''
         self.create_user('FavouritingUser')
         self.login_user('FavouritingUser')
-        response = self.client.get('/recipes/{}/favourite'.format(self.urn), content_type='application/json')
+        response = self.client.get('/recipes/{}/following'.format(self.urn), content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
-    def test_json_request_returns_favourite_true(self):
+    def test_json_request_returns_following_true(self):
         '''
-        Json response to successful favourite should be favourite: true
+        Json response to successful following should be following: true
         '''
         self.create_user('FavouritingUser')
         self.login_user('FavouritingUser')
-        response = self.client.get('/recipes/{}/favourite'.format(self.urn), content_type='application/json')
-        self.assertEqual(json.loads(response.get_data(as_text=True)).get('favourite'), True)
+        response = self.client.get('/recipes/{}/following'.format(self.urn), content_type='application/json')
+        self.assertEqual(json.loads(response.get_data(as_text=True)).get('following'), True)
 
-    def test_json_request_returns_favourite_false(self):
+    def test_json_request_returns_following_false(self):
         '''
-        Json response to successful unfavourite should be favourite: false
+        Json response to successful unfollowing should be following: false
         '''
         self.create_user('FavouritingUser')
         self.login_user('FavouritingUser')
-        self.client.get('/recipes/{}/favourite'.format(self.urn))
-        response = self.client.get('/recipes/{}/favourite'.format(self.urn), content_type='application/json')
-        self.assertEqual(json.loads(response.get_data(as_text=True)).get('favourite'), False)
+        self.client.get('/recipes/{}/following'.format(self.urn))
+        response = self.client.get('/recipes/{}/following'.format(self.urn), content_type='application/json')
+        self.assertEqual(json.loads(response.get_data(as_text=True)).get('following'), False)
 
 
 class TestFeature(TestClient):
@@ -1212,7 +1212,7 @@ class TestFeature(TestClient):
         response = self.client.get('/recipes/{}/feature'.format(self.urn), content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
-    def test_json_request_returns_favourite_true(self):
+    def test_json_request_returns_following_true(self):
         '''
         Json response to successful feature should be feature: true
         '''
@@ -1220,7 +1220,7 @@ class TestFeature(TestClient):
         response = self.client.get('/recipes/{}/feature'.format(self.urn), content_type='application/json')
         self.assertEqual(json.loads(response.get_data(as_text=True)).get('feature'), True)
 
-    def test_json_request_returns_favourite_false(self):
+    def test_json_request_returns_following_false(self):
         '''
         Json response to successful unfeature should be feature: false
         '''
@@ -1757,6 +1757,121 @@ class TestRecipesList(TestClient):
         '''
         response = self.client.get('/recipes?search=%22apple%20pie%22')
         self.assertIn(str.encode(escape('"apple pie"')), response.data)
+
+
+class TestFollowUser(TestClient):
+    '''
+    Class for testing follow user route
+    '''
+    def setUp(self):
+        # Delete all records from the login and user collection and create test user
+        self.mongo.db.logins.delete_many({})
+        self.mongo.db.users.delete_many({})
+        # Delete all records from the recipe collection
+        self.logout_user()
+        self.create_user('Followee')
+        self.logout_user()
+        self.create_user('Follower')
+        self.logout_user()
+
+    def test_follow_user_not_logged_in(self):
+        '''
+        Users that aren't logged in can't follow users, should return forbidden.
+        '''
+        response = self.client.get('/follow/Followee')
+        self.assertEqual(response.status_code, 403)
+
+    def test_follow_not_found(self):
+        '''
+        If user doesn't exist return 404
+        '''
+        response = self.client.get('/follow/NotAUser')
+        self.assertEqual(response.status_code, 404)
+
+    def test_follow_self(self):
+        '''
+        Users can't follow themselves
+        '''
+        self.login_user()
+        response = self.client.get('/follow/Follower')
+        self.assertEqual(response.status_code, 403)
+
+    def test_page_redirects_user_recipes(self):
+        '''
+        The follow route should redirect to recipes by that user
+        '''
+        self.login_user('Follower')
+        response = self.client.get('/follow/Followee')
+        self.assertEqual(response.status_code, 302)
+
+    def test_logged_in_users_add_to_followers_count(self):
+        '''
+        Logged in users following a user increases the followees follower count
+        '''
+        self.login_user('Follower')
+        self.client.get('/follow/Followee')
+        self.assertEqual(self.mongo.db.users.find_one({'username': 'Followee'}).get('follower-count'), 1)
+
+    def test_logged_in_users_add_to_following_count(self):
+        '''
+        Logged in users following a user increases the follower following count
+        '''
+        self.login_user('Follower')
+        self.client.get('/follow/Followee')
+        self.assertEqual(self.mongo.db.users.find_one({'username': 'Follower'}).get('following-count'), 1)
+
+    def test_adds_user_to_following(self):
+        '''
+        User being followed should be added to the followers list of users they are following
+        '''
+        self.login_user('Follower')
+        self.client.get('/follow/Followee')
+        self.assertEqual(self.mongo.db.users.find_one({'username': 'Follower'}).get('following'), ['Followee'])
+
+    def test_adds_user_to_followers(self):
+        '''
+        Following users should be added to the followees list of users they are being followed by
+        '''
+        self.login_user('Follower')
+        self.client.get('/follow/Followee')
+        self.assertEqual(self.mongo.db.users.find_one({'username': 'Followee'}).get('followers'), ['Follower'])
+
+    def test_user_already_followed_unfollows(self):
+        '''
+        If a user has already followed a user, unfollow them
+        '''
+        self.login_user('Follower')
+        self.client.get('/follow/Followee')
+        self.client.get('/follow/Followee')
+        self.assertEqual(self.mongo.db.users.find_one({'username': 'Followee'}).get('follower-count'), 0)
+        self.assertEqual(self.mongo.db.users.find_one({'username': 'Follower'}).get('following-count'), 0)
+        self.assertNotIn('Followee', self.mongo.db.users.find_one({'username': 'Follower'}).get('following'))
+        self.assertNotIn('Follower', self.mongo.db.users.find_one({'username': 'Followee'}).get('followers'))
+
+    def test_json_request_returns_200(self):
+        '''
+        If the request is made for json, a successful response is 200
+        '''
+        self.login_user('Follower')
+        response = self.client.get('/follow/Followee', content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+    def test_json_request_returns_following_true(self):
+        '''
+        Json response to successful follow should be following: true
+        '''
+        self.login_user('Follower')
+        response = self.client.get('/follow/Followee', content_type='application/json')
+        self.assertEqual(json.loads(response.get_data(as_text=True)).get('following'), True)
+
+    def test_json_request_returns_following_false(self):
+        '''
+        Json response to successful unfollow should be following: false
+        '''
+        self.login_user('Follower')
+        self.client.get('/follow/Followee', content_type='application/json')
+        response = self.client.get('/follow/Followee', content_type='application/json')
+        self.assertEqual(json.loads(response.get_data(as_text=True)).get('following'), False)
 
 
 if __name__ == '__main__':
