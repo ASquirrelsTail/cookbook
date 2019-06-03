@@ -112,14 +112,21 @@
                 {% if recipe['comment-count'] %}
                 <p id="comment-count">{{ recipe['comment-count'] }} comments.</p>
                 {% for comment in recipe['comments'] %}
-                <div class="divider"></div>
-                <p>By {{ comment['username'] }} at {{ comment['time'] }}</p>
-                <blockquote>
-                {% set lines = comment['comment'].split('\n') %}
-                {% for line in lines %}
-                    <p>{{ line }}</p>
-                {% endfor %}
-                </blockquote>
+                    <p>By {{ comment['username'] }} at {{ comment['time'] }}</p>
+                    <blockquote>
+                    {% set lines = comment['comment'].split('\n') %}
+                    {% for line in lines %}
+                        <p>{{ line }}</p>
+                    {% endfor %}
+                    </blockquote>
+                    {% if username == 'Admin' or username == comment['username'] %}
+                    <form action="{{ url_for('delete_comment', urn=urn) }}" method="POST" class="delete-comment">
+                        <input type="hidden" name="comment-index" value="{{ loop.index - 1 }}">
+                        <div class="col s12">
+                            <button class="btn waves-effect waves-light red small right" type="submit"><i class="material-icons left">delete</i>Delete Comment</button>
+                        </div>
+                    </form>
+                    {% endif %}
                 {% endfor %}
                 {% else %}
                 <p id="comment-count">No comments. Be the first to comment on this recipe.</p>
@@ -199,6 +206,24 @@
         }
     }
 
+    function deleteComment() {
+        if (this.readyState == 4) {
+            if (this.status == 200) {
+                let response = JSON.parse(this.responseText);
+                if (response.success === true) {
+                    let newCount = parseInt($('#comment-count').val().split(' ')[0])
+                    $('#comment-count').text(newCount + ' comments.');
+                    reloadComments();
+                }
+                response.messages.forEach(function(message) {
+                    M.toast({ html: message });
+                });
+            }else M.toast({ html: 'Failed to delete comment!' });
+        }
+    }
+
+    function reloadComments() {}
+
     function updateFavourite() {
         if (this.readyState == 4) {
             if (this.status == 200) {
@@ -241,6 +266,11 @@
         $('#add-comment').on('submit', function(e) {
             e.preventDefault();
             jsonPost($(this).attr('action'), {comment: $('#comment').val()}, addComment);
+        });
+        $('.delete-comment').on('submit', function(e) {
+            e.preventDefault();
+            $('.delete-comment .btn[type=submit]').addClass('disabled')
+            jsonPost($(this).attr('action'), {'comment-index': $(this).find('input[name="comment-index"]').val()}, deleteComment);
         });
     });
 

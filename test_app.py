@@ -1430,6 +1430,15 @@ class TestDeleteComment(TestClient):
         for comment in comments:
             self.assertNotEqual(comment['comment'], 'Comment 2!')
 
+    def test_delete_comment_reduces_count(self):
+        '''
+        Admins should be able to delete a comment
+        '''
+        self.create_user('Admin')
+        self.login_user('Admin')
+        self.client.post('/recipes/{}/delete-comment'.format(self.urn), data={'comment-index': '1'})
+        self.assertEqual(self.mongo.db.recipes.find_one({'urn': self.urn}, {'comment-count': 1}).get('comment-count'), 2)
+
     def test_author_deletes_comment(self):
         '''
         Comment authors should be able to delete their comments

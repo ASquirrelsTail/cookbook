@@ -14,7 +14,16 @@
 		        <p>{{ line }}</p>
 		    {% endfor %}
 		    </blockquote>
+		    {% if username == 'Admin' or username == comment['username'] %}
+		    <form action="{{ url_for('delete_comment', urn=urn) }}" method="POST">
+		    	<input type="hidden" name="comment-index" value="{{ loop.index - 1}}">
+		    	<div class="col s12">
+		        	<button class="btn waves-effect waves-ligh red" type="submit"><i class="material-icons left">delete</i>Delete Comment</button>
+		        </div>
+		    </form>
+			{% endif %}
 		{% endfor %}
+		
 		{% else %}
 		<p class="flow-text">No comments!</p>
 		{% endif %}
@@ -30,7 +39,7 @@
 		          <label for="comment">Comment</label>
 	        </div>
 	        <div class="col s12">
-	        	<button class="btn waves-effect waves-light" type="submit" name="action">Post Comment</button>
+	        	<button class="btn waves-effect waves-light" type="submit">Post Comment</button>
 	        </div>
 		</form>
 	</div>

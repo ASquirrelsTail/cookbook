@@ -584,7 +584,7 @@ def comments(urn):
             comment['comment'] = escape(comment['comment'])
         return jsonify(comments=recipe.get('comments', []), success=success, messages=get_flashed_messages())
     else:
-        return render_template('comments.html', username=username, recipe=recipe)
+        return render_template('comments.html', username=username, recipe=recipe, urn=urn)
 
 
 @app.route('/recipes/<urn>/delete-comment', methods=['POST'])
@@ -606,9 +606,13 @@ def delete_comment(urn):
         else:
             comment = comment[0]
         if username == 'Admin' or username == comment['username']:
-            mongo.db.recipes.update_one({'urn': urn}, {'$pull': {'comments': comment}})
+            mongo.db.recipes.update_one({'urn': urn}, {'$pull': {'comments': comment}, '$inc': {'comment-count': -1}})
+            if username == 'Admin':
+                flash('Successfully deleted comment from {}.'.format(comment['username']))
+            else:
+                flash('Successfully deleted your comment.')
             if request.is_json:
-                return jsonify(success=True, messages=get_flashed_messages())
+                return jsonify(success=True, index=index, messages=get_flashed_messages())
             else:
                 return redirect(url_for('comments', urn=urn))
         else:
