@@ -112,8 +112,6 @@ def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, sea
     else:
         recipes = []
 
-    print(kwargs)
-
     return {'recipes': recipes, 'no_recipes': no_recipes, 'page': page}
 
 
@@ -587,6 +585,34 @@ def comments(urn):
         return jsonify(comments=recipe.get('comments', []), success=success, messages=get_flashed_messages())
     else:
         return render_template('comments.html', username=username, recipe=recipe)
+
+
+@app.route('/recipes/<urn>/delete-comment', methods=['POST'])
+def delete_comment(urn):
+    username = session.get('username')
+    if username is None:
+        abort(403)
+    else:
+        try:
+            if request.is_json:
+                index = int(request.json.get('comment-index'))
+            else:
+                index = int(request.form.get('comment-index'))
+        except ValueError:
+            abort(403)
+        comment = mongo.db.recipes.find_one({'urn': urn}, {'comments': {'$slice': [index, 1]}}).get('comments')
+        if len(comment) != 1:
+            abort(403)
+        else:
+            comment = comment[0]
+        if username == 'Admin' or username == comment['username']:
+            mongo.db.recipes.update_one({'urn': urn}, {'$pull': {'comments': comment}})
+            if request.is_json:
+                return jsonify(success=True, messages=get_flashed_messages())
+            else:
+                return redirect(url_for('comments', urn=urn))
+        else:
+            abort(403)
 
 
 @app.route('/cookies')

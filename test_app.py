@@ -40,7 +40,7 @@ class TestClient(unittest.TestCase):
         '''
         Helper function to create a new user by sending a POST request to /new-user
         '''
-        return cls.client.post('/new-user', follow_redirects=True,
+        return cls.client.post('/new-user',
                                data={'username': username})
 
     @classmethod
@@ -48,15 +48,14 @@ class TestClient(unittest.TestCase):
         '''
         Helper function to log in user.
         '''
-        return cls.client.post('/login', follow_redirects=True,
-                               data={'username': username})
+        return cls.client.post('/login', data={'username': username})
 
     @classmethod
     def logout_user(cls):
         '''
         Helper function to logout current user.
         '''
-        cls.client.get('/logout', follow_redirects=True)
+        cls.client.get('/logout')
 
     @classmethod
     def submit_recipe(cls, title='Test Recipe', ingredients=['Test ingredient 1', 'Test ingredient 2'],
@@ -71,7 +70,7 @@ class TestClient(unittest.TestCase):
             else:
                 return input_list
 
-        return cls.client.post('/add-recipe', follow_redirects=True,
+        return cls.client.post('/add-recipe',
                                data={'title': title, 'ingredients': join_if_array(ingredients), 'methods': join_if_array(methods),
                                      'tags': join_if_array(tags, '/'), 'meals': join_if_array(meals, '/'), 'prep-time': prep_time,
                                      'cook-time': cook_time, 'parent': parent, 'image': image, 'old-image': old_image})
@@ -502,7 +501,9 @@ class TestAddRecipe(TestClient):
         recipe_ingredients = ['Flour', 'Eggs', 'Milk', 'Vegetable Oil']
         recipe_methods = ['Heat oil in a pan.', 'Whisk the rest of the ingredients together.',
                           'Cook until golden.']
-        response = self.submit_recipe(None, recipe_ingredients, recipe_methods)
+        response = self.client.post('/add-recipe',
+                                    data={'title': 'Test Recipe', 'ingredients': recipe_ingredients.join('\n'),
+                                          'methods': recipe_methods.join('\n')})
         self.assertIn(b'Cook until golden.', response.data)
 
     def test_submit_recipe_has_urn(self):
@@ -1370,6 +1371,99 @@ class TestComments(TestClient):
         self.login_user('Commenter')
         response = self.client.post('/recipes/{}/comments'.format(self.urn), data=json.dumps({'comment': ''}), content_type='application/json')
         self.assertEqual(json.loads(response.get_data(as_text=True)).get('success'), False)
+
+
+class TestDeleteComment(TestClient):
+    '''
+    Class for testing deleting comments on recipes.
+    '''
+    def setUp(self):
+        # Delete all records from the login and user collection and create test user
+        self.mongo.db.logins.delete_many({})
+        self.mongo.db.users.delete_many({})
+        # Delete all records from the recipe collection
+        self.mongo.db.recipes.delete_many({})
+        self.logout_user()
+        self.create_user()
+        self.login_user()
+        self.submit_recipe()
+        self.logout_user()
+        self.urn = self.mongo.db.recipes.find_one({}).get('urn')
+        self.create_user('Commenter')
+        self.login_user('Commenter')
+        self.client.post('/recipes/{}/comments'.format(self.urn), data=json.dumps({'comment': 'Comment 1!'}), content_type='application/json')
+        self.client.post('/recipes/{}/comments'.format(self.urn), data=json.dumps({'comment': 'Comment 2!'}), content_type='application/json')
+        self.client.post('/recipes/{}/comments'.format(self.urn), data=json.dumps({'comment': 'Comment 3!'}), content_type='application/json')
+        self.logout_user()
+
+    def test_get_forbidden(self):
+        '''
+        Delete comment shuld only respond to post requests
+        '''
+        response = self.client.get('/recipes/{}/delete-comment'.format(self.urn))
+        self.assertEqual(response.status_code, 405)
+
+    def test_delete_comment_not_logged_in(self):
+        '''
+        Delete comment should be forbidden to users who arent logged in
+        '''
+        response = self.client.post('/recipes/{}/delete-comment'.format(self.urn), data={'comment-index': '1'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_delete_comment_not_admin_or_user(self):
+        '''
+        Delete comment should be forbidden to users that are not the author or Admin
+        '''
+        self.create_user('OtherUser')
+        self.login_user('OtherUser')
+        response = self.client.post('/recipes/{}/delete-comment'.format(self.urn), data={'comment-index': '1'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_admin_deletes_comment(self):
+        '''
+        Admins should be able to delete a comment
+        '''
+        self.create_user('Admin')
+        self.login_user('Admin')
+        self.client.post('/recipes/{}/delete-comment'.format(self.urn), data={'comment-index': '1'})
+        comments = self.mongo.db.recipes.find_one({'urn': self.urn}, {'comments': 1}).get('comments', [])
+        for comment in comments:
+            self.assertNotEqual(comment['comment'], 'Comment 2!')
+
+    def test_author_deletes_comment(self):
+        '''
+        Comment authors should be able to delete their comments
+        '''
+        self.login_user('Commenter')
+        self.client.post('/recipes/{}/delete-comment'.format(self.urn), data={'comment-index': '1'})
+        comments = self.mongo.db.recipes.find_one({'urn': self.urn}, {'comments': 1}).get('comments', [])
+        for comment in comments:
+            self.assertNotEqual(comment['comment'], 'Comment 2!')
+
+    def test_delete_comment_doesnt_exist(self):
+        '''
+        Attempting to delete a comment that does not exist should return forbidden
+        '''
+        self.login_user('Commenter')
+        response = self.client.post('/recipes/{}/delete-comment'.format(self.urn), data={'comment-index': '5'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_delete_comment_nan(self):
+        '''
+        Attempting to delete a comment with an invalid index should return forbidden
+        '''
+        self.login_user('Commenter')
+        response = self.client.post('/recipes/{}/delete-comment'.format(self.urn), data={'comment-index': 'notanumber'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_json_successful_delete(self):
+        '''
+        Json response to deleteing a comment should include success: True
+        '''
+        self.login_user('Commenter')
+        response = self.client.post('/recipes/{}/delete-comment'.format(self.urn), data=json.dumps({'comment-index': '1'}),
+                                    content_type='application/json')
+        self.assertEqual(json.loads(response.get_data(as_text=True)).get('success'), True)
 
 
 class TestAdmin(TestClient):
