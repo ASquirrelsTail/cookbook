@@ -11,7 +11,7 @@ Recipes - Fork.it
 	            <div class="col s12">
 	                <p class="flow-text no-b-margin">Found {{ no_recipes }} 
 	                {% if parent_title %} forks of {{ parent_title }}{% else %}recipes{% endif %}{% if current_query['username'] %} by {{ current_query['username'] }}{% elif current_query['following'] %} from users you follow{% endif %}.</p>
-	                {% if current_query['username'] %}<input type="hidden" name="username" value="{{ current_query['username'] }}">{% endif %}
+	                {% if current_query['username'] %}<input type="hidden" name="username" value="{{ current_query['username'] }}">
                     {% elif current_query['following'] %}<input type="hidden" name="following" value="1">{% endif %}
 	                {% if parent_title %}<input type="hidden" name="forks" value="{{ current_query['forks'] }}">{% endif %}
 	            </div>
