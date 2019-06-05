@@ -111,7 +111,9 @@
                 <h4>Comments</h4>
                 {% if recipe['comment-count'] %}
                 <p id="comment-count">{{ recipe['comment-count'] }} comments.</p>
+                <div id="comments-content">
                 {% for comment in recipe['comments'] %}
+                    <div class="divider"></div>
                     <p>By {{ comment['username'] }} at {{ comment['time'] }}</p>
                     <blockquote>
                     {% set lines = comment['comment'].split('\n') %}
@@ -122,14 +124,17 @@
                     {% if username == 'Admin' or username == comment['username'] %}
                     <form action="{{ url_for('delete_comment', urn=urn) }}" method="POST" class="delete-comment">
                         <input type="hidden" name="comment-index" value="{{ loop.index - 1 }}">
-                        <div class="col s12">
+                        <div class="delete-wrapper">
                             <button class="btn waves-effect waves-light red small right" type="submit"><i class="material-icons left">delete</i>Delete Comment</button>
                         </div>
                     </form>
                     {% endif %}
                 {% endfor %}
+                    <div class="divider"></div>
+                </div>
                 {% else %}
                 <p id="comment-count">No comments. Be the first to comment on this recipe.</p>
+                <div id="comments-content"></div>
                 {% endif %}
                 <p></p>
             </div>
@@ -182,38 +187,12 @@
         xhr.send(JSON.stringify(data));
     }
 
-    function addComment() {
-        if (this.readyState == 4) {
-            if (this.status == 200) {
-                let response = JSON.parse(this.responseText);
-                if (response.success === true) {
-                    let count = response.comments.length;
-                    $('#comment-count').text(count + ' comments.');
-                    let comment = response.comments[count - 1];
-                    $('#comments').append('<div class="divider"></div>');
-                    $('#comments').append('<p>By ' + comment.username + ' at ' + comment.time + '</p>');
-                    let commentContent = '';
-                    comment.comment.split('\n').forEach(function(line) {
-                        commentContent += '<p>' + line + '</p>';
-                    });
-                    $('#comments').append('<blockquote>' + commentContent + '</blockquote>');
-                    $('#comment').val('');
-                }
-                response.messages.forEach(function(message) {
-                    M.toast({ html: message });
-                });
-            }
-        }
-    }
-
     function deleteComment() {
         if (this.readyState == 4) {
             if (this.status == 200) {
                 let response = JSON.parse(this.responseText);
                 if (response.success === true) {
-                    let newCount = parseInt($('#comment-count').val().split(' ')[0])
-                    $('#comment-count').text(newCount + ' comments.');
-                    reloadComments();
+                    jsonGet('{{url_for("comments", urn=urn)}}', reloadComments);
                 }
                 response.messages.forEach(function(message) {
                     M.toast({ html: message });
@@ -222,7 +201,47 @@
         }
     }
 
-    function reloadComments() {}
+    function reloadComments() {
+        if (this.readyState == 4) {
+            if (this.status == 200) {
+                let response = JSON.parse(this.responseText);
+                renderComments(response.comments);
+                response.messages.forEach(function(message) {
+                    M.toast({ html: message });
+                });
+            }
+        }
+    }
+
+    function renderComments(comments) {
+        let count = comments.length;
+        $('#comment-count').text(count + ' comments.');
+        $('#comments-content').html('');
+        comments.forEach(function (comment, index) {
+            $('#comments-content').append('<div class="divider"></div>');
+            $('#comments-content').append('<p>By ' + comment.username + ' at ' + comment.time + '</p>');
+            let commentContent = '';
+            comment.comment.split('\n').forEach(function(line) {
+                commentContent += '<p>' + line + '</p>';
+            });
+            $('#comments-content').append('<blockquote>' + commentContent + '</blockquote>');
+            if (comment.delete == true) {
+                let deleteForm = '<form action="{{ url_for('delete_comment', urn=urn) }}" method="POST" class="delete-comment">';
+                deleteForm += '<input type="hidden" name="comment-index" value="' + index + '">';
+                deleteForm += '<div class="delete-wrapper">';
+                deleteForm += '<button class="btn waves-effect waves-light red small right" type="submit"><i class="material-icons left">delete</i>Delete Comment</button>';
+                deleteForm += '</div>';
+                deleteForm += '</form>';
+                $('#comments-content').append(deleteForm);
+            }
+        });
+        $('.delete-comment').on('submit', function(e) {
+            e.preventDefault();
+            $('.delete-comment .btn[type=submit]').addClass('disabled')
+            jsonPost($(this).attr('action'), {'comment-index': $(this).find('input[name="comment-index"]').val()}, deleteComment);
+        });
+        $('#comments-content').append('<div class="divider"></div>');
+    }
 
     function updateFavourite() {
         if (this.readyState == 4) {
@@ -265,7 +284,8 @@
         });
         $('#add-comment').on('submit', function(e) {
             e.preventDefault();
-            jsonPost($(this).attr('action'), {comment: $('#comment').val()}, addComment);
+            jsonPost($(this).attr('action'), {comment: $('#comment').val()}, reloadComments);
+            $('#comment').val('');
         });
         $('.delete-comment').on('submit', function(e) {
             e.preventDefault();

@@ -582,6 +582,8 @@ def comments(urn):
     if request.is_json:
         for comment in recipe.get('comments', []):
             comment['comment'] = escape(comment['comment'])
+            if username == 'Admin' or username == comment['username']:
+                comment['delete'] = True
         return jsonify(comments=recipe.get('comments', []), success=success, messages=get_flashed_messages())
     else:
         return render_template('comments.html', username=username, recipe=recipe, urn=urn)

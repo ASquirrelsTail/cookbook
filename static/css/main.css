@@ -7390,6 +7390,12 @@ nav.nav-extended .nav-content .tabs i {
   margin-bottom: 0.8rem;
 }
 
+.delete-wrapper {
+  width: 100%;
+  height: 36px;
+  margin: 10px;
+}
+
 .overlay-container {
   position: relative;
   line-height: 0;
