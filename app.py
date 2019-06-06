@@ -507,20 +507,18 @@ def recipe(urn):
 
 @app.route('/recipes/<urn>/favourite')
 def favourite_recipe(urn):
-    recipe = mongo.db.recipes.find_one({'urn': urn}, {'username': 1})
+    recipe = mongo.db.recipes.find_one({'urn': urn}, {'username': 1, 'favouriting-users': 1})
     if recipe is None:
         abort(404)
     username = session.get('username')
     if username is None or username == recipe.get('username', username):
         abort(403)
     else:
-        if urn in mongo.db.users.find_one({'username': username}, {'favourites': 1}).get('favourites', []):
-            mongo.db.recipes.update_one({'urn': urn}, {'$inc': {'favourites': -1}})
-            mongo.db.users.update_one({'username': username}, {'$pull': {'favourites': urn}})
+        if username in recipe.get('favouriting-users', []):
+            mongo.db.recipes.update_one({'urn': urn}, {'$inc': {'favourites': -1}, '$pull': {'favouriting-users': username}})
             favourite = False
         else:
-            mongo.db.recipes.update_one({'urn': urn}, {'$inc': {'favourites': 1}})
-            mongo.db.users.update_one({'username': username}, {'$addToSet': {'favourites': urn}})
+            mongo.db.recipes.update_one({'urn': urn}, {'$inc': {'favourites': 1}, '$addToSet': {'favouriting-users': username}})
             favourite = True
     if request.is_json:
         return jsonify(favourite=favourite)

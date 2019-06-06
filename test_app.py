@@ -1091,13 +1091,13 @@ class TestFavourite(TestClient):
 
     def test_user_adds_recipe_to_favourites(self):
         '''
-        Favourited recipes are added to a users list of favourites
+        Favouriting users are added to the recipes list of favouriting users
         '''
         username = 'FavouritingUser'
         self.create_user(username)
         self.login_user(username)
         self.client.get('/recipes/{}/favourite'.format(self.urn))
-        self.assertEqual(self.mongo.db.users.find_one({'username': username}).get('favourites'), [self.urn])
+        self.assertEqual(self.mongo.db.recipes.find_one({'urn': self.urn}).get('favouriting-users'), ['FavouritingUser'])
 
     def test_user_already_favourited_decreases_favourites(self):
         '''
@@ -1111,14 +1111,14 @@ class TestFavourite(TestClient):
 
     def test_user_already_favourited_removes_recipe_from_favourites(self):
         '''
-        If a user has already favourited a recipe remove it from their favourites
+        If a user has already favourited a recipe remove their username from its list of favouriting users
         '''
         username = 'FavouritingUser'
         self.create_user(username)
         self.login_user(username)
         self.client.get('/recipes/{}/favourite'.format(self.urn))
         self.client.get('/recipes/{}/favourite'.format(self.urn))
-        self.assertEqual(self.mongo.db.users.find_one({'username': username}).get('favourites'), [])
+        self.assertEqual(self.mongo.db.recipes.find_one({'urn': self.urn}).get('favouriting-users'), [])
 
     def test_json_request_returns_200(self):
         '''
