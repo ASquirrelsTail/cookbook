@@ -10,9 +10,10 @@ Recipes - Fork.it
         	<form action="" method="GET" id="filters-form">
 	            <div class="col s12">
 	                <p class="flow-text no-b-margin">Found {{ no_recipes }} 
-	                {% if parent_title %} forks of {{ parent_title }}{% else %}recipes{% endif %}{% if current_query['username'] %} by {{ current_query['username'] }}{% elif current_query['following'] %} from users you follow{% endif %}.</p>
+	                {% if parent_title %} forks of {{ parent_title }}{% else %}recipes{% endif %}{% if current_query['username'] %} by {{ current_query['username'] }}{% elif current_query['following'] %} from users you follow{% endif %}{% if current_query['favourites'] and username %} in your favourites{% endif %}.</p>
 	                {% if current_query['username'] %}<input type="hidden" name="username" value="{{ current_query['username'] }}">
                     {% elif current_query['following'] %}<input type="hidden" name="following" value="1">{% endif %}
+                    {% if current_query['favourites'] and username  %}<input type="hidden" name="favourites" value="1">{% endif %}
 	                {% if parent_title %}<input type="hidden" name="forks" value="{{ current_query['forks'] }}">{% endif %}
 	            </div>
                 <div class="input-field col s12 m6 l12">

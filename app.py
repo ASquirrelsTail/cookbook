@@ -44,9 +44,9 @@ def hours_mins_to_string(hours_mins):
 
 
 def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, search=None, featured=None,
-                 following=None, sort='views', order='-1', **kwargs):
+                 following=None, favourites=None, sort='views', order='-1', **kwargs):
     query = {}
-    results = {}
+    user = session.get('username')
     preferences = session.get('preferences')
     if tags is not None and tags != '' and preferences is not None and preferences != '':
             tags = tags + ' ' + preferences
@@ -66,8 +66,10 @@ def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, sea
             query['meals'] = {'$all': meals}
         else:
             query['meals'] = meals
+    if favourites is not None and user is not None:
+        query['favouriting-users'] = user
     if following is not None:
-        following_user = mongo.db.users.find_one({'username': session.get('username')}, {'following': 1})
+        following_user = mongo.db.users.find_one({'username': user}, {'following': 1})
         if following_user is not None and isinstance(following_user.get('following'), list):
             query['username'] = {'$in': following_user['following']}
         else:

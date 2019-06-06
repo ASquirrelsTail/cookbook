@@ -1877,12 +1877,26 @@ class TestRecipesList(TestClient):
 
     def test_show_none_following(self):
         '''
-        Filtering by following should show no recipes if you have no followers
+        Filtering by following should show no recipes if you are not following anyone
         '''
         self.logout_user()
         self.login_user('Alice')
         response = self.client.get('/recipes?tags=Vegetarian&following=1')
         self.assertIn(b'Found 0', response.data)
+
+    def test_show_favourites(self):
+        '''
+        Filtering by favourites should show only recipes you have favourited.
+        '''
+        self.logout_user()
+        self.create_user('Favouriter')
+        self.login_user('Favouriter')
+        self.client.get('/recipes/alice-s-apple-pie/favourite', content_type='application/json')
+        self.client.get('/recipes/ben-s-baked-alaska/favourite', content_type='application/json')
+        response = self.client.get('/recipes?favourites=1')
+        self.assertIn(b'Found 2', response.data)
+        self.assertIn(b'alice-s-apple-pie', response.data)
+        self.assertIn(b'ben-s-baked-alaska', response.data)
 
 
 class TestFollowUser(TestClient):
