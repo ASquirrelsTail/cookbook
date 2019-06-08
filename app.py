@@ -338,14 +338,21 @@ def add_recipe():
                     image = Image.open(BytesIO(imageBytes))
                     if image.format == 'JPEG' and image.size == (1200, 700):
                         filename = recipe_data['urn'] + '.jpg'
-                        s3.upload_fileobj(BytesIO(imageBytes), s3_bucket, filename)
-                        config = s3._client_config
-                        config.signature_version = botocore.UNSIGNED
+                        if s3_bucket is not None:
+                            s3.upload_fileobj(BytesIO(imageBytes), s3_bucket, filename)
+                            config = s3._client_config
+                            config.signature_version = botocore.UNSIGNED
 
-                        recipe_data['image'] = boto3.client('s3', config=config).generate_presigned_url('get_object', ExpiresIn=0, Params={'Bucket': s3_bucket, 'Key': filename})
+                            recipe_data['image'] = boto3.client('s3', config=config).generate_presigned_url('get_object', ExpiresIn=0, Params={'Bucket': s3_bucket, 'Key': filename})
+                        else:
+                            f = open(os.path.join('static', 'user-images', filename), 'wb')
+                            f.write(imageBytes)
+                            f.close()
+                            recipe_data['image'] = url_for('static', filename='user-images/' + filename)
                     else:
                         recipe_data.pop('image', '')
                         flash('Failed to upload image.')
+                    image.close()
                 except IOError:
                     recipe_data.pop('image', '')
                     flash('Failed to upload image, incorrectly formatted file.')
@@ -445,14 +452,21 @@ def edit_recipe(urn):
                         image = Image.open(BytesIO(imageBytes))
                         if image.format == 'JPEG' and image.size == (1200, 700):
                             filename = urn + '.jpg'
-                            s3.upload_fileobj(BytesIO(imageBytes), s3_bucket, filename)
-                            config = s3._client_config
-                            config.signature_version = botocore.UNSIGNED
+                            if s3_bucket is not None:
+                                s3.upload_fileobj(BytesIO(imageBytes), s3_bucket, filename)
+                                config = s3._client_config
+                                config.signature_version = botocore.UNSIGNED
 
-                            updated_recipe['image'] = boto3.client('s3', config=config).generate_presigned_url('get_object', ExpiresIn=0, Params={'Bucket': s3_bucket, 'Key': filename})
+                                updated_recipe['image'] = boto3.client('s3', config=config).generate_presigned_url('get_object', ExpiresIn=0, Params={'Bucket': s3_bucket, 'Key': filename})
+                            else:
+                                f = open(os.path.join('static', 'user-images', filename), 'wb')
+                                f.write(imageBytes)
+                                f.close()
+                                updated_recipe['image'] = url_for('static', filename='user-images/' + filename)
                         else:
                             updated_recipe.pop('image', '')
                             flash('Failed to upload image.')
+                        image.close()
                     except IOError:
                         updated_recipe.pop('image', '')
                         flash('Failed to upload image, incorrectly formatted file.')
