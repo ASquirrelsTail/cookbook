@@ -21,6 +21,11 @@ h1 {
 	}
 }
 
+.wrap-chips {
+	display: flex;
+	flex-wrap: wrap;
+}
+
 .chip {
 	font-family: $secondary-font-stack;
 	font-size: 1rem;

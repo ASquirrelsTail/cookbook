@@ -7181,6 +7181,11 @@ h1 {
   flex-wrap: wrap;
 }
 
+.wrap-chips {
+  display: flex;
+  flex-wrap: wrap;
+}
+
 .chip {
   font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
   font-size: 1rem;

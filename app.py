@@ -66,9 +66,15 @@ def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, sea
     if user_exclusions is not None:
         if ' ' in user_exclusions:
             user_exclusions = user_exclusions.split(' ')
-            query['tags']['$nin'] = user_exclusions
+            if query.get('tags'):
+                query['tags']['$nin'] = user_exclusions
+            else:
+                query['tags'] = {'$nin': user_exclusions}
         else:
-            query['tags']['$nin'] = [user_exclusions]
+            if query.get('tags'):
+                query['tags']['$nin'] = [user_exclusions]
+            else:
+                query['tags'] = {'$nin': [user_exclusions]}
     if meals is not None and meals != '':
         meals = request.args['meals']
         if ' ' in meals:
@@ -244,12 +250,14 @@ def preferences():
         if request.method == 'POST':
             tags = request.form.get('tags')
             exclude = request.form.get('exclude')
+            print(exclude)
             if tags is not None or exclude is not None:
                 mongo.db.users.update_one({'username': username}, {'$set': {'preferences': tags, 'exclusions': exclude}})
                 session['preferences'] = tags
                 session['exclusions'] = exclude
-        all_tags = mongo.db.tags.find()
-        return render_template('preferences.html', username=username, all_tags=all_tags)
+        all_tags = list(mongo.db.tags.find())
+        return render_template('preferences.html', username=username, all_tags=all_tags,
+                               preferences=session.get('preferences'), exclusions=session.get('exclusions'))
     abort(403)
 
 
