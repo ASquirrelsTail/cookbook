@@ -507,6 +507,7 @@ def delete_recipe(urn):
 @app.route('/recipes')
 def recipes():
     preferences = session.get('preferences', '')
+    exclusions = session.get('exclusions', '')
     query_args = request.args.to_dict()
     results = find_recipes(**query_args)
     if query_args.get('following') is not None:
@@ -519,12 +520,19 @@ def recipes():
         else:
             tags = preferences
         query_args['tags'] = tags
+    if exclusions is not None and exclusions != '':
+        exclude = query_args.pop('exclude', '')
+        if exclude != '':
+            exclude += ' ' + exclusions
+        else:
+            exclude = exclusions
+        query_args['exclude'] = exclude
     if query_args.get('forks', '') != '':
         parent_title = mongo.db.recipes.find_one({'urn': query_args['forks']}, {'title': 1}).get('title')
     else:
         parent_title = None
 
-    all_tags = mongo.db.tags.find()
+    all_tags = list(mongo.db.tags.find())
     all_meals = mongo.db.meals.find()
 
     return render_template('recipes.html', current_query=query_args, username=session.get('username'),

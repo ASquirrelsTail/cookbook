@@ -15,6 +15,7 @@ Recipes - Fork.it
                     {% elif current_query['following'] %}<input type="hidden" name="following" value="1">{% endif %}
                     {% if current_query['favourites'] and username  %}<input type="hidden" name="favourites" value="1">{% endif %}
 	                {% if parent_title %}<input type="hidden" name="forks" value="{{ current_query['forks'] }}">{% endif %}
+                    <input type="hidden" name="preferences" value="-1">
 	            </div>
                 <div class="input-field col s12 m6 l12">
                     <input type="text" name="filter-search" id="filter-search" {% if current_query['search'] %}value="{{ current_query['search'] }}" {% endif %}>
@@ -39,12 +40,21 @@ Recipes - Fork.it
                 </div>
                 <div class="col s12">
                 	<div>Tags</div>
-                	<div id="tag-chips">
+                	<div id="tag-chips" class="wrap-chips">
                 		{% for tag in all_tags %}
                         <div class="chip" data-tag="{{ tag['name'] }}"><a href="#!">{{ tag['name'] }}</a></div>
                         {% endfor %}
                         <input type="hidden" name='tags' id="tags">
                 	</div>
+                </div>
+                <div class="col s12">
+                    <div>Exclude Tags</div>
+                    <div id="exclude-chips" class="wrap-chips">
+                        {% for tag in all_tags %}
+                        <div class="chip" data-tag="{{ tag['name'] }}"><a href="#!">{{ tag['name'] }}</a></div>
+                        {% endfor %}
+                        <input type="hidden" name='exclude' id="exclude">
+                    </div>
                 </div>
                 <div class="input-field col s12 m6 l12">
                     <select name="sort" id="sort">
@@ -96,14 +106,30 @@ Recipes - Fork.it
 	const $ = cash;
 	const select = M.FormSelect.init($('select'));
 
+    function chipsToInput(chipContainer, targetInput) {
+        let chipsInput = [];
+            $(chipContainer + ' .chip.active').each(function() {
+                chipsInput.push($(this).data('tag'));
+            });
+            if (chipsInput.length > 0) $(targetInput).val(chipsInput.join(' '));
+            else $(targetInput).remove();
+    }
+
+    function activateChips(chipContainer, tagString) {
+        let tags = []
+        if (tagString.indexOf(' ') != -1) tags = tagString.split(' ');
+        else tags = [tagString];
+        tags.forEach(function(tag) {
+            if (tag != '') $(chipContainer).find('[data-tag=' + tag + ']').addClass('active');
+        });
+    }
+
     $(function() {
     	{% if current_query['tags'] %}
-        let tags = '{{ current_query['tags'] }}'
-        if (tags.indexOf(' ') != -1) tags = tags.split(' ');
-        else tags = [tags];
-        tags.forEach(function(tag) {
-        	if (tag != '') $('#tag-chips').find('[data-tag=' + tag + ']').addClass('active');
-        });
+        activateChips('#tag-chips', '{{ current_query['tags'] }}')
+        {% endif %}
+        {% if current_query['exclude'] %}
+        activateChips('#exclude-chips', '{{ current_query['exclude'] }}')
         {% endif %}
 
         $('.input-field select').on('change', function() {
@@ -120,12 +146,8 @@ Recipes - Fork.it
         });
 
         $('#filters-form').on('submit', function() {
-        	let tagsInput = [];
-			$('.chip.active').each(function() {
-				tagsInput.push($(this).data('tag'));
-			});
-			if (tagsInput.length > 0) $('#tags').val(tagsInput.join(' '));
-			else $('#tags').remove();
+            chipsToInput('#tag-chips', '#tags')
+            chipsToInput('#exclude-chips', '#exclude')
             if ($('#sort').val() == 'total-time') $('#order').val('1');
 			$('#filter-search').attr('name', 'search');
 			$('#filters-form')[0].submit();
