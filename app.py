@@ -44,10 +44,13 @@ def hours_mins_to_string(hours_mins):
 
 
 def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, search=None, featured=None,
-                 following=None, favourites=None, sort='views', order='-1', **kwargs):
+                 following=None, favourites=None, preferences=None, sort='views', order='-1', **kwargs):
     query = {}
     user = session.get('username')
-    preferences = session.get('preferences')
+    if preferences == '-1':
+        preferences = None
+    else:
+        preferences = session.get('preferences')
     if tags is not None and tags != '' and preferences is not None and preferences != '':
             tags = tags + ' ' + preferences
     elif preferences is not None and preferences != '':

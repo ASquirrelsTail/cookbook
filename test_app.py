@@ -316,6 +316,25 @@ class TestPreferences(TestClient):
         response = self.client.get('/recipes?tags=Low-Fat')
         self.assertIn(b'Vegan Gluten-Free', response.data)
 
+    def test_exclude_preferences_from_recipes_route(self):
+        '''
+        User preferences should be overridden by the preferences tag beings et to -1
+        '''
+        self.logout_user()
+        self.create_user('RecipeAuthor')
+        self.login_user('RecipeAuthor')
+        self.submit_recipe(title='Meaty GF Recipe', tags=['Gluten-Free', 'Low-Fat'])
+        self.submit_recipe(title='Vegan Recipe', tags=['Vegan', 'Vegetarian', 'Low-Fat'])
+        self.submit_recipe(title='Vegan GF Recipe', tags=['Vegan', 'Vegetarian', 'Gluten-Free', 'Low-Fat'])
+        self.logout_user()
+        self.create_user('VeganGFUser')
+        self.login_user('VeganGFUser')
+        self.client.post('/preferences', data={'tags': 'Vegan Gluten-Free'})
+        response = self.client.get('/recipes?tags=Low-Fat&preferences=-1')
+        self.assertIn(b'Vegan GF Recipe', response.data)
+        self.assertIn(b'Vegan Recipe', response.data)
+        self.assertIn(b'Meaty GF Recipe', response.data)
+
 
 class TestAddRecipe(TestClient):
     '''
