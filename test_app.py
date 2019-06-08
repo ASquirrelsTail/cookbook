@@ -258,6 +258,15 @@ class TestPreferences(TestClient):
         self.client.post('/preferences', data={'exclude': 'Nuts Shellfish'})
         self.assertEqual(self.mongo.db.users.find_one({}).get('exclusions'), 'Nuts Shellfish')
 
+    def test_preferences_cant_be_excluded(self):
+        '''
+        A tag can't be a preference as well as an exclusion, don't make the update if it is.
+        '''
+        self.login_user()
+        self.client.post('/preferences', data={'tags': 'Nuts', 'exclude': 'Nuts'})
+        self.assertNotEqual(self.mongo.db.users.find_one({}).get('preferences'), 'Nuts')
+        self.assertNotEqual(self.mongo.db.users.find_one({}).get('exclusions'), 'Nuts')
+
     def test_preferences_saved_to_session(self):
         '''
         Preferences should be saved to the session cookie

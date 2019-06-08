@@ -250,11 +250,22 @@ def preferences():
         if request.method == 'POST':
             tags = request.form.get('tags')
             exclude = request.form.get('exclude')
-            print(exclude)
+            if tags is not None and ' ' in tags:
+                tag_list = tags.split(' ')
+            else:
+                tag_list = [tags]
+            for tag in tag_list:
+                if tag is not None and tag != '' and tag in exclude:
+                    tags = None
+                    exclude = None
+                    flash('Can\'t exclude a tag that is already included in preferences!')
+                    break
+
             if tags is not None or exclude is not None:
                 mongo.db.users.update_one({'username': username}, {'$set': {'preferences': tags, 'exclusions': exclude}})
                 session['preferences'] = tags
                 session['exclusions'] = exclude
+                flash('Preferences updated!')
         all_tags = list(mongo.db.tags.find())
         return render_template('preferences.html', username=username, all_tags=all_tags,
                                preferences=session.get('preferences'), exclusions=session.get('exclusions'))
