@@ -1684,6 +1684,27 @@ class TestRecipesList(TestClient):
         response = self.client.get('/recipes?tags=Vegetarian%20Vegan')
         self.assertIn(b'Found 2', response.data)
 
+    def test_number_of_excluded_tags(self):
+        '''
+        Recipes page should show how many recipes don't have the excluded tags
+        '''
+        response = self.client.get('/recipes?exclude=Gluten-free%20Vegan')
+        self.assertIn(b'Found 53', response.data)
+
+    def test_number_of_excluded_and_included_tags(self):
+        '''
+        Recipes page should show how many recipes don't have the excluded, but do have included tags
+        '''
+        response = self.client.get('/recipes?tags=Vegetarian&exclude=Gluten-free%20Vegan')
+        self.assertIn(b'Found 7', response.data)
+
+    def test_clashing_excluded_and_included_tags(self):
+        '''
+        Where there is a clash of included and excluded tags ignore the exclusion of that tag.
+        '''
+        response = self.client.get('/recipes?tags=Vegetarian&exclude=Gluten-free%20Vegetarian')
+        self.assertIn(b'Found 9', response.data)
+
     def test_number_of_recipes_by_author(self):
         '''
         Recipes page should show how many recipes by the requested user

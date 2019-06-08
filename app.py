@@ -43,7 +43,7 @@ def hours_mins_to_string(hours_mins):
     return string
 
 
-def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, search=None, featured=None,
+def find_recipes(page='1', tags=None, exclude=None, meals=None, username=None, forks=None, search=None, featured=None,
                  following=None, favourites=None, preferences=None, sort='views', order='-1', **kwargs):
     query = {}
     user = session.get('username')
@@ -63,18 +63,29 @@ def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, sea
             query['tags'] = {'$all': tags}
         else:
             query['tags'] = {'$all': [tags]}
-    if user_exclusions is not None:
-        if ' ' in user_exclusions:
-            user_exclusions = user_exclusions.split(' ')
+
+    if exclude is not None and exclude != '' and user_exclusions is not None and user_exclusions != '':
+        exclude = exclude + ' ' + user_exclusions
+    elif user_exclusions is not None and user_exclusions != '':
+        exclude = user_exclusions
+
+    if exclude is not None:
+        if ' ' in exclude:
+            exclude = exclude.split(' ')
             if query.get('tags'):
-                query['tags']['$nin'] = user_exclusions
+                query['tags']['$nin'] = exclude
             else:
-                query['tags'] = {'$nin': user_exclusions}
+                query['tags'] = {'$nin': exclude}
         else:
             if query.get('tags'):
-                query['tags']['$nin'] = [user_exclusions]
+                query['tags']['$nin'] = [exclude]
             else:
-                query['tags'] = {'$nin': [user_exclusions]}
+                query['tags'] = {'$nin': [exclude]}
+    if query.get('tags'):
+        for tag in query['tags'].get('$all', []):
+            if tag in query['tags'].get('$nin', []):
+                query['tags']['$nin'].remove(tag)
+
     if meals is not None and meals != '':
         meals = request.args['meals']
         if ' ' in meals:
@@ -254,12 +265,13 @@ def preferences():
                 tag_list = tags.split(' ')
             else:
                 tag_list = [tags]
-            for tag in tag_list:
-                if tag is not None and tag != '' and tag in exclude:
-                    tags = None
-                    exclude = None
-                    flash('Can\'t exclude a tag that is already included in preferences!')
-                    break
+            if tags is not None and exclude is not None:
+                for tag in tag_list:
+                    if tag is not None and tag != '' and tag in exclude:
+                        tags = None
+                        exclude = None
+                        flash('Can\'t exclude a tag that is already included in preferences!')
+                        break
 
             if tags is not None or exclude is not None:
                 mongo.db.users.update_one({'username': username}, {'$set': {'preferences': tags, 'exclusions': exclude}})
