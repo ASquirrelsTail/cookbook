@@ -48,20 +48,27 @@ def find_recipes(page='1', tags=None, meals=None, username=None, forks=None, sea
     query = {}
     user = session.get('username')
     if preferences == '-1':
-        preferences = None
+        user_preferences = None
+        user_exclusions = None
     else:
-        preferences = session.get('preferences')
-    if tags is not None and tags != '' and preferences is not None and preferences != '':
-            tags = tags + ' ' + preferences
-    elif preferences is not None and preferences != '':
-        tags = preferences
+        user_preferences = session.get('preferences')
+        user_exclusions = session.get('exclusions')
+    if tags is not None and tags != '' and user_preferences is not None and user_preferences != '':
+            tags = tags + ' ' + user_preferences
+    elif user_preferences is not None and user_preferences != '':
+        tags = user_preferences
     if tags is not None and tags != '':
         if ' ' in tags:
             tags = tags.split(' ')
             query['tags'] = {'$all': tags}
         else:
-            query['tags'] = tags
-
+            query['tags'] = {'$all': [tags]}
+    if user_exclusions is not None:
+        if ' ' in user_exclusions:
+            user_exclusions = user_exclusions.split(' ')
+            query['tags']['$nin'] = user_exclusions
+        else:
+            query['tags']['$nin'] = [user_exclusions]
     if meals is not None and meals != '':
         meals = request.args['meals']
         if ' ' in meals:
@@ -168,7 +175,9 @@ def login():
         username = request.form.get('username', '')
         if username != '' and mongo.db.logins.find_one({'username': username}):
             session['username'] = username
-            session['preferences'] = mongo.db.users.find_one({'username': username}, {'preferences': 1}).get('preferences', None)
+            user_data = mongo.db.users.find_one({'username': username}, {'preferences': 1, 'exclusions': 1})
+            session['preferences'] = user_data.get('preferences', None)
+            session['exclusions'] = user_data.get('exclusions', None)
             flash('Successfully logged in as "{}".'.format(username))
             if request.form.get('target') is not None:
                 return redirect(request.form.get('target'))
@@ -221,6 +230,7 @@ def logout():
     if session.get('username') is not None:
         session['username'] = None
         session['preferences'] = None
+        session['exclusions'] = None
         flash("Successfully logged out.")
         return redirect(url_for('index'))
     return abort(403)
@@ -233,9 +243,11 @@ def preferences():
         all_tags = mongo.db.tags.find()
         if request.method == 'POST':
             tags = request.form.get('tags')
-            if tags is not None:
-                mongo.db.users.update_one({'username': username}, {'$set': {'preferences': tags}})
+            exclude = request.form.get('exclude')
+            if tags is not None or exclude is not None:
+                mongo.db.users.update_one({'username': username}, {'$set': {'preferences': tags, 'exclusions': exclude}})
                 session['preferences'] = tags
+                session['exclusions'] = exclude
         all_tags = mongo.db.tags.find()
         return render_template('preferences.html', username=username, all_tags=all_tags)
     abort(403)

@@ -250,35 +250,46 @@ class TestPreferences(TestClient):
         self.client.post('/preferences', data={'tags': 'Vegan Gluten-Free'})
         self.assertEqual(self.mongo.db.users.find_one({}).get('preferences'), 'Vegan Gluten-Free')
 
+    def test_set_exclusions(self):
+        '''
+        Set exclusions should be added to the users document
+        '''
+        self.login_user()
+        self.client.post('/preferences', data={'exclude': 'Nuts Shellfish'})
+        self.assertEqual(self.mongo.db.users.find_one({}).get('exclusions'), 'Nuts Shellfish')
+
     def test_preferences_saved_to_session(self):
         '''
         Preferences should be saved to the session cookie
         '''
         self.login_user()
-        self.client.post('/preferences', data={'tags': 'Vegan Gluten-Free'})
+        self.client.post('/preferences', data={'tags': 'Vegan Gluten-Free', 'exclude': 'Nuts Shellfish'})
         with self.client.session_transaction() as session:
             self.assertEqual(session.get('preferences'), 'Vegan Gluten-Free')
+            self.assertEqual(session.get('exclusions'), 'Nuts Shellfish')
 
     def test_preferences_cleared_on_logout(self):
         '''
         Preferences should be cleared from the session cookie when a user logs out
         '''
         self.login_user()
-        self.client.post('/preferences', data={'tags': 'Vegan Gluten-Free'})
+        self.client.post('/preferences', data={'tags': 'Vegan Gluten-Free', 'exclude': 'Nuts Shellfish'})
         self.logout_user()
         with self.client.session_transaction() as session:
             self.assertEqual(session.get('preferences'), None)
+            self.assertEqual(session.get('exclusions'), None)
 
     def test_preferences_reloaded_to_session_on_login(self):
         '''
         User preferences should be retrieved on login
         '''
         self.login_user()
-        self.client.post('/preferences', data={'tags': 'Vegan Gluten-Free'})
+        self.client.post('/preferences', data={'tags': 'Vegan Gluten-Free', 'exclude': 'Nuts Shellfish'})
         self.logout_user()
         self.login_user()
         with self.client.session_transaction() as session:
             self.assertEqual(session.get('preferences'), 'Vegan Gluten-Free')
+            self.assertEqual(session.get('exclusions'), 'Nuts Shellfish')
 
     def test_preferences_applied_to_recipes_route(self):
         '''
@@ -290,18 +301,20 @@ class TestPreferences(TestClient):
         self.submit_recipe(title='Meaty GF Recipe', tags=['Gluten-Free', 'Low-Fat'])
         self.submit_recipe(title='Vegan Recipe', tags=['Vegan', 'Vegetarian', 'Low-Fat'])
         self.submit_recipe(title='Vegan GF Recipe', tags=['Vegan', 'Vegetarian', 'Gluten-Free', 'Low-Fat'])
+        self.submit_recipe(title='Nutty Vegan GF Recipe', tags=['Vegan', 'Vegetarian', 'Gluten-Free', 'Low-Fat', 'Nuts'])
         self.logout_user()
         self.create_user('VeganGFUser')
         self.login_user('VeganGFUser')
-        self.client.post('/preferences', data={'tags': 'Vegan Gluten-Free'})
+        self.client.post('/preferences', data={'tags': 'Vegan Gluten-Free', 'exclude': 'Nuts Shellfish'})
         response = self.client.get('/recipes?tags=Low-Fat')
         self.assertIn(b'Vegan GF Recipe', response.data)
+        self.assertNotIn(b'Nutty Vegan GF Recipe', response.data)
         self.assertNotIn(b'Vegan Recipe', response.data)
         self.assertNotIn(b'Meaty GF Recipe', response.data)
 
     def test_preferences_added_to_recipes_route_queries(self):
         '''
-        User preferences should automatically be applied on searches
+        User preferences should be preserved for later searches
         '''
         self.logout_user()
         self.create_user('RecipeAuthor')
@@ -312,13 +325,14 @@ class TestPreferences(TestClient):
         self.logout_user()
         self.create_user('VeganGFUser')
         self.login_user('VeganGFUser')
-        self.client.post('/preferences', data={'tags': 'Vegan Gluten-Free'})
+        self.client.post('/preferences', data={'tags': 'Vegan Gluten-Free', 'exclude': 'Nuts Shellfish'})
         response = self.client.get('/recipes?tags=Low-Fat')
         self.assertIn(b'Vegan Gluten-Free', response.data)
+        self.assertIn(b'Nuts Shellfish', response.data)
 
-    def test_exclude_preferences_from_recipes_route(self):
+    def test_override_preferences_from_recipes_route(self):
         '''
-        User preferences should be overridden by the preferences tag beings et to -1
+        User preferences should be overridden by the preferences tag being set to -1
         '''
         self.logout_user()
         self.create_user('RecipeAuthor')
@@ -326,12 +340,14 @@ class TestPreferences(TestClient):
         self.submit_recipe(title='Meaty GF Recipe', tags=['Gluten-Free', 'Low-Fat'])
         self.submit_recipe(title='Vegan Recipe', tags=['Vegan', 'Vegetarian', 'Low-Fat'])
         self.submit_recipe(title='Vegan GF Recipe', tags=['Vegan', 'Vegetarian', 'Gluten-Free', 'Low-Fat'])
+        self.submit_recipe(title='Nutty Vegan GF Recipe', tags=['Vegan', 'Vegetarian', 'Gluten-Free', 'Low-Fat', 'Nuts'])
         self.logout_user()
         self.create_user('VeganGFUser')
         self.login_user('VeganGFUser')
-        self.client.post('/preferences', data={'tags': 'Vegan Gluten-Free'})
+        self.client.post('/preferences', data={'tags': 'Vegan Gluten-Free', 'exclude': 'Nuts Shellfish'})
         response = self.client.get('/recipes?tags=Low-Fat&preferences=-1')
         self.assertIn(b'Vegan GF Recipe', response.data)
+        self.assertIn(b'Nutty Vegan GF Recipe', response.data)
         self.assertIn(b'Vegan Recipe', response.data)
         self.assertIn(b'Meaty GF Recipe', response.data)
 
