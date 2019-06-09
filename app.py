@@ -126,7 +126,10 @@ def find_recipes(page='1', tags=None, exclude=None, meals=None, username=None, f
     order = int(order)
     if order != 1 and order != -1:
         order = -1
-    page = int(page)
+    try:
+        page = int(page)
+    except ValueError:
+        page = 1
     offset = (page - 1) * 10
     no_recipes = mongo.db.recipes.count_documents(query)
     if page < 1 or (page != 1 and offset >= no_recipes):
@@ -295,6 +298,30 @@ def user_page(user):
     return render_template('user.html', username=session.get('username'), user_details=user_details, user_recipes=user_recipes)
 
 
+@app.route('/users')
+def user_list():
+    query = {}
+    if request.args.get('following', '') != '':
+        query['followers'] = request.args['following']
+    if request.args.get('followers', '') != '':
+        query['following'] = request.args['followers']
+    no_users = mongo.db.users.count_documents(query)
+    try:
+        page = int(request.args.get('page', '1'))
+    except ValueError:
+        page = 1
+    offset = (page - 1) * 10
+    if page < 1 or (page != 1 and offset >= no_users):
+        abort(404)  # Out of bounds error
+    sort = request.args.get('sort', 'joined')
+    order = -1
+    users = mongo.db.users.find(query, {'username': 1}).sort(sort, order).skip(offset).limit(10)
+    current_query = request.args.to_dict()
+    current_query.pop('page', '')
+    return render_template('users.html', username=session.get('username'), page=page, no_users=no_users,
+                           users=users, current_query=current_query)
+
+
 @app.route('/follow/<user>')
 def follow(user):
     followee = mongo.db.users.find_one({'username': user}, {'followers': 1})
@@ -399,6 +426,7 @@ def add_recipe():
                     recipe_data['parent'] = None
                     flash('Parent recipe does not exist!')
             mongo.db.recipes.insert_one(recipe_data)
+            mongo.db.users.update_one({'username': recipe_data['username']}, {'$inc': {'recipe-count': 1}})
             flash('Recipe "{}" successfully created.'.format(recipe_data['title']))
             return redirect(url_for('recipe', urn = recipe_data['urn']))
         else:
@@ -524,6 +552,7 @@ def delete_recipe(urn):
         if request.method == 'POST':
             if request.form.get('confirm') == recipe_data['title']:
                 mongo.db.recipes.delete_one({'urn': urn})
+                mongo.db.users.update_one({'username': recipe_data['username']}, {'$inc': {'recipe-count': -1}})
                 flash('Successfully deleted recipe "{}".'.format(recipe_data['title']))
                 return redirect(url_for('index'))
             else:

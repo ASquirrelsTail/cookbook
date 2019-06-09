@@ -1,0 +1,62 @@
+{% import 'macros.html' as macro %}
+{% extends "base.html" %}
+{% block title %}
+Recipes - Fork.it
+{% endblock %}
+{% block content %}
+<section class="container">
+    <div class="row no-b-margin">
+        <div class="col s12 l3 filters">
+        	<form action="" method="GET" id="filters-form">
+	            <div class="col s12">
+	                <p class="flow-text no-b-margin">{{ no_users }} users.</p>
+	            </div>{#
+                <div class="input-field col s12 m6 l12">
+                    <select name="sort" id="sort">
+                    	{% if not current_query['sort'] or current_query['sort'] == 'views' %}
+                        <option value="views" selected>Most Viewed</option>
+                        {% else %}
+                        <option value="views">Most Viewed</option>
+                        {% endif %}
+                        {% if current_query['sort'] == 'date' %}
+                        <option value="date" selected>Most Recent</option>
+                        {% else %}
+                        <option value="date">Most Recent</option>
+                        {% endif %}
+                        {% if current_query['sort'] == 'favourites' %}
+                        <option value="favourites" selected>Most Favourited</option>
+                        {% else %}
+                        <option value="favourites">Most Favourited</option>
+                        {% endif %}
+                        {% if current_query['sort'] == 'total-time' and current_query['order'] == '1' %}
+                        <option value="total-time" selected>Quickest</option>
+                        {% else %}
+                        <option value="total-time">Quickest</option>
+                        {% endif %}
+                    </select>
+                    <label for="sort">Order by</label>
+                </div>
+                {% if current_query['order'] == '1' %}
+                <input type="hidden" name='order' id="order" value="1">
+                {% else %}
+                <input type="hidden" name='order' id="order" value="-1">
+                {% endif %}
+                #}
+            </form>
+        </div>
+        <div class="col s12 l9">
+            {{ macro.pagination('user_list', page, no_users, **current_query)}}
+            {% for user in users %}
+                <div class="col s12 user-card">
+                    {{ user['username'] }}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="row">
+    	<div class="col s12 l9 offset-l3">
+    		{{ macro.pagination('recipes', page, no_users, **current_query)}}
+    	</div>
+    </div>
+</section>
+{% endblock %}

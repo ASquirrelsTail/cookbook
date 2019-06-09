@@ -1985,6 +1985,14 @@ class TestRecipesList(TestClient):
         self.assertIn(b'alice-s-apple-pie', response.data)
         self.assertIn(b'ben-s-baked-alaska', response.data)
 
+    def test_pagination_nan(self):
+        '''
+        If the selected page is not a number should return the first page
+        '''
+        response = self.client.get('/recipes?page=NAN')
+        ideal_response = self.client.get('/recipes?page=1')
+        self.assertEqual(ideal_response.data, response.data)
+
 
 class TestUserPage(TestClient):
     '''
@@ -2098,6 +2106,179 @@ class TestUserPage(TestClient):
         response = self.client.get('/users/{}'.format(self.username))
         self.assertIn(b'Latest Rescipe One', response.data)
         self.assertIn(b'Latest Rescipe Two', response.data)
+
+
+class TestUserList(TestClient):
+    '''
+    Class for testing the user list page
+    '''
+    @classmethod
+    def setUpClass(cls):
+        super(TestUserList, cls).setUpClass()
+        # Delete all records from the login and user collection and create test user
+        cls.mongo.db.logins.delete_many({})
+        cls.mongo.db.users.delete_many({})
+        # Delete all records from the recipe collection
+        cls.mongo.db.recipes.delete_many({})
+
+        cls.create_user('Alice')
+        cls.login_user('Alice')
+        cls.submit_recipe()
+        cls.submit_recipe()
+        cls.logout_user()
+        cls.create_user('Bob')
+        cls.login_user('Bob')
+        cls.submit_recipe()
+        cls.logout_user()
+
+        for n in range(50):
+            cls.create_user('User{}'.format(n))
+            cls.logout_user()
+            if n < 40:
+                cls.login_user('User{}'.format(n))
+                cls.client.get('follow/{}'.format('Bob'))
+                cls.logout_user()
+            if n < 30:
+                cls.login_user('Alice')
+                cls.client.get('follow/{}'.format('User{}'.format(n)))
+                cls.logout_user()
+            if n < 20:
+                cls.login_user('Bob')
+                cls.client.get('follow/{}'.format('User{}'.format(n)))
+                cls.logout_user()
+            if n < 10:
+                cls.login_user('User{}'.format(n))
+                cls.client.get('follow/{}'.format('Alice'))
+                cls.logout_user()
+
+    def test_user_list_page(self):
+        '''
+        Page should return 200
+        '''
+        response = self.client.get('/users')
+        self.assertEqual(response.status_code, 200)
+
+    def test_number_of_users(self):
+        '''
+        Page should show how many users there are
+        '''
+        response = self.client.get('/users')
+        self.assertIn(b'52 users', response.data)
+
+    def test_number_of_followers(self):
+        '''
+        Page should show how many users are following a user
+        '''
+        response = self.client.get('/users?followers=Alice')
+        self.assertIn(b'10 users', response.data)
+
+    def test_number_of_following(self):
+        '''
+        Page should show how many users are being followed by a user
+        '''
+        response = self.client.get('/users?following=Alice')
+        self.assertIn(b'30 users', response.data)
+
+    def test_incude_usernames(self):
+        '''
+        Page should include usernames in the reuslts
+        '''
+        response = self.client.get('/users?followers=Alice')
+        self.assertIn(b'User5', response.data)
+
+    def test_users_per_page(self):
+        '''
+        Page should show a maximum of 10 users per page
+        '''
+        response = self.client.get('/users')
+        self.assertLess(response.data.decode().count('user-card'), 11)
+
+    def test_returns_no_users(self):
+        '''
+        Page should still work when zero results are found, and should list zero users.
+        '''
+        response = self.client.get('/users?following=User49')
+        self.assertIn(b'0 users', response.data)
+
+    def test_pagination(self):
+        '''
+        The page should display the correct number of reuslts for the page
+        '''
+        response = self.client.get('/users?page=6')
+        self.assertEqual(response.data.decode().count('user-card'), 2)
+
+    def test_pagination_beyond_range(self):
+        '''
+        Pages beyond range should return 404 not found
+        '''
+        response = self.client.get('/users?page=7')
+        self.assertEqual(response.status_code, 404)
+
+    def test_pagination_links(self):
+        '''
+        The current page should link to the previous and next pages
+        '''
+        response = self.client.get('/users?page=3')
+        self.assertIn(b'/users?page=2', response.data)
+        self.assertIn(b'/users?page=4', response.data)
+
+    def test_pagination_no_links_beyond_range(self):
+        '''
+        There shouldn't be pagination links to pages beyond bounds
+        '''
+        response = self.client.get('/users')
+        self.assertNotIn(b'/users?page=0', response.data)
+        response = self.client.get('/users?page=5')
+        self.assertNotIn(b'/users?page=7', response.data)
+
+    def test_pagination_links_include_queries(self):
+        '''
+        Pagination links should preserve the current query
+        '''
+        response = self.client.get('/users?following=Alice')
+        self.assertRegex(response.data.decode(), '/users\?.*page=2')
+        self.assertRegex(response.data.decode(), '/users\?.*following=Alice')
+
+    def test_ordered_by_signup(self):
+        '''
+        Page should sort users by most recent first.
+        '''
+        old_time = datetime.utcnow() - timedelta(1)
+        new_time = datetime.utcnow() + timedelta(1)
+        self.mongo.db.users.update_one({'username': 'Alice'}, {'$set': {'joined': old_time.strftime("%Y-%m-%d %H:%M:%S")}})
+        self.mongo.db.users.update_one({'username': 'Bob'}, {'$set': {'joined': new_time.strftime("%Y-%m-%d %H:%M:%S")}})
+        response = self.client.get('/users')
+        self.assertIn(b'Bob', response.data)
+        self.assertNotIn(b'Alice', response.data)
+
+    def test_ordered_by_no_followers(self):
+        '''
+        Page should sort users by most followers first if sort is set to follower count.
+        '''
+        response = self.client.get('/users?sort=follower-count')
+        self.assertLess(response.data.decode().index('Bob'), response.data.decode().index('Alice'))
+
+    def test_ordered_by_no_recipes(self):
+        '''
+        Page should sort users by most recipes first if sort is set to recipe count.
+        '''
+        self.login_user('Alice')
+        self.submit_recipe()
+        self.submit_recipe()
+        self.logout_user()
+        self.login_user('Bob')
+        self.submit_recipe()
+        self.logout_user()
+        response = self.client.get('/users?sort=recipe-count')
+        self.assertLess(response.data.decode().index('Alice'), response.data.decode().index('Bob'))
+
+    def test_pagination_nan(self):
+        '''
+        If the selected page is not a number should return the first page
+        '''
+        response = self.client.get('/users?page=NAN&sort=follower-count')
+        self.assertIn(b'Alice', response.data)
+        self.assertIn(b'Bob', response.data)
 
 
 class TestFollowUser(TestClient):
