@@ -42,7 +42,8 @@ A breakdown of the UX process can be found [here](https://github.com/ASquirrelsT
 
 ### Features Left to Implement
 
-- Individual user pages
+- List of all users with filters.
+- Custom error code pages.
 
 ## Technologies Used
 

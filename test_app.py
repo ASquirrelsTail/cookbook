@@ -1986,6 +1986,120 @@ class TestRecipesList(TestClient):
         self.assertIn(b'ben-s-baked-alaska', response.data)
 
 
+class TestUserPage(TestClient):
+    '''
+    Class for testing the individual user page
+    '''
+    def setUp(self):
+        # Delete all records from the login and user collection and create test user
+        self.mongo.db.logins.delete_many({})
+        self.mongo.db.users.delete_many({})
+        # Delete all records from the recipe collection
+        self.mongo.db.recipes.delete_many({})
+        self.logout_user()
+        self.username = 'TestUser'
+        self.create_user(self.username)
+        self.logout_user()
+
+    def test_page(self):
+        '''
+        Page should return 200 status.
+        '''
+        response = self.client.get('/users/{}'.format(self.username))
+        self.assertEqual(response.status_code, 200)
+
+    def test_user_doesnt_exist(self):
+        '''
+        Page should return 404 if a user does not exist.
+        '''
+        response = self.client.get('/users/{}'.format('NotARealUser'))
+        self.assertEqual(response.status_code, 404)
+
+    def test_user_since(self):
+        '''
+        Page should show the month a user joined.
+        '''
+        today = datetime.now()
+        response = self.client.get('/users/{}'.format(self.username))
+        self.assertIn(str.encode(escape(today.strftime('%b \'%y'))), response.data)
+
+    def test_follower_count(self):
+        '''
+        Page should show number of followers a user has.
+        '''
+        response = self.client.get('/users/{}'.format(self.username))
+        self.assertIn(b'Followers: 0', response.data)
+        self.create_user('Follower1')
+        self.login_user('Follower1')
+        self.client.get('/follow/{}'.format(self.username))
+        self.logout_user()
+        self.create_user('Follower2')
+        self.login_user('Follower2')
+        self.client.get('/follow/{}'.format(self.username))
+        self.logout_user()
+        self.create_user('Follower3')
+        self.login_user('Follower3')
+        self.client.get('/follow/{}'.format(self.username))
+        self.logout_user()
+        self.create_user('Follower4')
+        self.login_user('Follower4')
+        self.client.get('/follow/{}'.format(self.username))
+        response = self.client.get('/users/{}'.format(self.username))
+        self.assertIn(b'Followers: 4', response.data)
+        self.client.get('/follow/{}'.format(self.username))
+        response = self.client.get('/users/{}'.format(self.username))
+        self.assertIn(b'Followers: 3', response.data)
+
+    def test_following_count(self):
+        '''
+        Page should show number of people a user is following.
+        '''
+        response = self.client.get('/users/{}'.format(self.username))
+        self.assertIn(b'Following: 0', response.data)
+        self.create_user('Followee1')
+        self.logout_user()
+        self.create_user('Followee2')
+        self.logout_user()
+        self.create_user('Followee3')
+        self.logout_user()
+        self.create_user('Followee4')
+        self.logout_user()
+        self.login_user(self.username)
+        self.client.get('/follow/{}'.format('Followee1'))
+        self.client.get('/follow/{}'.format('Followee2'))
+        self.client.get('/follow/{}'.format('Followee3'))
+        self.client.get('/follow/{}'.format('Followee4'))
+        response = self.client.get('/users/{}'.format(self.username))
+        self.assertIn(b'Following: 4', response.data)
+        self.client.get('/follow/{}'.format('Followee1'))
+        response = self.client.get('/users/{}'.format(self.username))
+        self.assertIn(b'Following: 3', response.data)
+
+    def test_recipe_count(self):
+        '''
+        Page should show the number of recipes a user has created
+        '''
+        self.login_user(self.username)
+        response = self.client.get('/users/{}'.format(self.username))
+        self.assertIn(b'Recipes: 0', response.data)
+        self.submit_recipe()
+        self.submit_recipe()
+        response = self.client.get('/users/{}'.format(self.username))
+        self.assertIn(b'Recipes: 2', response.data)
+
+    def test_recent_recipes(self):
+        '''
+        Page should contain the most recent recipes by the user.
+        '''
+        self.login_user(self.username)
+        self.submit_recipe(title='Latest Rescipe One')
+        self.submit_recipe(title='Latest Rescipe Two')
+        self.client.get('/logout', follow_redirects=True)
+        response = self.client.get('/users/{}'.format(self.username))
+        self.assertIn(b'Latest Rescipe One', response.data)
+        self.assertIn(b'Latest Rescipe Two', response.data)
+
+
 class TestFollowUser(TestClient):
     '''
     Class for testing follow user route

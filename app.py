@@ -170,14 +170,15 @@ def new_user():
         return redirect(url_for('index'))
     elif request.method == 'POST':
         username = request.form.get('username', '')
-        # Regex snippet for allowed characters from https://stackoverflow.com/questions/89909/how-do-i-verify-that-a-string-only-contains-letters-numbers-underscores-and-da
+        # Regex snippet for allowed characters from
+        # https://stackoverflow.com/questions/89909/how-do-i-verify-that-a-string-only-contains-letters-numbers-underscores-and-da
         if username == '' or not match("^[A-Za-z0-9_-]*$", username):
             flash("Please enter a valid username!")
         elif mongo.db.logins.find_one({'username': username}) is not None:
             flash('Username "{}" is already taken, please choose another.'.format(username))
         else:
             mongo.db.logins.insert_one(request.form.to_dict())
-            mongo.db.users.insert_one({'username': username})
+            mongo.db.users.insert_one({'username': username, 'joined': datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")})
             return redirect(url_for('login'), code=307)
 
     return render_template('new-user.html')
@@ -284,6 +285,16 @@ def preferences():
     abort(403)
 
 
+@app.route('/users/<user>')
+def user_page(user):
+    user_details = mongo.db.users.find_one({'username': user})
+    if user_details is None:
+        abort(404)
+    user_details['joined'] = datetime.strptime(user_details['joined'], "%Y-%m-%d %H:%M:%S").strftime('%b \'%y')
+    user_recipes = find_recipes(username=user, preferences='-1')
+    return render_template('user.html', username=session.get('username'), user_details=user_details, user_recipes=user_recipes)
+
+
 @app.route('/follow/<user>')
 def follow(user):
     followee = mongo.db.users.find_one({'username': user}, {'followers': 1})
@@ -343,7 +354,9 @@ def add_recipe():
                             config = s3._client_config
                             config.signature_version = botocore.UNSIGNED
 
-                            recipe_data['image'] = boto3.client('s3', config=config).generate_presigned_url('get_object', ExpiresIn=0, Params={'Bucket': s3_bucket, 'Key': filename})
+                            recipe_data['image'] = boto3.client('s3', config=config) \
+                                                        .generate_presigned_url('get_object', ExpiresIn=0,
+                                                                                Params={'Bucket': s3_bucket, 'Key': filename})
                         else:
                             f = open(os.path.join('static', 'user-images', filename), 'wb')
                             f.write(imageBytes)
@@ -457,7 +470,9 @@ def edit_recipe(urn):
                                 config = s3._client_config
                                 config.signature_version = botocore.UNSIGNED
 
-                                updated_recipe['image'] = boto3.client('s3', config=config).generate_presigned_url('get_object', ExpiresIn=0, Params={'Bucket': s3_bucket, 'Key': filename})
+                                updated_recipe['image'] = boto3.client('s3', config=config) \
+                                                               .generate_presigned_url('get_object', ExpiresIn=0,
+                                                                                       Params={'Bucket': s3_bucket, 'Key': filename})
                             else:
                                 f = open(os.path.join('static', 'user-images', filename), 'wb')
                                 f.write(imageBytes)

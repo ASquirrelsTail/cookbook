@@ -1,0 +1,25 @@
+{% import 'macros.html' as macro %}
+{% extends "base.html" %}
+{% block content %}
+<section class="container">
+	<div class="row">
+		<div class="col s12">
+			<h1>{{ user_details['username'] }}</h1>
+		    <p>Member since {{ user_details['joined'] }}</p>
+		    {% if user_details['follower-count'] %}
+		    <p><a href="#!">Followers: {{ user_details['follower-count'] }}</a></p>
+		    {% else %}
+		    <p>Followers: 0</p>
+		    {% endif %}
+		    {% if user_details['following-count'] %}
+		    <p><a href="#!">Following: {{ user_details['following-count'] }}</a></p>
+		    {% else %}
+		    <p>Following: 0</p>
+		    {% endif %}
+		    <p>Recipes: {{ user_recipes['no_recipes'] }}</p>
+		</div>
+	</div>
+     	{{ macro.recipe_list(user_recipes['recipes']) }}
+        {{ macro.pagination('recipes', 1, user_recipes['no_recipes'], username=user, preferences='-1')}}
+</section>
+{% endblock %}
