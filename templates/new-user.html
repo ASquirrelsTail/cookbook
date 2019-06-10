@@ -9,8 +9,8 @@ Create New User - Fork.it
 	    <form action="" method="POST">
 	    	<div class="input-field col s12">
 	    		<label for="username">Username</label>
-		    	<input type="text" name="username" maxlength="20" placeholder="Enter Username" pattern="[A-Za-z0-9_-]+" class="validate" required>
-		    	<span class="helper-text" data-error="Username can only contain letters, numbers, hyphens and underscores."></span>
+		    	<input type="text" name="username" maxlength="20" placeholder="Enter Username" pattern="[A-Za-z0-9_-]*" class="validate" required>
+		    	<span class="helper-text" data-error="Username must contain only letters, numbers, hyphens and underscores."></span>
 	    	</div>
 	    	<div class="input-field col s12">
 	    		<button class="btn waves-effect waves-light" type="submit">Create New User</button>

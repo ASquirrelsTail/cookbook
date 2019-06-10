@@ -7346,6 +7346,17 @@ nav.nav-extended .nav-content .tabs i {
   float: none;
 }
 
+ol.invalid ~ .helper-text {
+  color: transparent;
+  user-select: none;
+  pointer-events: none;
+}
+
+ol.invalid ~ .helper-text:after {
+  content: attr(data-error);
+  color: #F44336;
+}
+
 .method {
   list-style: none;
   counter-reset: method-counter;

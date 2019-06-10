@@ -199,9 +199,11 @@ function validatePrepTime() {
     updateTimeInput('#prep-time');
     if ($('#prep-time-input').val() == '00:00') {
         $('#prep-time input[type=number]').addClass('invalid');
+        $('#prep-time').addClass('invalid');
         return false;
     }else{
         $('#prep-time input[type=number]').removeClass('invalid');
+        $('#prep-time').removeClass('invalid');
         return true;
     }
 }
@@ -223,6 +225,8 @@ function validateMultilineInput(target) {
 
 // On load attach event listeners
 $(function() {
+
+    M.Tooltip.init($('.tooltipped'));
     
     // Fix materialize label focus bug
     $("label").on('click', function() {
@@ -235,19 +239,20 @@ $(function() {
     $('#create-recipe').on('submit', function(e) {
         if (!validatePrepTime()) {
             e.preventDefault();
-            $('#prep-time .hours')[0].focus()
+            $('#prep-time .hours')[0].focus();
         }
         if (!validateMultilineInput('.method textarea')) {
             e.preventDefault();
-            $('.method textarea')[0].focus()
-        }
+            $('ol.method').addClass('invalid');
+            $('.method textarea')[0].focus();
+        }else $('ol.method').removeClass('invalid');
         if (!validateMultilineInput('.ingredient')) {
             e.preventDefault();
-            $('.ingredient')[0].focus()
+            $('.ingredient')[0].focus();
         }
         if (!validateMultilineInput('[name=title]')) {
             e.preventDefault();
-            $('[name=title]')[0].focus()
+            $('[name=title]')[0].focus();
         }
         concatFields('.ingredient', '#ingredients');
         concatFields('.method textarea', '#methods');
@@ -286,7 +291,8 @@ $(function() {
     $('#image-upload').on('change', loadImage);
 
     $('.method textarea').on('keydown', addRemoveMethodLine).on('blur', function() {
-        validateMultilineInput('.method textarea')
+        if (validateMultilineInput('.method textarea')) $('ol.method').removeClass('invalid');
+        else $('ol.method').addClass('invalid');
     });
 
     $('.ingredient').on('keydown', addRemoveIngredientLine).on('blur', function() {
