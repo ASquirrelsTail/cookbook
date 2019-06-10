@@ -557,7 +557,7 @@ def delete_recipe(urn):
                 return redirect(url_for('index'))
             else:
                 flash('Failed to delete recipe "{}".'.format(recipe_data['title']))
-        return render_template('delete-recipe.html', title=recipe_data['title'], urn=urn, username=username)
+        return render_template('delete-recipe.html', title=recipe_data['title'], title_pattern=re_escape(recipe_data['title']), urn=urn, username=username)
     else:
         abort(403)
 
@@ -672,7 +672,7 @@ def comments(urn):
                 comment = request.json.get('comment', '')
             else:
                 comment = request.form.get('comment', '')
-            if comment != '':
+            if comment != '' and comment is not None:
                 now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
                 comment_doc = {'username': username, 'time': now, 'comment': comment}
                 mongo.db.recipes.update_one({'urn': urn}, {'$addToSet': {'comments': comment_doc},

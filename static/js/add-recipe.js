@@ -195,6 +195,31 @@ function addRemoveIngredientLine(e) {
     }
 }
 
+function validatePrepTime() {
+    updateTimeInput('#prep-time');
+    if ($('#prep-time-input').val() == '00:00') {
+        $('#prep-time input[type=number]').addClass('invalid');
+        return false;
+    }else{
+        $('#prep-time input[type=number]').removeClass('invalid');
+        return true;
+    }
+}
+
+function validateMultilineInput(target) {
+    var valid = false;
+        $(target).each(function() {
+            if ($(this).val() != '' && $(this).val() != null) valid = true;
+        })
+        if (!valid) {
+            $(target).addClass('invalid');
+            return false;
+        }else{
+            $(target).removeClass('invalid');
+            return true;
+        }
+}
+
 
 // On load attach event listeners
 $(function() {
@@ -208,9 +233,25 @@ $(function() {
     inputCanvas.init();
 
     $('#create-recipe').on('submit', function(e) {
+        if (!validatePrepTime()) {
+            e.preventDefault();
+            $('#prep-time .hours')[0].focus()
+        }
+        if (!validateMultilineInput('.method textarea')) {
+            e.preventDefault();
+            $('.method textarea')[0].focus()
+        }
+        if (!validateMultilineInput('.ingredient')) {
+            e.preventDefault();
+            $('.ingredient')[0].focus()
+        }
+        if (!validateMultilineInput('[name=title]')) {
+            e.preventDefault();
+            $('[name=title]')[0].focus()
+        }
         concatFields('.ingredient', '#ingredients');
         concatFields('.method textarea', '#methods');
-        updateTimeInput('#prep-time');
+        
         updateTimeInput('#cook-time');
         chipsToInput(tagChips, '#tag-input');
         chipsToInput(mealChips, '#meal-input');
@@ -244,13 +285,23 @@ $(function() {
 
     $('#image-upload').on('change', loadImage);
 
-    $('.method textarea').on('keydown', addRemoveMethodLine);
+    $('.method textarea').on('keydown', addRemoveMethodLine).on('blur', function() {
+        validateMultilineInput('.method textarea')
+    });
 
-    $('.ingredient').on('keydown', addRemoveIngredientLine);
+    $('.ingredient').on('keydown', addRemoveIngredientLine).on('blur', function() {
+        validateMultilineInput('.ingredient')
+    });
+
+    $('[name=title]').on('blur', function() {
+        validateMultilineInput('[name=title]')
+    });
 
     $('#ingredient-label').on('click', function() {
         $(this).next()[0].focus();
     });
+
+    $('#prep-time input[type=number]').on('blur', validatePrepTime);
 });
 
 

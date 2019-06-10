@@ -35,8 +35,9 @@
 				<p>Commenting as {{username}}</p>
 			</div>
 			<div class="input-field col s12">
-		          <textarea id="comment" name="comment" class="materialize-textarea"></textarea>
-		          <label for="comment">Comment</label>
+		          <textarea id="comment" name="comment" class="materialize-textarea validate" required></textarea>
+                  <label for="comment">Comment</label>
+                  <span class="helper-text" data-error="Please enter a comment."></span>
 	        </div>
 	        <div class="col s12">
 	        	<button class="btn waves-effect waves-light" type="submit">Post Comment</button>

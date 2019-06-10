@@ -14,8 +14,9 @@ Add Recipe - Fork.it
         <div class="col s12 overlay-container" id="old-image-container">
             <img src="{{ recipe['old-image'] }}" alt="{{ recipe['title'] }}" class="responsive-img resize-height" id="old-imag-img">
             <div id="old-image-overlay" class="overlay" style="">
-                <a class="btn-floating btn-large waves-effect waves-light red scale-transition" id="old-image-delete">
-                    <i class="material-icons">delete</i></a>
+                <a class="btn-floating btn-large waves-effect waves-light red scale-transition tooltipped" data-position="left" data-tooltip="Delete image" id="old-image-delete">
+                    <i class="material-icons">delete</i>
+                </a>
             </div>
         </div>
         <input type="hidden" name="old-image" id="old-image" value="{{ recipe['old-image'] }}">
@@ -23,9 +24,14 @@ Add Recipe - Fork.it
     <div class="col s12 overlay-container">
         <canvas id="input-canvas" class="resize-height"></canvas>
         <div id="canvas-overlay" class="overlay">
-            <a class="btn-floating btn-large waves-effect waves-light red scale-transition scale-out" id="image-delete"><i class="material-icons">delete</i></a>
-            <a class="btn-floating btn-large waves-effect waves-light scale-transition scale-out" id="image-crop"><i class="material-icons">crop</i></a>
-            <a class="btn-floating btn-large waves-effect waves-light scale-transition scale-out" id="image-reset"><i class="material-icons">refresh</i></a>
+            <a class="btn-floating btn-large waves-effect waves-light red scale-transition scale-out tooltipped" data-position="left" data-tooltip="Delete image" id="image-delete">    <i class="material-icons">delete</i>
+            </a>
+            <a class="btn-floating btn-large waves-effect waves-light scale-transition scale-out tooltipped" data-position="left" data-tooltip="Crop image" id="image-crop">
+                <i class="material-icons">crop</i>
+            </a>
+            <a class="btn-floating btn-large waves-effect waves-light scale-transition scale-out tooltipped" data-position="left" data-tooltip="Reset image" id="image-reset">
+                <i class="material-icons">refresh</i>
+            </a>
         </div>
     </div>
     <div class="file-field input-field col s12">
@@ -78,6 +84,7 @@ Add Recipe - Fork.it
                 <div class="input-field col xs5 s3 m2">
                     <label>Minutes</label><input type="number" class="minutes"  value="{{ recipe['prep-time'][1] }}" min="-1" max="60">
                 </div>
+                <span class="helper-text" data-error="Enter a prep time."></span>
             </div>
             <input type="hidden" name="prep-time" id="prep-time-input" value="{{ recipe['prep-time'][0] }}:{{ recipe['prep-time'][1] }}">
             {% else %}

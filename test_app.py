@@ -1351,7 +1351,11 @@ class TestComments(TestClient):
         self.create_user('Commenter')
         self.login_user('Commenter')
         self.client.post('/recipes/{}/comments'.format(self.urn), data={'comment': ''})
+        self.client.post('/recipes/{}/comments'.format(self.urn), data={'comment': None})
         self.client.post('/recipes/{}/comments'.format(self.urn))
+        self.client.post('/recipes/{}/comments'.format(self.urn), data=json.dumps({'comment': ''}), content_type='application/json')
+        self.client.post('/recipes/{}/comments'.format(self.urn), data=json.dumps({'comment': None}), content_type='application/json')
+        self.client.post('/recipes/{}/comments'.format(self.urn), content_type='application/json')
         self.assertEqual(len(self.mongo.db.recipes.find_one({'urn': self.urn}).get('comments', [])), 0)
 
     def test_comments_contain_username_time_comment(self):
