@@ -61,6 +61,28 @@ h1 {
 	}
 }
 
+.sidenav {
+	li.info {
+		padding: 0 32px;
+	}
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-content: space-between;
+
+	ul {
+		margin-top: 5px;
+	}
+
+	.brand-logo {
+		padding: 10px 20px;
+		display: block;
+		&:hover {
+			background-color: initial;
+		}
+	}
+}
+
 input:not([type]),
 input[type=text]:not(.browser-default),
 input[type=password]:not(.browser-default),
