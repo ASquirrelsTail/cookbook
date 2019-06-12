@@ -4,10 +4,7 @@
 .recipe-card {
 	position: relative;
 	margin-bottom: 1rem;
-
-	img {
-		@extend .z-depth-1;
-	}
+	@extend .z-depth-1;
 
 	.recipe-details {
 		position: absolute;
@@ -35,6 +32,33 @@
 			font-family: $secondary-font-stack;
 			letter-spacing: 0.07em;
 			font-size: 1.4em;
+		}
+	}
+
+	& > a {
+		display: block;
+		font-size: 0px;
+	}
+
+	.recipe-stats {
+		@extend .z-depth-1;
+		@extend .truncate;
+		position: absolute;
+		bottom: 0px;
+		right: 0px;
+		display: block;
+		margin: 0.5rem;
+		padding: 0.2em 0.4em;
+		background-color: $recipe-card-bg-color;
+		color: black;
+		font-family: $secondary-font-stack;
+		z-index: 99;
+		font-size: 1.2rem;
+		font-weight: bold;
+
+		i {
+			vertical-align: middle;
+			margin-right: 0.25rem;
 		}
 	}
 }

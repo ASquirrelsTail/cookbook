@@ -136,7 +136,7 @@ def find_recipes(page='1', tags=None, exclude=None, meals=None, username=None, f
         abort(404)  # Out of bounds error
     if no_recipes > 0:
         recipes = (
-            mongo.db.recipes.find(query, {'urn': 1, 'title': 1, 'username': 1, 'image': 1})
+            mongo.db.recipes.find(query, {'urn': 1, 'title': 1, 'username': 1, 'image': 1, 'comment-count': 1, 'favourites': 1})
             .sort(sort, order)
             .skip(offset)
             .limit(10)

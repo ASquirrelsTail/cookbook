@@ -38,22 +38,36 @@
 {# Macro to create styled recipe lists #}
 <div class="row no-b-margin">
     {% for recipe in recipes %}
-    <div class="col s12 m6 recipe-card">
-        <div class="recipe-details">
-            <div class="recipe-title">
-                <a href="{{ url_for('recipe', urn=recipe['urn']) }}">{{ recipe['title'] }}</a>
-            </div><br>
-            <div class="recipe-author">
-                by <a href="{{ url_for('recipes', username=recipe['username']) }}">{{ recipe['username'] }}</a>
+    <div class="col s12 m6">
+        <div class="recipe-card">
+            <div class="recipe-details">
+                <div class="recipe-title">
+                    <a href="{{ url_for('recipe', urn=recipe['urn']) }}">{{ recipe['title'] }}</a>
+                </div><br>
+                <div class="recipe-author">
+                    by <a href="{{ url_for('recipes', username=recipe['username']) }}">{{ recipe['username'] }}</a>
+                </div>
             </div>
+            <a href="{{ url_for('recipe', urn=recipe['urn']) }}">
+                {% if recipe['image'] %}
+                <img src="{{ recipe['image'] }}" alt="{{ recipe['title'] }} by {{ recipe['username'] }}" class="responsive-img">
+                {% else %}
+                <img src="https://ci-cookbook.s3.amazonaws.com/vegetable-sushi.jpg" alt="{{ recipe['title'] }} by {{ recipe['username'] }}" class="responsive-img">
+                {% endif %}
+                <div class="recipe-stats">
+                    {% if recipe['favourites'] %}
+                    <i class="material-icons">favorite</i>{{ recipe['favourites'] }} 
+                    {% else %}
+                    <i class="material-icons">favorite</i>0 
+                    {% endif %}
+                    {% if recipe['comment-count'] %}
+                    <i class="material-icons">comment</i>{{ recipe['comment-count'] }}
+                    {% else %}
+                    <i class="material-icons">comment</i>0
+                    {% endif %}
+                </div>
+            </a>
         </div>
-        <a href="{{ url_for('recipe', urn=recipe['urn']) }}">
-            {% if recipe['image'] %}
-            <img src="{{ recipe['image'] }}" alt="{{ recipe['title'] }} by {{ recipe['username'] }}" class="responsive-img">
-            {% else %}
-            <img src="https://ci-cookbook.s3.amazonaws.com/vegetable-sushi.jpg" alt="{{ recipe['title'] }} by {{ recipe['username'] }}" class="responsive-img">
-            {% endif %}
-        </a>
     </div>
     {% endfor %}
 </div>

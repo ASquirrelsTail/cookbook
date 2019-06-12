@@ -37,30 +37,36 @@
     </div>
     {% endif %}
     <div class="container">
-        <div class="row">
-            <div class="col s12">
-                By <a href="{{ url_for('recipes', username=recipe['username']) }}">{{ recipe['username'] }}</a> on {{ recipe['date'] }}.
+        <div class="row recipe-info no-b-margin">
+            <div class="col s12 m6 l7 center-on-small-only">
+                <span>By <a href="{{ url_for('recipes', username=recipe['username']) }}">{{ recipe['username'] }}</a></span> <span>on {{ recipe['date'] }}</span>
                 {% if recipe['parent-title'] %}
-                It's a fork of <a href="{{ url_for('recipe', urn=recipe['parent']) }}">{{ parent_title }}</a>
-                {% if recipe['forks'] %}
-                and has <a href="{{ url_for('recipes', forks=urn) }}">{{ recipe['forks'] }} forks</a> of it's own.
+                <span>It's a fork of <a href="{{ url_for('recipe', urn=recipe['parent']) }}">{{ parent_title }}</a></span>
                 {% endif %}
+            </div>
+            <div class="col s12 m6 l5 center stats">
+                {% if recipe['forks'] %}
+                <a href="{{ url_for('recipes', forks=urn) }}"><i class="material-icons">restaurant_menu</i> {{ recipe['forks'] }}</a> 
+                {% endif %}
+                {% if recipe['favourites'] %}
+                <i class="material-icons">favorite</i> {{ recipe['favourites'] }} 
                 {% else %}
-                {% if recipe['forks'] %}
-                It has <a href="{{ url_for('recipes', forks=urn) }}">{{ recipe['forks'] }} forks</a>.
+                <i class="material-icons">favorite</i> 0
                 {% endif %}
+                <a href="#comments">
+                {% if recipe['comment-count'] %}
+                <i class="material-icons">comment</i> {{ recipe['comment-count'] }} 
+                {% else %}
+                <i class="material-icons">comment</i> 0 
                 {% endif %}
-                
-                <i class="material-icons small">access_time</i> Prep-Time: {{ recipe['prep-time'] }}
-                <i class="material-icons small">access_time</i> Cooking-Time: {{ recipe['cook-time'] }}
-                {% if recipe['meals'] %}
+                </a>
+                </div>
+            
+            <div class="col s12 times center-on-small-only">
+                <span><i class="material-icons small">access_time</i> Prep-Time: {{ recipe['prep-time'] }} </span>
+                <span><i class="material-icons small">access_time</i> Cooking-Time: {{ recipe['cook-time'] }}</span>
             </div>
-            <div class="col s12 m6">
-                {% for meal in recipe['meals'] %}
-                <div class="chip"><a href="{{ url_for('recipes', meals=meal) }}">{{meal}}</a></div>
-                {% endfor %}
-                {% endif %}
-            </div>
+            
         </div>
         <div class="row">
             <div class="col s12">
@@ -91,8 +97,16 @@
             </div>
         </div>
         <div class="row tags">
+            {% if recipe['meals'] %}
+            <div class="col s12 m6">
+                <h3>Meals</h3>
+                {% for meal in recipe['meals'] %}
+                <div class="chip"><a href="{{ url_for('recipes', meals=meal) }}">{{meal}}</a></div>
+                {% endfor %}
+            </div>
+            {% endif %}
             {% if recipe['tags'] %}
-            <div class="col s12">
+            <div class="col s12 m6">
                 <h3>Tags</h3>
                 {% for tag in recipe['tags'] %}
                 <div class="chip"><a href="{{ url_for('recipes', tags=tag) }}">{{tag}}</a></div>
