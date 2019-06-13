@@ -149,6 +149,7 @@ Recipes - Fork.it
             chipsToInput('#tag-chips', '#tags')
             chipsToInput('#exclude-chips', '#exclude')
             if ($('#sort').val() == 'total-time') $('#order').val('1');
+            else $('#order').val('-1');
 			$('#filter-search').attr('name', 'search');
 			$('#filters-form')[0].submit();
         });

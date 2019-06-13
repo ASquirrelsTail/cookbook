@@ -1,25 +1,54 @@
 {% import 'macros.html' as macro %}
 {% extends "base.html" %}
+{% block title %}
+{{ user_details['username'] }} - Fork.it
+{% endblock %}
 {% block content %}
 <section class="container">
 	<div class="row">
 		<div class="col s12">
-			<h1>{{ user_details['username'] }}</h1>
-		    <p>Member since {{ user_details['joined'] }}</p>
+			<h1 class="no-b-margin">{{ user_details['username'] }}</h1>
+		</div>
+		<div class="col s12 l3">
+			Member since {{ user_details['joined'] }}
+		</div>
+		<div class="col s12 m4 l3">
 		    {% if user_details['follower-count'] %}
-		    <p><a href="#!">Followers: {{ user_details['follower-count'] }}</a></p>
+		    <a href="{{ url_for('user_list', following=user_details['username']) }}">Followers: {{ user_details['follower-count'] }}</a>
 		    {% else %}
-		    <p>Followers: 0</p>
+		    Followers: 0
 		    {% endif %}
+		</div>
+		<div class="col s12 m4 l3">
 		    {% if user_details['following-count'] %}
-		    <p><a href="#!">Following: {{ user_details['following-count'] }}</a></p>
+		    <a href="{{ url_for('user_list', followers=user_details['username']) }}">Following: {{ user_details['following-count'] }}</a>
 		    {% else %}
-		    <p>Following: 0</p>
+		    Following: 0
 		    {% endif %}
-		    <p>Recipes: {{ user_recipes['no_recipes'] }}</p>
+		</div>
+		<div class="col s12 m4 l3">
+		    {% if user_recipes['no_recipes'] and user_recipes['no_recipes'] > 0 %}
+		    <a href="{{ url_for('recipes', username=user_details['username']) }}">Recipes: {{ user_recipes['no_recipes'] }}</a>
+		    {% else %}
+		    Recipes: 0
+		    {% endif %}
 		</div>
 	</div>
+		{% if user_recipes['no_recipes'] and user_recipes['no_recipes'] > 0 %}
+		<div class="row">
+        	<div class="col s12">
+        		<p class="flow-text">{{ user_details['username'] }}'s most recent recipes:</p>
+        	</div>
+        </div>
      	{{ macro.recipe_list(user_recipes['recipes']) }}
-        {{ macro.pagination('recipes', 1, user_recipes['no_recipes'], username=user, preferences='-1')}}
+        {{ macro.pagination('recipes', 1, user_recipes['no_recipes'], username=user_details['username'], preferences='-1')}}
+        {% else %}
+        <div class="row">
+        	<div class="col s12">
+        		<p class="flow-text">This user doesn't have any recipes yet.</p>
+        	</div>
+        </div>
+        {% endif %}
+
 </section>
 {% endblock %}

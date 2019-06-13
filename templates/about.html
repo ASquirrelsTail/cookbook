@@ -1,5 +1,8 @@
 {% import 'macros.html' as macro %}
 {% extends "base.html" %}
+{% block title %}
+About - Fork.it
+{% endblock %}
 {% block content %}
 <article class="container">
 {{ macro.about(request.path) }}

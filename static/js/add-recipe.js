@@ -260,6 +260,7 @@ $(function() {
         updateTimeInput('#cook-time');
         chipsToInput(tagChips, '#tag-input');
         chipsToInput(mealChips, '#meal-input');
+        inputCanvas.renderOutput();
     });
 
     $('.dropdown-content[data-target] a').on('click', function() {

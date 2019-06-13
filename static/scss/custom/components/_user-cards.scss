@@ -1,0 +1,19 @@
+.user-card {
+	margin-bottom: 1rem;
+	@extend .z-depth-1;
+
+	a {
+		color: black;
+	}
+	.user {
+		margin: 0.5rem;
+		font-size: 2.5rem;
+		font-family: $secondary-font-stack;
+		margin-bottom: 0.2rem;
+	}
+
+	.followers {
+		padding: 0 0.5rem 0.5rem;
+		text-align: right;
+	}
+}

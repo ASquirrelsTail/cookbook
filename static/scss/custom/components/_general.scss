@@ -51,6 +51,10 @@ h1 {
 .tabs {
 	.tab {
 		a {
+			color: black;
+			font-family: $secondary-font-stack;
+			font-weight: bold;
+			font-size: 14px;
 			&:hover {
 				background-color: rgba(0,0,0,.1);
 			}

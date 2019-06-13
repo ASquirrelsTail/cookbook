@@ -2613,7 +2613,7 @@ a {
 }
 
 /* 2dp elevation modified*/
-.z-depth-1, .recipe-card .recipe-stats, .recipe-card .recipe-details .recipe-title, .recipe-card .recipe-details .recipe-author, .recipe-card, nav .nav-wrapper, .sidenav, .collapsible, .dropdown-content, .btn-floating, .btn, .btn-small, .btn-large, .toast, nav {
+.z-depth-1, .user-card, .recipe-card .recipe-stats, .recipe-card .recipe-details .recipe-title, .recipe-card .recipe-details .recipe-author, .recipe-card, nav .nav-wrapper, .sidenav, .collapsible, .dropdown-content, .btn-floating, .btn, .btn-small, .btn-large, .toast, nav {
   box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
 }
 
@@ -7391,6 +7391,12 @@ h1 {
   color: #fff;
 }
 
+.tabs .tab a {
+  color: black;
+  font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+  font-weight: bold;
+  font-size: 14px;
+}
 .tabs .tab a:hover {
   background-color: rgba(0, 0, 0, 0.1);
 }
@@ -7528,6 +7534,9 @@ nav.nav-extended .nav-content .tabs i {
 }
 .recipe-info span {
   display: inline-block;
+}
+.recipe-info a {
+  font-weight: bold;
 }
 .recipe-info .stats {
   font-size: 1.5rem;
@@ -7713,6 +7722,23 @@ ol.invalid ~ .helper-text:after, #prep-time.invalid .helper-text:after {
 .recipe-card .recipe-stats i {
   vertical-align: middle;
   margin-right: 0.25rem;
+}
+
+.user-card {
+  margin-bottom: 1rem;
+}
+.user-card a {
+  color: black;
+}
+.user-card .user {
+  margin: 0.5rem;
+  font-size: 2.5rem;
+  font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+  margin-bottom: 0.2rem;
+}
+.user-card .followers {
+  padding: 0 0.5rem 0.5rem;
+  text-align: right;
 }
 
 .carousel .controls-wrapper {

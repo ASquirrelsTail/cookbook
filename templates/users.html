@@ -1,7 +1,7 @@
 {% import 'macros.html' as macro %}
 {% extends "base.html" %}
 {% block title %}
-Recipes - Fork.it
+Users - Fork.it
 {% endblock %}
 {% block content %}
 <section class="container">
@@ -9,29 +9,29 @@ Recipes - Fork.it
         <div class="col s12 l3 filters">
         	<form action="" method="GET" id="filters-form">
 	            <div class="col s12">
-	                <p class="flow-text no-b-margin">{{ no_users }} users.</p>
-	            </div>{#
+	                <p class="flow-text no-b-margin">Found {{ no_users }} users.</p>
+	            </div>
                 <div class="input-field col s12 m6 l12">
                     <select name="sort" id="sort">
-                    	{% if not current_query['sort'] or current_query['sort'] == 'views' %}
-                        <option value="views" selected>Most Viewed</option>
+                    	{% if not current_query['sort'] or current_query['sort'] == 'joined' %}
+                        <option value="joined" selected>Newest</option>
                         {% else %}
-                        <option value="views">Most Viewed</option>
+                        <option value="joined">Newest</option>
                         {% endif %}
-                        {% if current_query['sort'] == 'date' %}
-                        <option value="date" selected>Most Recent</option>
+                        {% if current_query['sort'] == 'recipe-count' %}
+                        <option value="recipe-count" selected>Most Recipes</option>
                         {% else %}
-                        <option value="date">Most Recent</option>
+                        <option value="recipe-count">Most Recipes</option>
                         {% endif %}
-                        {% if current_query['sort'] == 'favourites' %}
-                        <option value="favourites" selected>Most Favourited</option>
+                        {% if current_query['sort'] == 'follower-count' %}
+                        <option value="follower-count" selected>Most Followers</option>
                         {% else %}
-                        <option value="favourites">Most Favourited</option>
+                        <option value="follower-count">Most Followers</option>
                         {% endif %}
-                        {% if current_query['sort'] == 'total-time' and current_query['order'] == '1' %}
-                        <option value="total-time" selected>Quickest</option>
+                        {% if current_query['sort'] == 'username' %}
+                        <option value="username" selected>Alphabetic</option>
                         {% else %}
-                        <option value="total-time">Quickest</option>
+                        <option value="username">Alphabetic</option>
                         {% endif %}
                     </select>
                     <label for="sort">Order by</label>
@@ -41,15 +41,25 @@ Recipes - Fork.it
                 {% else %}
                 <input type="hidden" name='order' id="order" value="-1">
                 {% endif %}
-                #}
             </form>
         </div>
         <div class="col s12 l9">
             {{ macro.pagination('user_list', page, no_users, **current_query)}}
             {% for user in users %}
-                <div class="col s12 user-card">
-                    {{ user['username'] }}
+            <div class="col s12 m6">
+                <div class="user-card">
+                    <a href="{{ url_for('user_page', user=user['username']) }}">
+                        <div class="user">{{ user['username'] }}</div>
+                        <div class="followers">
+                            {% if user['follower-count'] %}
+                            Followers: {{ user['follower-count'] }}
+                            {% else %}
+                            Followers: 0
+                            {% endif %}
+                        </div>
+                    </a>
                 </div>
+            </div>
             {% endfor %}
         </div>
     </div>
@@ -59,4 +69,22 @@ Recipes - Fork.it
     	</div>
     </div>
 </section>
+{% endblock %}
+{% block javascript %}
+<script>
+    const $ = cash;
+    const select = M.FormSelect.init($('select'));
+
+    $(function() {
+        $('.input-field select').on('change', function() {
+            $('#filters-form').trigger('submit');
+        });
+
+        $('#filters-form').on('submit', function() {
+            if ($('#sort').val() == 'username') $('#order').val('1');
+            else $('#order').val('-1');
+            $('#filters-form')[0].submit();
+        });
+    });
+</script>
 {% endblock %}

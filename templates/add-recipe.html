@@ -162,9 +162,10 @@ Add Recipe - Fork.it
     <input type="hidden" name="meals" id="meal-input" value="">
     <div class="input-field col s12">
         {% if action == 'Edit' %}
-        <button class="btn waves-effect waves-light" type="submit" name="action">Update Recipe</button>
+        <button class="btn waves-effect waves-light" type="submit">Update Recipe</button> 
+        <a href="{{ url_for('delete_recipe', urn=urn) }}" class="btn waves-effect waves-light red">Delete Recipe</a>
         {% else %}
-        <button class="btn waves-effect waves-light" type="submit" name="action">Submit Recipe</button>
+        <button class="btn waves-effect waves-light" type="submit">Submit Recipe</button>
         {% endif %}
     </div>
 </form>

@@ -5,7 +5,7 @@ Fork.it
 {% endblock %}
 {% block content %}
 <section class="container-m">
-    <div class="row">
+    <div class="row no-b-margin">
         <div class="carousel carousel-slider" id="features">
             <div class="controls-wrapper">
                 <div class="controls">
@@ -24,7 +24,7 @@ Fork.it
                             <a href="{{ url_for('recipe', urn=recipe['urn']) }}">{{ recipe['title'] }}</a>
                         </div><br>
                         <div class="recipe-author">
-                            by <a href="{{ url_for('recipes', username=recipe['username']) }}">{{ recipe['username'] }}</a>
+                            by <a href="{{ url_for('user_page', user=recipe['username']) }}">{{ recipe['username'] }}</a>
                         </div>
                     </div>
                 </div>

@@ -45,7 +45,7 @@
                     <a href="{{ url_for('recipe', urn=recipe['urn']) }}">{{ recipe['title'] }}</a>
                 </div><br>
                 <div class="recipe-author">
-                    by <a href="{{ url_for('recipes', username=recipe['username']) }}">{{ recipe['username'] }}</a>
+                    by <a href="{{ url_for('user_page', user=recipe['username']) }}">{{ recipe['username'] }}</a>
                 </div>
             </div>
             <a href="{{ url_for('recipe', urn=recipe['urn']) }}">

@@ -39,7 +39,7 @@
     <div class="container">
         <div class="row recipe-info no-b-margin">
             <div class="col s12 m6 l7 center-on-small-only">
-                <span>By <a href="{{ url_for('recipes', username=recipe['username']) }}">{{ recipe['username'] }}</a></span> <span>on {{ recipe['date'] }}</span>
+                <span>By <a href="{{ url_for('user_page', user=recipe['username']) }}">{{ recipe['username'] }}</a></span> <span>on {{ recipe['date'] }}</span>
                 {% if recipe['parent-title'] %}
                 <span>It's a fork of <a href="{{ url_for('recipe', urn=recipe['parent']) }}">{{ parent_title }}</a></span>
                 {% endif %}

@@ -314,7 +314,11 @@ def user_list():
     if page < 1 or (page != 1 and offset >= no_users):
         abort(404)  # Out of bounds error
     sort = request.args.get('sort', 'joined')
-    order = -1
+    order = request.args.get('order', '-1')
+    try:
+        order = int(order)
+    except ValueError:
+        order = -1
     users = mongo.db.users.find(query, {'username': 1}).sort(sort, order).skip(offset).limit(10)
     current_query = request.args.to_dict()
     current_query.pop('page', '')
@@ -537,7 +541,8 @@ def edit_recipe(urn):
                 recipe_data['meals'] = '/'.join(recipe_data['meals'])
             if recipe_data.get('image', '') != '':
                 recipe_data['old-image'] = recipe_data['image']
-            return render_template('add-recipe.html', action='Edit', recipe=recipe_data, username=username, tags=all_tags, meals=all_meals)
+            return render_template('add-recipe.html', action='Edit', urn=urn, recipe=recipe_data,
+                                   username=username, tags=all_tags, meals=all_meals)
     else:
         abort(403)
 
@@ -557,7 +562,8 @@ def delete_recipe(urn):
                 return redirect(url_for('index'))
             else:
                 flash('Failed to delete recipe "{}".'.format(recipe_data['title']))
-        return render_template('delete-recipe.html', title=recipe_data['title'], title_pattern=re_escape(recipe_data['title']), urn=urn, username=username)
+        return render_template('delete-recipe.html', title=recipe_data['title'], title_pattern=re_escape(recipe_data['title']),
+                               urn=urn, username=username)
     else:
         abort(403)
 
