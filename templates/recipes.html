@@ -17,43 +17,54 @@ Recipes - Fork.it
 	                {% if parent_title %}<input type="hidden" name="forks" value="{{ current_query['forks'] }}">{% endif %}
                     <input type="hidden" name="preferences" value="-1">
 	            </div>
-                <div class="input-field col s12 m6 l12">
-                    <input type="text" name="filter-search" id="filter-search" {% if current_query['search'] %}value="{{ current_query['search'] }}" {% endif %}>
-                    <label for="filter-search"><i class="material-icons left">search</i>Search</label>
+                <div class="col s12 hide-on-med-and-up">
+                    {% if current_query['search'] or current_query['meals'] or current_query['tags'] or current_query['exclude'] %}
+                    <a href="#!" id="filter-toggle">Hide filters <i class="material-icons">keyboard_arrow_up</i></a>
                 </div>
-                <div class="input-field col s12 m6 l12">
-                    <select name="meals" id="meals">
-                        {% if current_query['meals'] %}
-                        <option value="">All Meals</option>
-                        {% else %}
-                        <option value="" selected>All Meals</option>
-                        {% endif %}
-                        {% for meal in all_meals %}
-                        {% if current_query['meals'] == meal['name'] %}
-	                    <option value="{{ meal['name'] }}" selected>{{ meal['name'] }}</option>
-	                    {% else %}
-	                    <option value="{{ meal['name'] }}">{{ meal['name'] }}</option>
-	                    {% endif %}
-                        {% endfor %}
-                    </select>
-                    <label for="meals">Meal</label>
+                <div id="filters">
+                    {% else %}
+                    <a href="#!" id="filter-toggle">Show filters <i class="material-icons">keyboard_arrow_down</i></a>
                 </div>
-                <div class="col s12">
-                	<div>Tags</div>
-                	<div id="tag-chips" class="wrap-chips">
-                		{% for tag in all_tags %}
-                        <div class="chip" data-tag="{{ tag['name'] }}"><a href="#!">{{ tag['name'] }}</a></div>
-                        {% endfor %}
-                        <input type="hidden" name='tags' id="tags">
-                	</div>
-                </div>
-                <div class="col s12">
-                    <div>Exclude Tags</div>
-                    <div id="exclude-chips" class="wrap-chips">
-                        {% for tag in all_tags %}
-                        <div class="chip" data-tag="{{ tag['name'] }}"><a href="#!">{{ tag['name'] }}</a></div>
-                        {% endfor %}
-                        <input type="hidden" name='exclude' id="exclude">
+                <div id="filters" class="hide-on-small-and-down">
+                    {% endif %}
+                    <div class="input-field col s12 m6 l12">
+                        <input type="text" name="filter-search" id="filter-search" {% if current_query['search'] %}value="{{ current_query['search'] }}" {% endif %}>
+                        <label for="filter-search"><i class="material-icons left">search</i>Search</label>
+                    </div>
+                    <div class="input-field col s12 m6 l12">
+                        <select name="meals" id="meals">
+                            {% if current_query['meals'] %}
+                            <option value="">All Meals</option>
+                            {% else %}
+                            <option value="" selected>All Meals</option>
+                            {% endif %}
+                            {% for meal in all_meals %}
+                            {% if current_query['meals'] == meal['name'] %}
+    	                    <option value="{{ meal['name'] }}" selected>{{ meal['name'] }}</option>
+    	                    {% else %}
+    	                    <option value="{{ meal['name'] }}">{{ meal['name'] }}</option>
+    	                    {% endif %}
+                            {% endfor %}
+                        </select>
+                        <label for="meals">Meal</label>
+                    </div>
+                    <div class="col s12">
+                    	<div>Tags <i class="material-icons small reset" data-target="include-chips">replay</i></div>
+                    	<div id="include-chips" class="wrap-chips">
+                    		{% for tag in all_tags %}
+                            <div class="chip" data-tag="{{ tag['name'] }}"><a href="#!">{{ tag['name'] }}</a></div>
+                            {% endfor %}
+                            <input type="hidden" name="tags" id="tags">
+                    	</div>
+                    </div>
+                    <div class="col s12">
+                        <div>Exclude Tags <i class="material-icons small reset" data-target="exclude-chips">replay</i></div>
+                        <div id="exclude-chips" class="wrap-chips">
+                            {% for tag in all_tags %}
+                            <div class="chip" data-tag="{{ tag['name'] }}"><a href="#!">{{ tag['name'] }}</a></div>
+                            {% endfor %}
+                            <input type="hidden" name='exclude' id="exclude">
+                        </div>
                     </div>
                 </div>
                 <div class="input-field col s12 m6 l12">
@@ -124,16 +135,31 @@ Recipes - Fork.it
         });
     }
 
+    function resetChips(chipContainer) {
+        $(chipContainer + ' .chip.active').removeClass('active');
+        $('#filters-form').trigger('submit');
+    }
+
     $(function() {
     	{% if current_query['tags'] %}
-        activateChips('#tag-chips', '{{ current_query['tags'] }}')
+        activateChips('#include-chips', '{{ current_query['tags'] }}');
         {% endif %}
         {% if current_query['exclude'] %}
-        activateChips('#exclude-chips', '{{ current_query['exclude'] }}')
+        activateChips('#exclude-chips', '{{ current_query['exclude'] }}');
         {% endif %}
+
+        $('#filter-toggle').on('click', function () {
+            $('#filters').toggleClass('hide-on-small-and-down');
+            if ($('#filters').hasClass('hide-on-small-and-down')) $('#filter-toggle').html('Show filters <i class="material-icons">keyboard_arrow_down</i>');
+            else $('#filter-toggle').html('Hide filters <i class="material-icons">keyboard_arrow_up</i>');
+        });
 
         $('.input-field select').on('change', function() {
             $('#filters-form').trigger('submit');
+        });
+
+        $('.reset').on('click', function() {
+            resetChips('#' + $(this).data('target'))
         });
 
         $('.chip').on('click', function() {
@@ -146,7 +172,7 @@ Recipes - Fork.it
         });
 
         $('#filters-form').on('submit', function() {
-            chipsToInput('#tag-chips', '#tags')
+            chipsToInput('#include-chips', '#tags')
             chipsToInput('#exclude-chips', '#exclude')
             if ($('#sort').val() == 'total-time') $('#order').val('1');
             else $('#order').val('-1');

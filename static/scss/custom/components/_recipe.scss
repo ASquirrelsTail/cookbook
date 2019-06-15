@@ -16,12 +16,20 @@
     margin: 10px;
 }
 
+#filter-toggle {
+    cursor: pointer;
+}
+
+.reset, #filter-toggle i {
+    vertical-align: middle;
+    cursor: pointer;
+}
+
 .recipe-info {
     font-size: 2rem;
     font-family: $secondary-font-stack;
     i {
         vertical-align: middle;
-        
     }
 
     span {

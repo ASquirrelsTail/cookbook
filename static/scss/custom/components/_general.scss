@@ -14,6 +14,10 @@ h1 {
 	margin-bottom: 0;
 }
 
+.secondary-font {
+	font-family: $secondary-font-stack;
+}
+
 .wrap-chips {
 	display: flex;
 	flex-wrap: wrap;
