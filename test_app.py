@@ -894,6 +894,7 @@ class TestDeleteRecipe(TestClient):
         self.mongo.db.users.delete_many({})
         # Delete all records from the recipe collection
         self.mongo.db.recipes.delete_many({})
+        self.logout_user()
 
     def test_page_not_user(self):
         '''
@@ -946,12 +947,51 @@ class TestDeleteRecipe(TestClient):
         self.assertEqual(response.status_code, 404)
 
     def test_delete_recipe(self):
+        '''
+        Deleting a recipe should remove it from the database
+        '''
         self.create_user('Tester')
         self.login_user('Tester')
         self.submit_recipe('Test Recipe')
         urn = self.mongo.db.recipes.find_one({}).get('urn')
         self.client.post('/delete-recipe/{}'.format(urn), data={'confirm': 'Test Recipe'})
         self.assertEqual(self.mongo.db.recipes.find_one({'urn': urn}), None)
+
+    def test_delete_recipe_reduces_count(self):
+        '''
+        Deleting a recipe should reduce the users recipe count.
+        '''
+        self.create_user('Tester')
+        self.login_user('Tester')
+        self.submit_recipe('Test Recipe')
+        urn = self.mongo.db.recipes.find_one({}).get('urn')
+        self.client.post('/delete-recipe/{}'.format(urn), data={'confirm': 'Test Recipe'})
+        self.assertEqual(self.mongo.db.users.find_one({}).get('recipe-count'), 0)
+
+    def test_removes_parent_from_children(self):
+        '''
+        Deleting a recipe should remove references to it from its children.
+        '''
+        self.create_user('Tester')
+        self.login_user('Tester')
+        self.submit_recipe('Test Recipe')
+        urn = self.mongo.db.recipes.find_one({}).get('urn')
+        self.submit_recipe('Test Recipe Fork', parent=urn)
+        self.client.post('/delete-recipe/{}'.format(urn), data={'confirm': 'Test Recipe'})
+        self.assertEqual(self.mongo.db.recipes.find_one().get('parent'), None)
+
+    def test_removes_child_from_parent(self):
+        '''
+        Deleting a recipe should remove references to it from its parent.
+        '''
+        self.create_user('Tester')
+        self.login_user('Tester')
+        self.submit_recipe('Test Recipe')
+        urn = self.mongo.db.recipes.find_one({}).get('urn')
+        self.submit_recipe('Test Recipe Fork', parent=urn)
+        child_urn = self.mongo.db.recipes.find_one({'title': 'Test Recipe Fork'}).get('urn')
+        self.client.post('/delete-recipe/{}'.format(child_urn), data={'confirm': 'Test Recipe Fork'})
+        self.assertNotIn({'urn': child_urn, 'title': 'Test Recipe Fork'}, self.mongo.db.recipes.find_one({'urn': urn}).get('children', []))
 
 
 class TestRecipes(TestClient):

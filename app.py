@@ -549,7 +549,7 @@ def edit_recipe(urn):
 
 @app.route('/delete-recipe/<urn>', methods=['GET', 'POST'])
 def delete_recipe(urn):
-    recipe_data = mongo.db.recipes.find_one({'urn': urn}, {'title': 1, 'username': 1})
+    recipe_data = mongo.db.recipes.find_one({'urn': urn}, {'title': 1, 'username': 1, 'parent': 1, 'children': 1})
     username = session.get('username')
     if recipe_data is None:
         abort(404)
@@ -558,6 +558,11 @@ def delete_recipe(urn):
             if request.form.get('confirm') == recipe_data['title']:
                 mongo.db.recipes.delete_one({'urn': urn})
                 mongo.db.users.update_one({'username': recipe_data['username']}, {'$inc': {'recipe-count': -1}})
+                if recipe_data.get('parent') is not None:
+                    mongo.db.recipes.update_one({'urn': recipe_data['parent']},
+                                                {'$pull': {'children': {'urn': urn, 'title': recipe_data['title']}}})
+                if recipe_data.get('children') is not None:
+                    mongo.db.recipes.update_many({'parent': urn}, {'$set': {'parent': None}})
                 flash('Successfully deleted recipe "{}".'.format(recipe_data['title']))
                 return redirect(url_for('index'))
             else:
