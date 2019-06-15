@@ -15,6 +15,7 @@
 		.recipe-title, .recipe-author {
 			@extend .z-depth-1;
 			@extend .truncate;
+			box-sizing: content-box;
 			display: inline-block;
 			max-width: 80%;
 			margin: 0 1rem 0.5em 1rem;

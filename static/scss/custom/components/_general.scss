@@ -10,46 +10,35 @@ h1 {
 	margin: 1rem;
 }
 
+input:not([type]),
+input[type=text]:not(.browser-default),
+input[type=password]:not(.browser-default),
+input[type=email]:not(.browser-default),
+input[type=url]:not(.browser-default),
+input[type=time]:not(.browser-default),
+input[type=date]:not(.browser-default),
+input[type=datetime]:not(.browser-default),
+input[type=datetime-local]:not(.browser-default),
+input[type=tel]:not(.browser-default),
+input[type=number]:not(.browser-default),
+input[type=search]:not(.browser-default),
+textarea.materialize-textarea {
+	border-bottom: 2px dotted $input-border-color;
+}
+
+.container-m {
+	@extend .container;
+	@media #{$medium-and-down} {
+		width: 100%;
+	}
+}
+
 .no-b-margin {
-	margin-bottom: 0;
+	margin-bottom: 0 !important;
 }
 
 .secondary-font {
 	font-family: $secondary-font-stack;
-}
-
-.wrap-chips {
-	display: flex;
-	flex-wrap: wrap;
-}
-
-.chip {
-	font-family: $secondary-font-stack;
-	font-size: 1rem;
-	border-radius: 0px;
-	vertical-align: middle;
-
-	a {
-		color: black;
-		text-decoration: underline;
-	}
-
-	&:focus {
-		color: #000;
-	}
-	&:hover {
-		color: #000;
-	}
-
-	&.active {
-		background-color: $primary-color;
-		color: #fff;
-		order: -1;
-
-		a {
-			color: #fff;
-		}
-	}
 }
 
 .tabs {
@@ -92,26 +81,37 @@ h1 {
 	}
 }
 
-input:not([type]),
-input[type=text]:not(.browser-default),
-input[type=password]:not(.browser-default),
-input[type=email]:not(.browser-default),
-input[type=url]:not(.browser-default),
-input[type=time]:not(.browser-default),
-input[type=date]:not(.browser-default),
-input[type=datetime]:not(.browser-default),
-input[type=datetime-local]:not(.browser-default),
-input[type=tel]:not(.browser-default),
-input[type=number]:not(.browser-default),
-input[type=search]:not(.browser-default),
-textarea.materialize-textarea {
-	border-bottom: 2px dotted $input-border-color;
+.wrap-chips {
+	display: flex;
+	flex-wrap: wrap;
 }
 
-.container-m {
-	@extend .container;
-	@media #{$medium-and-down} {
-		width: 100%;
+.chip {
+	font-family: $secondary-font-stack;
+	font-size: 1rem;
+	border-radius: 0px;
+	vertical-align: middle;
+
+	a {
+		color: black;
+		text-decoration: underline;
+	}
+
+	&:focus {
+		color: #000;
+	}
+	&:hover {
+		color: #000;
+	}
+
+	&.active {
+		background-color: $primary-color;
+		color: #fff;
+		order: -1;
+
+		a {
+			color: #fff;
+		}
 	}
 }
 

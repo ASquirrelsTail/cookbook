@@ -49,8 +49,12 @@
                 <a href="{{ url_for('recipes', forks=urn) }}" class="tooltipped" data-position="top" data-tooltip="Forks">
                     <i class="material-icons">restaurant_menu</i> {{ recipe['forks'] }}</a> 
                 {% endif %}
-                {% if recipe['favourites'] %}
+                {% if username %}
                 <a href="{{ url_for('favourite_recipe', urn=recipe['urn']) }}" class="fav-link tooltipped" data-position="top" data-tooltip="Favourites">
+                {% else %}
+                <a href="#!" class="tooltipped" data-position="top" data-tooltip="Favourites">
+                {% endif %}
+                {% if recipe['favourites'] %}
                     {% if favourite %}
                     <i class="material-icons">favorite</i> 
                     {% else %}
@@ -58,7 +62,6 @@
                     {% endif %}
                     <span class="fav-count">{{ recipe['favourites'] }}</span></a> 
                 {% else %}
-                <a href="{{ url_for('favourite_recipe', urn=recipe['urn']) }}" class="fav-link tooltipped" data-position="top" data-tooltip="Favourites">
                     <i class="material-icons">favorite_border</i> <span class="fav-count">0</span>
                 </a> 
                 {% endif %}
@@ -302,10 +305,12 @@
     $(function() {
         M.Tooltip.init($('.tooltipped'));
 
+        {% if username %}
         $('.fav-link').on('click', function(e) {
             e.preventDefault();
             jsonGet($(this).attr('href'), updateFavourite);
         });
+        {% endif %}
         $('#feature-btn').on('click', function(e) {
             e.preventDefault();
             jsonGet($(this).attr('href'), updateFeature);

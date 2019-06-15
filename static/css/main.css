@@ -7357,42 +7357,34 @@ h1 {
   margin: 1rem;
 }
 
+input:not([type]),
+input[type=text]:not(.browser-default),
+input[type=password]:not(.browser-default),
+input[type=email]:not(.browser-default),
+input[type=url]:not(.browser-default),
+input[type=time]:not(.browser-default),
+input[type=date]:not(.browser-default),
+input[type=datetime]:not(.browser-default),
+input[type=datetime-local]:not(.browser-default),
+input[type=tel]:not(.browser-default),
+input[type=number]:not(.browser-default),
+input[type=search]:not(.browser-default),
+textarea.materialize-textarea {
+  border-bottom: 2px dotted #9e9e9e;
+}
+
+@media only screen and (max-width : 992px) {
+  .container-m {
+    width: 100%;
+  }
+}
+
 .no-b-margin {
-  margin-bottom: 0;
+  margin-bottom: 0 !important;
 }
 
 .secondary-font {
   font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
-}
-
-.wrap-chips {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.chip {
-  font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
-  font-size: 1rem;
-  border-radius: 0px;
-  vertical-align: middle;
-}
-.chip a {
-  color: black;
-  text-decoration: underline;
-}
-.chip:focus {
-  color: #000;
-}
-.chip:hover {
-  color: #000;
-}
-.chip.active {
-  background-color: #757575;
-  color: #fff;
-  order: -1;
-}
-.chip.active a {
-  color: #fff;
 }
 
 .tabs .tab a {
@@ -7428,26 +7420,34 @@ h1 {
   background-color: initial;
 }
 
-input:not([type]),
-input[type=text]:not(.browser-default),
-input[type=password]:not(.browser-default),
-input[type=email]:not(.browser-default),
-input[type=url]:not(.browser-default),
-input[type=time]:not(.browser-default),
-input[type=date]:not(.browser-default),
-input[type=datetime]:not(.browser-default),
-input[type=datetime-local]:not(.browser-default),
-input[type=tel]:not(.browser-default),
-input[type=number]:not(.browser-default),
-input[type=search]:not(.browser-default),
-textarea.materialize-textarea {
-  border-bottom: 2px dotted #9e9e9e;
+.wrap-chips {
+  display: flex;
+  flex-wrap: wrap;
 }
 
-@media only screen and (max-width : 992px) {
-  .container-m {
-    width: 100%;
-  }
+.chip {
+  font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+  font-size: 1rem;
+  border-radius: 0px;
+  vertical-align: middle;
+}
+.chip a {
+  color: black;
+  text-decoration: underline;
+}
+.chip:focus {
+  color: #000;
+}
+.chip:hover {
+  color: #000;
+}
+.chip.active {
+  background-color: #757575;
+  color: #fff;
+  order: -1;
+}
+.chip.active a {
+  color: #fff;
 }
 
 .see-all {
@@ -7708,6 +7708,7 @@ ol.invalid ~ .helper-text:after, #prep-time.invalid .helper-text:after {
   height: 0px;
 }
 .recipe-card .recipe-details .recipe-title, .recipe-card .recipe-details .recipe-author {
+  box-sizing: content-box;
   display: inline-block;
   max-width: 80%;
   margin: 0 1rem 0.5em 1rem;
