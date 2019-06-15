@@ -17,7 +17,7 @@
     </a>
     {% endif %}
     {% else %}
-    <a href="{{ url_for('favourite_recipe', urn=recipe['urn']) }}" class="btn-floating btn-large waves-effect waves-light tooltipped" data-position="left" data-tooltip="Favourite recipe" id="fav-btn">
+    <a href="{{ url_for('favourite_recipe', urn=recipe['urn']) }}" class="btn-floating btn-large waves-effect waves-light tooltipped fav-link" data-position="left" data-tooltip="Favourite recipe" id="fav-btn">
         {% if favourite %}
         <i class="material-icons">favorite</i>
         {% else %}
@@ -37,23 +37,32 @@
     </div>
     {% endif %}
     <div class="container">
-        <div class="row recipe-info no-b-margin">
+        <div class="row recipe-info">
             <div class="col s12 m6 l7 center-on-small-only">
                 <span>By <a href="{{ url_for('user_page', user=recipe['username']) }}">{{ recipe['username'] }}</a></span> <span>on {{ recipe['date'] }}</span>
                 {% if recipe['parent-title'] %}
-                <span>It's a fork of <a href="{{ url_for('recipe', urn=recipe['parent']) }}">{{ parent_title }}</a></span>
+                <span>It's a fork of <a href="{{ url_for('recipe', urn=recipe['parent']) }}">{{ recipe['parent-title'] }}</a></span>
                 {% endif %}
             </div>
             <div class="col s12 m6 l5 center stats">
                 {% if recipe['forks'] %}
-                <a href="{{ url_for('recipes', forks=urn) }}"><i class="material-icons">restaurant_menu</i> {{ recipe['forks'] }}</a> 
+                <a href="{{ url_for('recipes', forks=urn) }}" class="tooltipped" data-position="top" data-tooltip="Forks">
+                    <i class="material-icons">restaurant_menu</i> {{ recipe['forks'] }}</a> 
                 {% endif %}
                 {% if recipe['favourites'] %}
-                <i class="material-icons">favorite</i> {{ recipe['favourites'] }} 
+                <a href="{{ url_for('favourite_recipe', urn=recipe['urn']) }}" class="fav-link tooltipped" data-position="top" data-tooltip="Favourites">
+                    {% if favourite %}
+                    <i class="material-icons">favorite</i> 
+                    {% else %}
+                    <i class="material-icons">favorite_border</i> 
+                    {% endif %}
+                    <span class="fav-count">{{ recipe['favourites'] }}</span></a> 
                 {% else %}
-                <i class="material-icons">favorite</i> 0
+                <a href="{{ url_for('favourite_recipe', urn=recipe['urn']) }}" class="fav-link tooltipped" data-position="top" data-tooltip="Favourites">
+                    <i class="material-icons">favorite_border</i> <span class="fav-count">0</span>
+                </a> 
                 {% endif %}
-                <a href="#comments">
+                <a href="#comments" class="tooltipped" data-position="top" data-tooltip="Jump to comments">
                 {% if recipe['comment-count'] %}
                 <i class="material-icons">comment</i> {{ recipe['comment-count'] }} 
                 {% else %}
@@ -263,10 +272,12 @@
             if (this.status == 200) {
                 let response = JSON.parse(this.responseText);
                 if (response.favourite === true) {
-                    $('#fav-btn i').text('favorite');
+                    $('.fav-count').text(parseInt($('.fav-count').text()) + 1)
+                    $('.fav-link i').text('favorite');
                     M.toast({ html: '<i class="material-icons left">favorite</i> Recipe added to favorites!' });
                 }else if (response.favourite === false) {
-                    $('#fav-btn i').text('favorite_border');
+                    $('.fav-link i').text('favorite_border');
+                    $('.fav-count').text(parseInt($('.fav-count').text()) -1)
                     M.toast({ html: 'Recipe removed from favourites.' });
                 }
             }else M.toast({ html: 'Oops. Something went wrong.' });
@@ -291,7 +302,7 @@
     $(function() {
         M.Tooltip.init($('.tooltipped'));
 
-        $('#fav-btn').on('click', function(e) {
+        $('.fav-link').on('click', function(e) {
             e.preventDefault();
             jsonGet($(this).attr('href'), updateFavourite);
         });

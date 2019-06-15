@@ -7545,6 +7545,9 @@ nav.nav-extended .nav-content .tabs i {
 .recipe-info .stats i {
   font-size: 3rem;
 }
+.recipe-info .stats a {
+  color: black;
+}
 .recipe-info .times {
   font-size: 1.3rem;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
@@ -7568,6 +7571,9 @@ nav.nav-extended .nav-content .tabs i {
 }
 .ingredients tbody {
   border: 2px solid rgba(242, 242, 242, 0.5);
+}
+.ingredients tbody td {
+  padding: 5px 5px;
 }
 .ingredients h2 {
   margin: 0;

@@ -614,7 +614,7 @@ def recipe(urn):
         if recipe['username'] != username:
             mongo.db.recipes.update_one({'urn': urn}, {'$inc': {'views': 1}})
             if username is not None:
-                favourite = mongo.db.users.find_one({'username': username, 'favourites': {'$in': [urn]}}, {'_id': 1})
+                favourite = username in recipe.get('favouriting-users', [])
         recipe['ingredients'] = recipe['ingredients'].split('\n')
         recipe['methods'] = recipe['methods'].split('\n')
         recipe['date'] = datetime.strptime(recipe['date'], "%Y-%m-%d %H:%M:%S").strftime('%a %d %b \'%y')
