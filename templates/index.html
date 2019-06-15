@@ -16,12 +16,12 @@ Fork.it
             {% for recipe in featured_recipes %}
             <div class="carousel-item">
                 <div class="recipe-card">
-                    <a href="{{ url_for('recipe', urn=recipe['urn']) }}">
+                    <a href="{{ url_for('recipe', urn=recipe['urn']) }}"  title="{{ recipe['title'] }} by {{ recipe['username'] }}">
                         <img src="{{ recipe['image'] }}" alt="{{ recipe['title'] }}" class="responsive-img">
                     </a>
                     <div class="recipe-details">
                         <div class="recipe-title">
-                            <a href="{{ url_for('recipe', urn=recipe['urn']) }}">{{ recipe['title'] }}</a>
+                            <a href="{{ url_for('recipe', urn=recipe['urn']) }}" title="{{ recipe['title'] }}">{{ recipe['title'] }}</a>
                         </div><br>
                         <div class="recipe-author">
                             by <a href="{{ url_for('user_page', user=recipe['username']) }}">{{ recipe['username'] }}</a>
@@ -56,17 +56,23 @@ Fork.it
     <div class="row">
         <div id="recent-recipes" class="col s12">
             {{ macro.recipe_list(recent_recipes['recipes']) }}
-            {{ macro.pagination('recipes', recent_recipes['page'], recent_recipes['no_recipes'], **recent_recipes['query'])}}
+            <div class="row center">
+                <a href="{{ url_for('recipes', **recent_recipes['query'])}}" class="waves-effect waves-light btn see-all">See all recent recipes</a>
+            </div>
         </div>
         {% if following_recipes %}
         <div id="following-recipes" class="col s12">
             {{ macro.recipe_list(following_recipes['recipes']) }}
-            {{ macro.pagination('recipes', following_recipes['page'], following_recipes['no_recipes'], **following_recipes['query'])}}
+            <div class="row center">
+                <a href="{{ url_for('recipes', **following_recipes['query'])}}" class="waves-effect waves-light btn see-all">See all recipes from those you follow</a>
+            </div>
         </div>
         {% endif %}
         <div id="popular-recipes" class="col s12">
             {{ macro.recipe_list(popular_recipes['recipes']) }}
-            {{ macro.pagination('recipes', popular_recipes['page'], popular_recipes['no_recipes'], **popular_recipes['query'])}}
+            <div class="row center">
+                <a href="{{ url_for('recipes', **popular_recipes['query'])}}" class="waves-effect waves-light btn see-all">See all popular recipes</a>
+            </div>
         </div>
         <div id="about" class="col s12">
             {{ macro.about(request.path) }}

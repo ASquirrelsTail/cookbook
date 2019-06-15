@@ -42,13 +42,13 @@
         <div class="recipe-card">
             <div class="recipe-details">
                 <div class="recipe-title">
-                    <a href="{{ url_for('recipe', urn=recipe['urn']) }}">{{ recipe['title'] }}</a>
+                    <a href="{{ url_for('recipe', urn=recipe['urn']) }}" title="{{ recipe['title'] }}">{{ recipe['title'] }}</a>
                 </div><br>
                 <div class="recipe-author">
                     by <a href="{{ url_for('user_page', user=recipe['username']) }}">{{ recipe['username'] }}</a>
                 </div>
             </div>
-            <a href="{{ url_for('recipe', urn=recipe['urn']) }}">
+            <a href="{{ url_for('recipe', urn=recipe['urn']) }}" title="{{ recipe['title'] }} by {{ recipe['username'] }}">
                 {% if recipe['image'] %}
                 <img src="{{ recipe['image'] }}" alt="{{ recipe['title'] }} by {{ recipe['username'] }}" class="responsive-img">
                 {% else %}

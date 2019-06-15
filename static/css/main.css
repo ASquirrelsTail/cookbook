@@ -7446,6 +7446,10 @@ textarea.materialize-textarea {
   }
 }
 
+.see-all {
+  margin-top: 15px;
+}
+
 footer ul {
   display: flex;
   flex-direction: row;
