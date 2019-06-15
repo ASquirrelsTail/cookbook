@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}
+Server Error - Fork.it
+{% endblock %}
+{% block content %}
+<section class="container">
+	<div class="row">
+		<div class="col s12 center">
+			<h1>Uh-oh! Something has gone wrong!</h1>
+		</div>
+		<div class="col s6 offset-s3 center">
+			<img src="{{url_for('static', filename='images/500.png') }}" alt="500 Server Error" class="responsive-img">
+		</div>
+		<div class="col s12">
+			<p class="flow-text">
+				Everything is fine, but it might be better if you went back to the <a href="{{ url_for('index') }} ">home page</a>.
+			</p>
+		</div>
+	</div>
+</section>
+{% endblock %}
