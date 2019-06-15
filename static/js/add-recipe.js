@@ -1,9 +1,9 @@
-const $ = cash;
+var $ = cash; // Get cash functions from materialize.js
 
-// Initialise that materialize chips and dropdowns
-const tagChips = M.Chips.init($('#tag-chips')[0], { onChipAdd: addChip, onChipDelete: removeChip });
+// Initialise  materialize chips and dropdowns
+var tagChips = M.Chips.init($('#tag-chips')[0], { onChipAdd: addChip, onChipDelete: removeChip });
 $(tagChips.el).find('input').addClass('hide'); // Hide the text input from the chips array, so users can't add custom tags
-const mealChips = M.Chips.init($('#meal-chips')[0], { onChipAdd: addChip, onChipDelete: removeChip });
+var mealChips = M.Chips.init($('#meal-chips')[0], { onChipAdd: addChip, onChipDelete: removeChip });
 $(mealChips.el).find('input').addClass('hide'); // Hide the text input from the chips array, so users can't add custom tags
 M.Dropdown.init($('.dropdown-trigger'));
 
@@ -32,7 +32,7 @@ function removeChip($el, chip) {
 // Converts the contents of chips to a string in the input element so they can be submitted
 function chipsToInput(chipInstance, inputElem) {
     if (chipInstance.chipsData.length > 0) {
-        let tags = chipInstance.chipsData.map(function(chip) {
+        var tags = chipInstance.chipsData.map(function(chip) {
             return chip.tag;
         });
         $(inputElem).val(tags.join('/'));
@@ -42,8 +42,8 @@ function chipsToInput(chipInstance, inputElem) {
 
 // Converts the inputs from the time fields into a 00:00 time string to be submitted
 function updateTimeInput(target) {
-    let hours = parseInt($(target + ' .hours').val());
-    let minutes = parseInt($(target + ' .minutes').val());
+    var hours = parseInt($(target + ' .hours').val());
+    var minutes = parseInt($(target + ' .minutes').val());
     if (minutes > 59) {
         $(target + ' .hours').val(Math.min(hours + 1, 24));
         $(target + ' .minutes').val(0)
@@ -57,7 +57,7 @@ function updateTimeInput(target) {
 
 // Combines multiple fields into one, split by newlines for submission.
 function concatFields(selector, target) {
-    let fields = [];
+    var fields = [];
     $(selector).each(function() {
         if ($(this).val() != null && $(this).val() != '') fields.push($(this).val());
     });
@@ -76,11 +76,11 @@ function deleteOldImage() {
 // Resets file input if input value is blank
 function loadImage() {
     if ($('#image-upload').val() != '' && $('#image-upload').val() != null) {
-        let reader = new FileReader();
+        var reader = new FileReader();
         reader.readAsDataURL($('#image-upload')[0].files[0]);
         reader.onload = () => {
             window.image = new Image();
-            let image = window.image;
+            var image = window.image;
             image.src = reader.result;
             image.addEventListener('load', function() {
                 deleteOldImage();
@@ -89,7 +89,7 @@ function loadImage() {
                 $('#image-crop').addClass('scale-in');
             }, false);
         };
-    }else resetFileInput();
+    } else resetFileInput();
 }
 
 
@@ -97,7 +97,7 @@ function loadImage() {
 // Clears the file input by replacing it and reattaching the on change event.
 function resetFileInput() {
     $('#image-upload').parent().parent().find('.file-path').val('');
-    $('#input-canvas').css({height: '0px'});
+    $('#input-canvas').css({ height: '0px' });
     $('#image-delete').removeClass('scale-in');
     $('#image-crop').removeClass('scale-in');
     $('#image-crop').removeClass('green');
@@ -106,8 +106,8 @@ function resetFileInput() {
     $('#image-crop i').text('crop');
     inputCanvas.image = null;
 
-    let imageUpload = $('#image-upload');
-    let parent = imageUpload.parent();
+    var imageUpload = $('#image-upload');
+    var parent = imageUpload.parent();
     imageUpload.remove();
     parent.append('<input type="file" id="image-upload" accept="image/*">');
     $('#image-upload').on('change', loadImage);
@@ -115,26 +115,27 @@ function resetFileInput() {
 }
 
 
-// Adds a new method textarea when user enters a new line, removes the textarea if they backspace the start of it
+// Adds a new textarea when user enters a new line, removes the textarea if they backspace the start of it
 // Text before/after the caret is passed to the next textarea
-function addRemoveMethodLine(e) {
+function addRemoveInputLine(e) {
     if (e.which == 13) {
         e.preventDefault();
         if ($(this).val() != null) {
-            let textBefore = $(this).val().slice(0, $(this).prop("selectionStart"));
-            let textAfter = $(this).val().slice($(this).prop("selectionEnd"));
+            var textBefore = $(this).val().slice(0, $(this).prop("selectionStart"));
+            var textAfter = $(this).val().slice($(this).prop("selectionEnd"));
             $(this).val(textBefore)
             $(this).parent().after('<li><textarea class="materialize-textarea"></textarea></li>');
-            let newTextarea = $(this).parent().next().find('textarea');
+            var newTextarea = $(this).parent().next().find('textarea');
             newTextarea.val(textAfter); // Set contents to text after newline
             newTextarea[0].setSelectionRange(0, 0); // Move the caret to the start
             newTextarea[0].focus(); // Focus the textarea
-            newTextarea.on('keydown', addRemoveMethodLine); // Add event listener for this function
+            newTextarea.on('keydown', addRemoveInputLine); // Add event listener for this function
         }
-    }else if (e.which == 8 && $(this).prop("selectionStart") == 0 && $('.method textarea').length > 1) { // Backspace, and caret is at start of input, and this isn't the only textarea
+        // Backspace, and caret is at start of input, and this isn't the only textarea
+    } else if (e.which == 8 && $(this).prop("selectionStart") == 0 && $(this).parent().parent().find('textarea').length > 1) {
         e.preventDefault();
-        let textContent = $(this).val();
-        let prevTextarea = $(this).parent().prev().find('textarea');
+        var textContent = $(this).val();
+        var prevTextarea = $(this).parent().prev().find('textarea');
         console.log(prevTextarea);
         if (textContent != null) { // If there is content and another textarea before this one move it the previous textarea and delete this one
             textContent = textContent.slice($(this).prop("selectionEnd"))
@@ -145,7 +146,7 @@ function addRemoveMethodLine(e) {
                 prevTextarea[0].focus();
                 $(this).parent().remove();
             }
-        }else{
+        } else {
             if (prevTextarea && prevTextarea.length > 0) prevTextarea[0].focus(); // Otherwise move the cursor to the previous input, or the next and delete this one
             else $(this).parent().next().find('textarea')[0].focus();
             $(this).parent().remove();
@@ -154,72 +155,34 @@ function addRemoveMethodLine(e) {
 }
 
 
-// Adds a new ingredient text input when user enters a new line, removes the input if they backspace the start of it
-// Text before/after the caret is passed to the next input
-function addRemoveIngredientLine(e) {
-    if (e.which == 13) { // Enter
-        e.preventDefault();
-        if ($(this).val() != null) {
-            let textBefore = $(this).val().slice(0, $(this).prop("selectionStart"));
-            let textAfter = $(this).val().slice($(this).prop("selectionEnd"));
-            $(this).val(textBefore)
-            $(this).after('<input class="ingredient" type="text">');
-            let newTextInput = $(this).next();
-            newTextInput.val(textAfter); // Set contents to the text after the newline
-            newTextInput[0].setSelectionRange(0, 0); // Move the caret to the start
-            newTextInput[0].focus(); // Focus the new input
-            newTextInput.on('keydown', addRemoveIngredientLine); // Add event listener for this function
-            newTextInput.on('blur', function() {
-                if ($('.ingredient').eq(0).val()) $('#ingredient-label').addClass('active');
-            });
-            
-        }
-    }else if (e.which == 8 && $(this).prop("selectionStart") == 0 && $('.ingredient').length > 1) { // Backspace, and caret is at start of input, and this isn't the only input
-        e.preventDefault();
-        let textContent = $(this).val();
-        let prevTextInput = $(this).prev();
-        if (textContent != null) { // If there is content and another input before this one move it the previous input and delete this one
-            textContent = textContent.slice($(this).prop("selectionEnd"))
-            if (prevTextInput.hasClass('ingredient')) {
-                caretPosition = prevTextInput.val().length;
-                prevTextInput.val(prevTextInput.val() + textContent);
-                prevTextInput.prop("selectionStart", caretPosition).prop("selectionEnd", caretPosition);
-                prevTextInput[0].focus();
-                $(this).remove();
-            }
-        }else{
-            if (prevTextInput.hasClass('ingredient')) prevTextInput[0].focus(); // Otherwise move the cursor to the previous input, or the next and delete this one
-            else $(this).next()[0].focus();
-            $(this).remove();
-        }
-    }
-}
-
+// Validates the prep time input field before submission
 function validatePrepTime() {
     updateTimeInput('#prep-time');
     if ($('#prep-time-input').val() == '00:00') {
         $('#prep-time input[type=number]').addClass('invalid');
         $('#prep-time').addClass('invalid');
         return false;
-    }else{
+    } else {
         $('#prep-time input[type=number]').removeClass('invalid');
         $('#prep-time').removeClass('invalid');
         return true;
     }
 }
 
+
+// Validates a multiline input (such as ingredient or method) to ensure there is something to submit
 function validateMultilineInput(target) {
     var valid = false;
-        $(target).each(function() {
-            if ($(this).val() != '' && $(this).val() != null) valid = true;
-        })
-        if (!valid) {
-            $(target).addClass('invalid');
-            return false;
-        }else{
-            $(target).removeClass('invalid');
-            return true;
-        }
+    $(target).each(function() {
+        if ($(this).val() != '' && $(this).val() != null) valid = true;
+    })
+    if (!valid) {
+        $(target).addClass('invalid');
+        return false;
+    } else {
+        $(target).removeClass('invalid');
+        return true;
+    }
 }
 
 
@@ -227,17 +190,19 @@ function validateMultilineInput(target) {
 $(function() {
 
     M.Tooltip.init($('.tooltipped'));
-    
+
     // Fix materialize label focus bug
     $("label").on('click', function() {
-        let target = $(this).attr('for');
+        var target = $(this).attr('for');
         if (target) $('[name="' + target + '"]')[0].focus();
     });
 
+    //Initialise the canvas for editing images
     inputCanvas.init();
 
+    // Attach on submit event to form, validate inputs then prepare them for submission
     $('#create-recipe').on('submit', function(e) {
-        if (!validatePrepTime()) {
+        if (!validatePrepTime()) { // If a validation fails, focus its input
             e.preventDefault();
             $('#prep-time .hours')[0].focus();
         }
@@ -245,27 +210,31 @@ $(function() {
             e.preventDefault();
             $('ol.method').addClass('invalid');
             $('.method textarea')[0].focus();
-        }else $('ol.method').removeClass('invalid');
-        if (!validateMultilineInput('.ingredient')) {
+        } else $('ol.method').removeClass('invalid');
+        if (!validateMultilineInput('.ingredient textarea')) {
             e.preventDefault();
-            $('.ingredient')[0].focus();
-        }
+            $('ul.ingredient').addClass('invalid');
+            $('.ingredient textarea')[0].focus();
+        } else $('ul.method').removeClass('invalid');
         if (!validateMultilineInput('[name=title]')) {
             e.preventDefault();
             $('[name=title]')[0].focus();
         }
-        concatFields('.ingredient', '#ingredients');
+
+        // Convert all inputs to strings
+        concatFields('.ingredient textarea', '#ingredients');
         concatFields('.method textarea', '#methods');
-        
         updateTimeInput('#cook-time');
         chipsToInput(tagChips, '#tag-input');
         chipsToInput(mealChips, '#meal-input');
+        // Draw the final image to the hidden canvas, then render it as a string to a hidden input.
         inputCanvas.renderOutput();
     });
 
+    // Listen for add tag or add meal
     $('.dropdown-content[data-target] a').on('click', function() {
-        let tagName = $(this).attr('data-chip-name');
-        let chipInstance = M.Chips.getInstance($('#' + $(this).parent().parent().attr('data-target'))[0]);
+        var tagName = $(this).attr('data-chip-name');
+        var chipInstance = M.Chips.getInstance($('#' + $(this).parent().parent().attr('data-target'))[0]);
         chipInstance.addChip({ tag: tagName });
     });
 
@@ -275,6 +244,14 @@ $(function() {
 
     $('#image-crop').on('click', inputCanvas.toggleCrop);
 
+    $('#image-reset').on('click', function() {
+        inputCanvas.autoCrop();
+        inputCanvas.showAll();
+    });
+
+    $('#image-upload').on('change', loadImage);
+
+    // Resize canvas on window resize, debounce to a third of a second.
     $(window).on('resize', function() {
         if (!inputCanvas.debounce) {
             inputCanvas.debounce = true;
@@ -284,36 +261,28 @@ $(function() {
         }
     });
 
-    $('#image-reset').on('click', function () {
-        inputCanvas.autoCrop();
-        inputCanvas.showAll();
-    });
-
-    $('#image-upload').on('change', loadImage);
-
-    $('.method textarea').on('keydown', addRemoveMethodLine).on('blur', function() {
+    // Listen for newlines on methods and ingredients, and validate them on blur. Add the invalid class to the ol element to trigger the tooltip if necessary.
+    $('.method textarea').on('keydown', addRemoveInputLine).on('blur', function() {
         if (validateMultilineInput('.method textarea')) $('ol.method').removeClass('invalid');
         else $('ol.method').addClass('invalid');
     });
-
-    $('.ingredient').on('keydown', addRemoveIngredientLine).on('blur', function() {
-        validateMultilineInput('.ingredient')
+    $('.ingredient textarea').on('keydown', addRemoveInputLine).on('blur', function() {
+        if (validateMultilineInput('.ingredient textarea')) $('ol.ingredient').removeClass('invalid');
+        else $('ul.ingredient').addClass('invalid');
     });
 
+    // Validate inputs on blur
     $('[name=title]').on('blur', function() {
         validateMultilineInput('[name=title]')
     });
-
-    $('#ingredient-label').on('click', function() {
-        $(this).next()[0].focus();
-    });
-
     $('#prep-time input[type=number]').on('blur', validatePrepTime);
 });
 
 
-// inputCanvas stores, manipulates and outputs uploaded images for submission
-let inputCanvas = {
+// inputCanvas stores, manipulates and outputs uploaded images for submission.
+// It uses 2 canvases, one to show the user what they're using,
+// and another to render the image out at the correct resolution before converting it to a string to submit.
+var inputCanvas = {
     elem: $('#input-canvas')[0],
     $elem: $('#input-canvas'),
     ctx: $('#input-canvas')[0].getContext('2d'),
@@ -322,15 +291,19 @@ let inputCanvas = {
     aspect: 7 / 12,
     crop: false,
     mouse: false,
-    cropStart: {x: 100, y: 100},
-    cropSize: {x: 120, y: 70},
-    init() {
-        let that = this;
+    cropStart: { x: 100, y: 100 },
+    cropSize: { x: 120, y: 70 },
+    init: function() { // Sets up input canvas for image editing.
+        var that = this;
+        // Adds mouse eent listeners for input canvas
         this.$elem.on('mousedown', function(e) {
             e.preventDefault();
             if (that.crop) {
-                that.mouse = {x: ((e.pageX - $(this).offset().left - (that.width / 2)) / that.scale) + (that.image.width / 2),
-                              y: ((e.pageY - $(this).offset().top - (that.height / 2)) / that.scale) + (that.image.height / 2)};
+                // If we are cropping, registers the mouse position.
+                that.mouse = {
+                    x: ((e.pageX - $(this).offset().left - (that.width / 2)) / that.scale) + (that.image.width / 2),
+                    y: ((e.pageY - $(this).offset().top - (that.height / 2)) / that.scale) + (that.image.height / 2)
+                };
             }
         });
         this.$elem.on('mouseup', function() {
@@ -341,84 +314,92 @@ let inputCanvas = {
         });
         this.$elem.on('mousemove', function(e) {
             if (that.crop) {
-                let newMouse = {x: ((e.pageX - $(this).offset().left - (that.width / 2)) / that.scale) + (that.image.width / 2),
-                                y: ((e.pageY - $(this).offset().top - (that.height / 2)) / that.scale) + (that.image.height / 2)};
+                // If we are cropping registers the new mosue position
+                var newMouse = {
+                    x: ((e.pageX - $(this).offset().left - (that.width / 2)) / that.scale) + (that.image.width / 2),
+                    y: ((e.pageY - $(this).offset().top - (that.height / 2)) / that.scale) + (that.image.height / 2)
+                };
                 if (that.mouse) {
-                    let mouseChange = {x: newMouse.x - that.mouse.x, y: newMouse.y - that.mouse.y}
+                    // If there is a previous mouse position logged, calculate the change
+                    var mouseChange = { x: newMouse.x - that.mouse.x, y: newMouse.y - that.mouse.y }
                     if (that.crop == 'move') {
+                        // If we are repositioning the image, move the image by the amount the mouse moved
                         that.cropStart.x += mouseChange.x;
                         that.cropStart.y += mouseChange.y;
-                    }else if (that.crop == 'nw-resize') {
-                        let change = mouseChange.x;
+                    } else if (that.crop == 'nw-resize') {
+                        // If we are resizing, move that corner by the amount the mouse moved, constrain the aspect, and limit scaling the crop to within the image boundries
+                        var change = mouseChange.x;
                         if (that.cropStart.x < -change) change = -that.cropStart.x;
                         if (that.cropStart.y < -change * that.aspect) change = -that.cropStart.y / that.aspect;
                         that.cropStart.x += change;
                         that.cropStart.y += change * that.aspect;
                         that.cropSize.x -= change;
                         that.cropSize.y -= change * that.aspect;
-                    }else if (that.crop == 'se-resize') {
-                        let change = mouseChange.x;
+                    } else if (that.crop == 'se-resize') {
+                        var change = mouseChange.x;
                         if (that.image.width - (that.cropStart.x + that.cropSize.x) < change) change = that.image.width - (that.cropStart.x + that.cropSize.x);
                         if (that.image.height - (that.cropStart.y + that.cropSize.y) < change * that.aspect) change = (that.image.height - (that.cropStart.y + that.cropSize.y)) / that.aspect;
                         that.cropSize.x += change;
                         that.cropSize.y += change * that.aspect;
-                    }else if (that.crop == 'ne-resize') {
-                        let change = mouseChange.x;
+                    } else if (that.crop == 'ne-resize') {
+                        var change = mouseChange.x;
                         if (that.image.width - (that.cropStart.x + that.cropSize.x) < change) change = that.image.width - (that.cropStart.x + that.cropSize.x);
                         if (that.cropStart.y < change * that.aspect) change = -that.cropStart.y / that.aspect;
                         that.cropStart.y -= change * that.aspect;
                         that.cropSize.x += change;
                         that.cropSize.y += change * that.aspect;
-                    }else if (that.crop == 'sw-resize') {
-                        let change = mouseChange.x;
+                    } else if (that.crop == 'sw-resize') {
+                        var change = mouseChange.x;
                         if (that.cropStart.x < -change) change = -that.cropStart.x;
                         if (that.image.height - (that.cropStart.y + that.cropSize.y) < -change * that.aspect) change = (that.image.height - (that.cropStart.y + that.cropSize.y)) / that.aspect;
                         that.cropStart.x += change;
                         that.cropSize.x -= change;
                         that.cropSize.y -= change * that.aspect;
                     }
+                    // Constrain the crop to within the boundries of the image
                     if (that.cropStart.x < 0) that.cropStart.x = 0;
                     else if (that.cropStart.x > that.image.width - that.cropSize.x) that.cropStart.x = that.image.width - that.cropSize.x;
                     if (that.cropStart.y < 0) that.cropStart.y = 0;
                     else if (that.cropStart.y > that.image.height - that.cropSize.y) that.cropStart.y = that.image.height - that.cropSize.y;
                     that.mouse = newMouse;
-                    that.showAll();
-                }else if (newMouse.x > that.cropStart.x + (that.cropSize.x / 5) && newMouse.x < that.cropStart.x + (that.cropSize.x * 0.8) &&
-                          newMouse.y > that.cropStart.y + (that.cropSize.y / 5) && newMouse.y < that.cropStart.y + (that.cropSize.y * 0.8)) {
-                    that.$elem.css({cursor: 'move'});
+                    that.showAll(); // Redraw the image
+                    // If the mouse isn't down, chnage the cursor based on its position within the crop
+                } else if (newMouse.x > that.cropStart.x + (that.cropSize.x / 5) && newMouse.x < that.cropStart.x + (that.cropSize.x * 0.8) &&
+                    newMouse.y > that.cropStart.y + (that.cropSize.y / 5) && newMouse.y < that.cropStart.y + (that.cropSize.y * 0.8)) {
+                    that.$elem.css({ cursor: 'move' });
                     that.crop = 'move';
-                }else{
+                } else {
                     if (newMouse.x < that.cropStart.x + (that.cropSize.x / 2)) {
                         if (newMouse.y < that.cropStart.y + (that.cropSize.y / 2)) that.crop = 'nw-resize';
                         else that.crop = 'sw-resize';
-                    }else{
+                    } else {
                         if (newMouse.y < that.cropStart.y + (that.cropSize.y / 2)) that.crop = 'ne-resize';
                         else that.crop = 'se-resize';
                     }
-                    that.$elem.css({cursor: that.crop});
+                    that.$elem.css({ cursor: that.crop });
                 }
             }
-            
+
         });
     },
-    toggleCrop() {
-        if (inputCanvas.crop){
+    toggleCrop: function() { // Toggle the input canvas in and out of crop mode, change buttons to reflect options
+        if (inputCanvas.crop) {
             inputCanvas.showOutput();
             $('#image-reset').removeClass('scale-in');
             $('#image-crop i').text('crop');
             $('#image-crop').removeClass('green');
             inputCanvas.crop = false;
-            inputCanvas.$elem.css({cursor: 'auto'});
-        }else{
+            inputCanvas.$elem.css({ cursor: 'auto' });
+        } else {
             $('#image-crop i').text('check');
             $('#image-crop').addClass('green');
             $('#image-reset').addClass('scale-in');
             inputCanvas.crop = true;
-            inputCanvas.$elem.css({cursor: 'move'});
+            inputCanvas.$elem.css({ cursor: 'move' });
             inputCanvas.showAll();
         }
     },
-    setImage(image) {
+    setImage: function(image) { // Set the image to edit in the input canvas
         this.image = image;
         this.autoCrop();
         this.showOutput();
@@ -427,39 +408,39 @@ let inputCanvas = {
         $('#image-crop i').text('crop');
         inputCanvas.crop = false;
     },
-    autoCrop() {
-        let imageAspect = this.image.height / this.image.width;
+    autoCrop: function() { // Crop the image to the centre of the image, constrained to the aspect ratio, as large as it will fit.
+        var imageAspect = this.image.height / this.image.width;
         if (imageAspect > this.aspect) {
             this.cropSize.x = this.image.width;
             this.cropSize.y = this.cropSize.x * this.aspect;
             this.cropStart.x = 0;
             this.cropStart.y = (this.image.height - this.cropSize.y) / 2;
-        }else{
+        } else {
             this.cropSize.y = this.image.height;
             this.cropSize.x = this.cropSize.y / this.aspect;
             this.cropStart.y = 0;
             this.cropStart.x = (this.image.width - this.cropSize.x) / 2;
         }
     },
-    showOutput() {
+    showOutput: function() { // Show only the cropped image in the input canvas
         this.width = this.elem.width = this.$elem.parent().width();
         this.height = this.elem.height = this.width * this.aspect;
-        this.$elem.css({height: this.height + 'px'});
+        this.$elem.css({ height: this.height + 'px' });
         this.ctx.resetTransform();
         this.scale = this.width / this.cropSize.x;
         this.ctx.scale(this.scale, this.scale);
         this.ctx.drawImage(this.image, -this.cropStart.x, -this.cropStart.y);
         this.renderOutput();
     },
-    showAll() {
-        let imageAspect = this.image.height / this.image.width;
+    showAll: function() { // Show the whole image in the input canvas, with the cropped area marked.
+        var imageAspect = this.image.height / this.image.width;
         if (imageAspect > this.aspect) this.scale = this.height / this.image.height;
         else this.scale = this.width / this.image.width;
         this.ctx.resetTransform();
         this.ctx.clearRect(0, 0, this.width, this.height)
-        this.ctx.translate(this.width /2, this.height /2);
+        this.ctx.translate(this.width / 2, this.height / 2);
         this.ctx.scale(this.scale, this.scale);
-        this.ctx.translate(-this.image.width /2, -this.image.height /2);
+        this.ctx.translate(-this.image.width / 2, -this.image.height / 2);
         this.ctx.drawImage(this.image, 0, 0);
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         // https://stackoverflow.com/questions/13618844/polygon-with-a-hole-in-the-middle-with-html5s-canvas
@@ -480,20 +461,20 @@ let inputCanvas = {
         this.ctx.lineWidth = 2 / this.scale;
         this.ctx.strokeRect(this.cropStart.x, this.cropStart.y, this.cropSize.x, this.cropSize.y);
     },
-    renderOutput() {
-        let target = $('#output-canvas')[0];
-        let width = target.width;
-        let height = target.height;
-        let ctx = target.getContext('2d');
+    renderOutput: function() { // Redraw the cropped image to the apropriately sized output canvas, then convert that image to a string to submit.
+        var target = $('#output-canvas')[0];
+        var width = target.width;
+        var height = target.height;
+        var ctx = target.getContext('2d');
         ctx.resetTransform();
-        
+
         scale = width / this.cropSize.x;
         ctx.scale(scale, scale);
-        
+
         ctx.drawImage(this.image, -this.cropStart.x, -this.cropStart.y);
         $('#image-data').val(target.toDataURL('image/jpeg', 0.5).split(',')[1]);
     },
-    resizeCanvas() {
+    resizeCanvas: function() { // Resize the canvas to fit, reset the debounce on resizing.
         this.debounce = false;
         if (this.image) {
             this.$elem.removeClass('resize-height');
@@ -502,5 +483,5 @@ let inputCanvas = {
             this.$elem.addClass('resize-height');
         }
     }
-    
+
 }

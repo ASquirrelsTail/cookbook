@@ -113,33 +113,8 @@ Recipes - Fork.it
 </section>
 {% endblock %}
 {% block javascript %}
+<script src="{{ url_for('static', filename='js/recipes-list.js') }}"></script>
 <script>
-	const $ = cash;
-	const select = M.FormSelect.init($('select'));
-
-    function chipsToInput(chipContainer, targetInput) {
-        let chipsInput = [];
-            $(chipContainer + ' .chip.active').each(function() {
-                chipsInput.push($(this).data('tag'));
-            });
-            if (chipsInput.length > 0) $(targetInput).val(chipsInput.join(' '));
-            else $(targetInput).remove();
-    }
-
-    function activateChips(chipContainer, tagString) {
-        let tags = []
-        if (tagString.indexOf(' ') != -1) tags = tagString.split(' ');
-        else tags = [tagString];
-        tags.forEach(function(tag) {
-            if (tag != '') $(chipContainer).find('[data-tag=' + tag + ']').addClass('active');
-        });
-    }
-
-    function resetChips(chipContainer) {
-        $(chipContainer + ' .chip.active').removeClass('active');
-        $('#filters-form').trigger('submit');
-    }
-
     $(function() {
     	{% if current_query['tags'] %}
         activateChips('#include-chips', '{{ current_query['tags'] }}');
@@ -147,38 +122,6 @@ Recipes - Fork.it
         {% if current_query['exclude'] %}
         activateChips('#exclude-chips', '{{ current_query['exclude'] }}');
         {% endif %}
-
-        $('#filter-toggle').on('click', function () {
-            $('#filters').toggleClass('hide-on-small-and-down');
-            if ($('#filters').hasClass('hide-on-small-and-down')) $('#filter-toggle').html('Show filters <i class="material-icons">keyboard_arrow_down</i>');
-            else $('#filter-toggle').html('Hide filters <i class="material-icons">keyboard_arrow_up</i>');
-        });
-
-        $('.input-field select').on('change', function() {
-            $('#filters-form').trigger('submit');
-        });
-
-        $('.reset').on('click', function() {
-            resetChips('#' + $(this).data('target'))
-        });
-
-        $('.chip').on('click', function() {
-            $(this).toggleClass('active');
-            $('#filters-form').trigger('submit');
-        });
-
-        $('#filter-search').on('keydown', function(e) {
-        	if (e.which == 13 && $(this).val() != null) $('#filters-form').trigger('submit');
-        });
-
-        $('#filters-form').on('submit', function() {
-            chipsToInput('#include-chips', '#tags')
-            chipsToInput('#exclude-chips', '#exclude')
-            if ($('#sort').val() == 'total-time') $('#order').val('1');
-            else $('#order').val('-1');
-			$('#filter-search').attr('name', 'search');
-			$('#filters-form')[0].submit();
-        });
     });
 </script>
 {% endblock %}

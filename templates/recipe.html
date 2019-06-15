@@ -49,7 +49,7 @@
                 <a href="{{ url_for('recipes', forks=urn) }}" class="tooltipped" data-position="top" data-tooltip="Forks">
                     <i class="material-icons">restaurant_menu</i> {{ recipe['forks'] }}</a> 
                 {% endif %}
-                {% if username %}
+                {% if username and username != 'Admin' and username != recipe['username'] %}
                 <a href="{{ url_for('favourite_recipe', urn=recipe['urn']) }}" class="fav-link tooltipped" data-position="top" data-tooltip="Favourites">
                 {% else %}
                 <a href="#!" class="tooltipped" data-position="top" data-tooltip="Favourites">
@@ -63,8 +63,8 @@
                     <span class="fav-count">{{ recipe['favourites'] }}</span></a> 
                 {% else %}
                     <i class="material-icons">favorite_border</i> <span class="fav-count">0</span>
-                </a> 
                 {% endif %}
+                </a> 
                 <a href="#comments" class="tooltipped" data-position="top" data-tooltip="Jump to comments">
                 {% if recipe['comment-count'] %}
                 <i class="material-icons">comment</i> {{ recipe['comment-count'] }} 
@@ -190,143 +190,8 @@
 {% endblock %}
 {% block javascript %}
 <script>
-    const $ = cash;
-
-    function jsonGet(url, callback) {
-        let xhr = new XMLHttpRequest();
-
-        xhr.open("GET", url, true); //Filter by postcodes, lat and lng as these are the only things we need
-        xhr.setRequestHeader("Content-Type", "application/json");
-
-        xhr.onreadystatechange = callback;
-
-        xhr.send(); 
-    }
-
-    function jsonPost(url, data, callback) {
-        let xhr = new XMLHttpRequest();
-
-        xhr.open("POST", url, true); //Filter by postcodes, lat and lng as these are the only things we need
-        xhr.setRequestHeader("Content-Type", "application/json");
-
-        xhr.onreadystatechange = callback;
-
-        xhr.send(JSON.stringify(data));
-    }
-
-    function deleteComment() {
-        if (this.readyState == 4) {
-            if (this.status == 200) {
-                let response = JSON.parse(this.responseText);
-                if (response.success === true) {
-                    jsonGet('{{url_for("comments", urn=urn)}}', reloadComments);
-                }
-                response.messages.forEach(function(message) {
-                    M.toast({ html: message });
-                });
-            }else M.toast({ html: 'Failed to delete comment!' });
-        }
-    }
-
-    function reloadComments() {
-        if (this.readyState == 4) {
-            if (this.status == 200) {
-                let response = JSON.parse(this.responseText);
-                renderComments(response.comments);
-                response.messages.forEach(function(message) {
-                    M.toast({ html: message });
-                });
-            }
-        }
-    }
-
-    function renderComments(comments) {
-        let count = comments.length;
-        $('#comment-count').text(count + ' comments.');
-        $('#comments-content').html('');
-        comments.forEach(function (comment, index) {
-            $('#comments-content').append('<div class="divider"></div>');
-            $('#comments-content').append('<p>By ' + comment.username + ' at ' + comment.time + '</p>');
-            let commentContent = '';
-            comment.comment.split('\n').forEach(function(line) {
-                commentContent += '<p>' + line + '</p>';
-            });
-            $('#comments-content').append('<blockquote>' + commentContent + '</blockquote>');
-            if (comment.delete == true) {
-                let deleteForm = '<form action="{{ url_for('delete_comment', urn=urn) }}" method="POST" class="delete-comment">';
-                deleteForm += '<input type="hidden" name="comment-index" value="' + index + '">';
-                deleteForm += '<div class="delete-wrapper">';
-                deleteForm += '<button class="btn waves-effect waves-light red small right" type="submit"><i class="material-icons left">delete</i>Delete Comment</button>';
-                deleteForm += '</div>';
-                deleteForm += '</form>';
-                $('#comments-content').append(deleteForm);
-            }
-        });
-        $('.delete-comment').on('submit', function(e) {
-            e.preventDefault();
-            $('.delete-comment .btn[type=submit]').addClass('disabled')
-            jsonPost($(this).attr('action'), {'comment-index': $(this).find('input[name="comment-index"]').val()}, deleteComment);
-        });
-        $('#comments-content').append('<div class="divider"></div>');
-    }
-
-    function updateFavourite() {
-        if (this.readyState == 4) {
-            if (this.status == 200) {
-                let response = JSON.parse(this.responseText);
-                if (response.favourite === true) {
-                    $('.fav-count').text(parseInt($('.fav-count').text()) + 1)
-                    $('.fav-link i').text('favorite');
-                    M.toast({ html: '<i class="material-icons left">favorite</i> Recipe added to favorites!' });
-                }else if (response.favourite === false) {
-                    $('.fav-link i').text('favorite_border');
-                    $('.fav-count').text(parseInt($('.fav-count').text()) -1)
-                    M.toast({ html: 'Recipe removed from favourites.' });
-                }
-            }else M.toast({ html: 'Oops. Something went wrong.' });
-        }
-    }
-
-    function updateFeature() {
-        if (this.readyState == 4) {
-            if (this.status == 200) {
-                let response = JSON.parse(this.responseText);
-                if (response.feature === true) {
-                    $('#feature-btn i').text('star');
-                    M.toast({ html: '<i class="material-icons left">star</i> Recipe featured!' });
-                }else if (response.feature === false) {
-                    $('#feature-btn i').text('star_border');
-                    M.toast({ html: 'Recipe removed from features.' });
-                }
-            }else M.toast({ html: 'Oops. Something went wrong.' });
-        }
-    }
-
-    $(function() {
-        M.Tooltip.init($('.tooltipped'));
-
-        {% if username %}
-        $('.fav-link').on('click', function(e) {
-            e.preventDefault();
-            jsonGet($(this).attr('href'), updateFavourite);
-        });
-        {% endif %}
-        $('#feature-btn').on('click', function(e) {
-            e.preventDefault();
-            jsonGet($(this).attr('href'), updateFeature);
-        });
-        $('#add-comment').on('submit', function(e) {
-            e.preventDefault();
-            jsonPost($(this).attr('action'), {comment: $('#comment').val()}, reloadComments);
-            $('#comment').val('');
-        });
-        $('.delete-comment').on('submit', function(e) {
-            e.preventDefault();
-            $('.delete-comment .btn[type=submit]').addClass('disabled')
-            jsonPost($(this).attr('action'), {'comment-index': $(this).find('input[name="comment-index"]').val()}, deleteComment);
-        });
-    });
-
-
+    var deleteCommentUrl = '{{ url_for('delete_comment', urn=urn) }}';
+    var commentUrl = '{{ url_for("comments", urn=urn) }}';
 </script>
+<script src="{{ url_for('static', filename='js/recipe-page.js') }}"></script>
 {% endblock %}

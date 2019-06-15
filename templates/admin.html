@@ -63,9 +63,8 @@ Admin Settings - Fork.it
 {% endblock %}
 {% block javascript %}
 <script>
-	document.addEventListener('DOMContentLoaded', function() {
-	    var elems = document.querySelectorAll('select');
-	    var instances = M.FormSelect.init(elems);
+	cash(function() {
+	    M.FormSelect.init(cash('select'));
 	});
 </script>
 {% endblock %}

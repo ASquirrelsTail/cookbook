@@ -72,8 +72,8 @@ Users - Fork.it
 {% endblock %}
 {% block javascript %}
 <script>
-    const $ = cash;
-    const select = M.FormSelect.init($('select'));
+    var $ = cash;
+    M.FormSelect.init($('select'));
 
     $(function() {
         $('.input-field select').on('change', function() {

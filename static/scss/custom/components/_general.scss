@@ -8,6 +8,9 @@ h1, h2, h3, h4, h5, h6, .btn, .pagination {
 
 h1 {
 	margin: 1rem;
+	@media #{$small-and-down} {
+		font-size: 3.3rem;
+	}
 }
 
 input:not([type]),

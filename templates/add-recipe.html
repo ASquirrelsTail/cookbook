@@ -48,14 +48,17 @@ Add Recipe - Fork.it
     <canvas id="output-canvas" width="1200" height="700" class="hide"></canvas>
     <input type="hidden" name="image" id="image-data" value="">
     <div class="input-field col s12">
-        <label id='ingredient-label'><i class="material-icons left">list</i>Ingredients</label>
-        {% if recipe['ingredients'] %}
-        {% for ingredient in recipe['ingredients'].split('\n') %}
-        <input class="ingredient" type="text" value="{{ ingredient.strip() }}">
-        {% endfor %}
-        {% else %}
-        <input class="ingredient" type="text">
-        {% endif %}
+        <label class='ingredient-label'><i class="material-icons left">list</i>Ingredients</label>
+        <ul class="ingredient">
+            {% if recipe['ingredients'] %}
+            {% for ingredient in recipe['ingredients'].split('\n') %}
+            <li><textarea class="materialize-textarea">{{ ingredient.strip() }}</textarea></li>
+            {% endfor %}
+            {% else %}
+            <li><textarea class="materialize-textarea"></textarea></li>
+            {% endif %}
+        </ul>
+        
         <span class="helper-text" data-error="The recipe must include at least one ingredient.">* required.</span>
         <input type="hidden" name="ingredients" id="ingredients">
     </div>

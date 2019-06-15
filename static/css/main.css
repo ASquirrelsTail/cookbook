@@ -7356,6 +7356,11 @@ h1, h2, h3, h4, h5, h6, .btn, .btn-large, .btn-small, .pagination {
 h1 {
   margin: 1rem;
 }
+@media only screen and (max-width : 600px) {
+  h1 {
+    font-size: 3.3rem;
+  }
+}
 
 input:not([type]),
 input[type=text]:not(.browser-default),
@@ -7611,7 +7616,7 @@ nav.nav-extended .nav-content .tabs i {
   font-size: 3rem;
 }
 
-.input-field .method-label {
+.input-field .method-label, .input-field .ingredient-label {
   position: static;
 }
 

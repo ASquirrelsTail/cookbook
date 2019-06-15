@@ -46,7 +46,7 @@ Fork.it
                 <li class="tab"><a href="#popular-recipes">Popular Recipes</a></li>
                 <li class="tab"><a href="#about">About Fork.it</a></li>
                 {% if username %}
-                <li class="tab"><a target="_self" href="{{ url_for('add_recipe') }}"><i class="material-icons left">create</i>Add Recipe</a></li>
+                <li class="tab"><a target="_self" href="{{ url_for('add_recipe') }}">Add Recipe</a></li>
                 {% else %}
                 <li class="tab"><a target="_self" href="{{ url_for('new_user') }}">Sign Up</a></li>
                 {% endif %}
@@ -82,10 +82,10 @@ Fork.it
 {% endblock %}
 {% block javascript %}
 <script>
-const $ = cash;
+var $ = cash;
 $(function() {
-    let tabs = M.Tabs.init($('#tabs')[0]);
-    let features = M.Carousel.init($('#features')[0], { fullWidth: true, dist: 0, indicators: true, dist: 0 });
+    tabs = M.Tabs.init($('#tabs')[0]);
+    var features = M.Carousel.init($('#features')[0], { fullWidth: true, dist: 0, indicators: true, dist: 0 });
     $('#carousel-left').on('click', function() {
         features.prev();
     });
