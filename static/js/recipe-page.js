@@ -119,10 +119,10 @@ function updateFeature() {
         if (this.status == 200) {
             var response = JSON.parse(this.responseText);
             if (response.feature === true) {
-                $('#feature-btn i').text('star');
+                $('.feat-link i').text('star');
                 M.toast({ html: '<i class="material-icons left">star</i> Recipe featured!' });
             } else if (response.feature === false) {
-                $('#feature-btn i').text('star_border');
+                $('.feat-link i').text('star_border');
                 M.toast({ html: 'Recipe removed from features.' });
             }
         } else M.toast({ html: 'Oops. Something went wrong.' });
@@ -138,7 +138,7 @@ $(function() {
         e.preventDefault();
         jsonGet($(this).attr('href'), updateFavourite);
     });
-    $('#feature-btn').on('click', function(e) {
+    $('.feat-link').on('click', function(e) {
         e.preventDefault();
         jsonGet($(this).attr('href'), updateFeature);
     });

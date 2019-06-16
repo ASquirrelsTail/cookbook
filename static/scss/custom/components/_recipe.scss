@@ -10,6 +10,12 @@
     }
 }
 
+.options-mobile {
+    .btn-floating {
+        margin: 0 0.5rem;
+    }
+}
+
 .delete-wrapper {
     width: 100%;
     height: 36px;
@@ -45,6 +51,11 @@
         font-weight: bold;
         i {
             font-size: 3rem;
+        }
+
+        img {
+            height: 3rem;
+            vertical-align: middle;
         }
 
         a {

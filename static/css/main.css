@@ -7392,6 +7392,11 @@ textarea.materialize-textarea {
   font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
 }
 
+.btn-floating.btn-large img {
+  height: 2.1rem;
+  vertical-align: middle;
+}
+
 .tabs .tab a {
   color: black;
   font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
@@ -7532,6 +7537,10 @@ nav.nav-extended .nav-content .tabs i {
   margin-bottom: 0.8rem;
 }
 
+.options-mobile .btn-floating {
+  margin: 0 0.5rem;
+}
+
 .delete-wrapper {
   width: 100%;
   height: 36px;
@@ -7566,6 +7575,10 @@ nav.nav-extended .nav-content .tabs i {
 }
 .recipe-info .stats i {
   font-size: 3rem;
+}
+.recipe-info .stats img {
+  height: 3rem;
+  vertical-align: middle;
 }
 .recipe-info .stats a {
   color: black;

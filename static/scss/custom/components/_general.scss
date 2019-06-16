@@ -44,6 +44,11 @@ textarea.materialize-textarea {
 	font-family: $secondary-font-stack;
 }
 
+.btn-floating.btn-large img {
+	height: 2.1rem;
+	vertical-align: middle;
+}
+
 .tabs {
 	.tab {
 		a {

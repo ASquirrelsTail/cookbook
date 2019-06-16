@@ -207,6 +207,8 @@ def prepare_recipe_template(action, recipe_data=None, urn=None):
             recipe_data['tags'] = '/'.join(recipe_data['tags'])
         if recipe_data.get('meals', '') != '' and isinstance(recipe_data['meals'], list):
             recipe_data['meals'] = '/'.join(recipe_data['meals'])
+        if recipe_data.get('image') is not None:
+            recipe_data['old-image'] = recipe_data['image']
 
     return render_template('add-recipe.html', action=action, recipe=recipe_data, username=session.get('username'),
                            tags=all_tags, meals=all_meals, urn=urn)

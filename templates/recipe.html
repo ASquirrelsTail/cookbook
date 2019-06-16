@@ -4,7 +4,7 @@
 {% endblock %}
 {% block content %}
 {% if username %}
-<div class="options right">
+<div class="options right hide-on-small-and-down">
     {% if username == recipe['username'] or username == 'Admin' %}
     <a href="{{ url_for('edit_recipe', urn=recipe['urn']) }}" class="btn-floating btn-large waves-effect waves-light tooltipped" data-position="left" data-tooltip="Edit recipe"><i class="material-icons">mode_edit</i></a>
     {% if username == 'Admin' %}
@@ -15,8 +15,15 @@
         <i class="material-icons">star_border</i>
         {% endif %}
     </a>
+    {% else %}
+    <a href="{{ url_for('add_recipe', fork=recipe['urn']) }}" class="btn-floating btn-large waves-effect waves-light tooltipped" data-position="left" data-tooltip="Fork recipe">
+        <img src="{{ url_for('static', filename='images/fork-white.png') }}" alt="Fork Recipe" class="responsive-img">
+    </a>
     {% endif %}
     {% else %}
+    <a href="{{ url_for('add_recipe', fork=recipe['urn']) }}" class="btn-floating btn-large waves-effect waves-light tooltipped" data-position="left" data-tooltip="Fork recipe">
+        <img src="{{ url_for('static', filename='images/fork-white.png') }}" alt="Fork Recipe" class="responsive-img">
+    </a>
     <a href="{{ url_for('favourite_recipe', urn=recipe['urn']) }}" class="btn-floating btn-large waves-effect waves-light tooltipped fav-link" data-position="left" data-tooltip="Favourite recipe" id="fav-btn">
         {% if favourite %}
         <i class="material-icons">favorite</i>
@@ -47,7 +54,7 @@
             <div class="col s12 m6 l5 center stats">
                 {% if recipe['forks'] %}
                 <a href="{{ url_for('recipes', forks=urn) }}" class="tooltipped" data-position="top" data-tooltip="Forks">
-                    <i class="material-icons">restaurant_menu</i> {{ recipe['forks'] }}</a> 
+                    <img src="{{ url_for('static', filename='images/fork-black.png') }}" alt="Forks" class="responsive-img"> {{ recipe['forks'] }}</a> 
                 {% endif %}
                 {% if username and username != 'Admin' and username != recipe['username'] %}
                 <a href="{{ url_for('favourite_recipe', urn=recipe['urn']) }}" class="fav-link tooltipped" data-position="top" data-tooltip="Favourites">
@@ -127,8 +134,36 @@
             {% endif %}
         </div>
         {% if username %}
-        <div class="row">
-            <a href="{{ url_for('add_recipe', fork=recipe['urn']) }}" class="waves-effect waves-light btn">Fork this recipe</a>
+        <div class="row hide-on-med-and-up">
+            <div class="col s12 options-mobile center">
+                {% if username == recipe['username'] or username == 'Admin' %}
+                <a href="{{ url_for('edit_recipe', urn=recipe['urn']) }}" class="btn-floating btn-large waves-effect waves-light tooltipped" data-position="top" data-tooltip="Edit recipe"><i class="material-icons">mode_edit</i></a>
+                {% if username == 'Admin' %}
+                <a href="{{ url_for('feature_recipe', urn=recipe['urn']) }}" class="btn-floating btn-large waves-effect waves-light tooltipped feat-link" data-position="top" data-tooltip="Feature recipe">
+                    {% if recipe['featured'] %}
+                    <i class="material-icons">star</i>
+                    {% else %}
+                    <i class="material-icons">star_border</i>
+                    {% endif %}
+                </a>
+                {% else %}
+                <a href="{{ url_for('add_recipe', fork=recipe['urn']) }}" class="btn-floating btn-large waves-effect waves-light tooltipped" data-position="top" data-tooltip="Fork recipe">
+                    <img src="{{ url_for('static', filename='images/fork-white.png') }}" alt="Fork Recipe" class="responsive-img">
+                </a>
+                {% endif %}
+                {% else %}
+                <a href="{{ url_for('add_recipe', fork=recipe['urn']) }}" class="btn-floating btn-large waves-effect waves-light tooltipped" data-position="top" data-tooltip="Fork recipe">
+                    <img src="{{ url_for('static', filename='images/fork-white.png') }}" alt="Fork Recipe" class="responsive-img">
+                </a>
+                <a href="{{ url_for('favourite_recipe', urn=recipe['urn']) }}" class="btn-floating btn-large waves-effect waves-light tooltipped fav-link" data-position="top" data-tooltip="Favourite recipe">
+                    {% if favourite %}
+                    <i class="material-icons">favorite</i>
+                    {% else %}
+                    <i class="material-icons">favorite_border</i>
+                    {% endif %}
+                </a>
+                {% endif %}
+            </div>
         </div>
         {% endif %}
         <div class="divider"></div>
