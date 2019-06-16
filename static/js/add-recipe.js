@@ -247,6 +247,7 @@ $(function() {
     $('#image-reset').on('click', function() {
         inputCanvas.autoCrop();
         inputCanvas.showAll();
+        M.Tooltip.getInstance($('#image-reset')[0]).close();
     });
 
     $('#image-upload').on('change', loadImage);
@@ -291,11 +292,12 @@ var inputCanvas = {
     aspect: 7 / 12,
     crop: false,
     mouse: false,
+    touches: [],
     cropStart: { x: 100, y: 100 },
     cropSize: { x: 120, y: 70 },
     init: function() { // Sets up input canvas for image editing.
         var that = this;
-        // Adds mouse eent listeners for input canvas
+        // Adds mouse event listeners for input canvas
         this.$elem.on('mousedown', function(e) {
             e.preventDefault();
             if (that.crop) {
@@ -356,6 +358,13 @@ var inputCanvas = {
                         that.cropSize.x -= change;
                         that.cropSize.y -= change * that.aspect;
                     }
+                    
+                    // Constrain the minimum size of the crop
+                    if (that.cropSize.x < 120 || that.cropSize.y < 70) {
+                        that.cropSize.x = 120;
+                        that.cropSize.y = 70;
+                    }
+
                     // Constrain the crop to within the boundries of the image
                     if (that.cropStart.x < 0) that.cropStart.x = 0;
                     else if (that.cropStart.x > that.image.width - that.cropSize.x) that.cropStart.x = that.image.width - that.cropSize.x;
@@ -379,7 +388,132 @@ var inputCanvas = {
                     that.$elem.css({ cursor: that.crop });
                 }
             }
+        });
+        //Add touch event listeners for inputCanvas
+        // Add new touches on touch start
+        this.$elem.on('touchstart', function(e) {
+            if (that.crop) {
+                e.preventDefault();
+                var newTouches = e.changedTouches;
 
+                var i;
+                for (i = 0; i < newTouches.length; i++) {
+                    that.touches.push(newTouches[i]);
+                }
+                console.log(that.touches)
+            }else that.touches = [];
+        });
+        
+        // Remove touches on touchend
+        this.$elem.on('touchend', function(e) {
+            if (that.crop) {
+                e.preventDefault();
+                var removeTouches = e.changedTouches;
+
+                that.touches = that.touches.filter(function(touch) {
+                    var i;
+                    for (i = 0; i < removeTouches.length; i++) {
+                        if (removeTouches[i].identifier == touch.identifier) return false;
+                    }
+                });
+                console.log(that.touches)
+            }else that.touches = [];
+        });
+
+        this.$elem.on('touchcancel', function(e) {
+            if (that.crop) {
+                e.preventDefault();
+                var removeTouches = e.changedTouches;
+
+                that.touches = that.touches.filter(function(touch) {
+                    var i;
+                    for (i = 0; i < removeTouches.length; i++) {
+                        if (removeTouches[i].identifier == touch.identifier) return false;
+                    }
+                });
+                console.log(that.touches)
+            }else that.touches = [];
+        });
+        
+        // Handle touchmoves
+        this.$elem.on('touchmove', function(e) {
+            if (that.crop) {
+                e.preventDefault();
+                console.log("touchmove.");
+                var updatedTouches = e.changedTouches
+                if (that.touches.length == 1 && updatedTouches.length == 1 && that.touches[0].identifier == updatedTouches[0].identifier) { // If one finger touch, it's a move
+                    var touchStartPos = {
+                        x: ((that.touches[0].pageX - $(this).offset().left - (that.width / 2)) / that.scale) + (that.image.width / 2),
+                        y: ((that.touches[0].pageY - $(this).offset().top - (that.height / 2)) / that.scale) + (that.image.height / 2)
+                    };
+                    var touchEndPos = {
+                        x: ((updatedTouches[0].pageX - $(this).offset().left - (that.width / 2)) / that.scale) + (that.image.width / 2),
+                        y: ((updatedTouches[0].pageY - $(this).offset().top - (that.height / 2)) / that.scale) + (that.image.height / 2)
+                    };
+
+                    console.log(touchStartPos, touchEndPos)
+
+                    var touchPosChange = { x: touchEndPos.x - touchStartPos.x, y: touchEndPos.y - touchStartPos.y }
+                    
+                    // Move the image by the amount the finger moved
+                    that.cropStart.x += touchPosChange.x;
+                    that.cropStart.y += touchPosChange.y;
+
+                    that.touches[0] = updatedTouches[0]; // Replace the previous touch event with the new one
+
+                }else if (that.touches.length == 2) { // If two finger touch, its a zoom
+                    // Find the distance between touches at the start
+                    var startDistance = Math.sqrt(Math.pow(that.touches[0].pageX - that.touches[1].pageX, 2) + Math.pow(that.touches[0].pageY - that.touches[1].pageY, 2));
+                    // Update touches
+                    var i, j;
+                    for (i = 0; i < updatedTouches.length; i++) {
+                        for (j = 0; j < that.touches.length; j++) {
+                            if (updatedTouches[i].identifier == that.touches[j].identifier) that.touches[j] = updatedTouches[i];
+                        }   
+                    }
+                    // Find the new distance between touches
+                    var endDistance = Math.sqrt(Math.pow(that.touches[0].pageX - that.touches[1].pageX, 2) + Math.pow(that.touches[0].pageY - that.touches[1].pageY, 2));
+
+                    // See how much the size has changed
+                    var change = endDistance / startDistance;
+
+                    // Constrain that change to the smallest dimension
+                    if (change > 1) {
+                        if (that.aspect < that.image.height / that.image.width) change = Math.min(that.image.width / that.cropSize.x , change);
+                        else  change = Math.min(that.image.height / that.cropSize.y, change);
+                    }
+
+                    // Move the top left corner outwards by half the change, the scale the crop size.
+                    that.cropStart.x = that.cropStart.x - ((that.cropSize.x * (change - 1)) / 2);
+                    that.cropStart.y = that.cropStart.y - ((that.cropSize.y * (change - 1)) / 2);
+
+                    that.cropSize.x = that.cropSize.x * change;
+                    that.cropSize.y = that.cropSize.y * change;
+                    
+                    // Limit the minimum size of the crop
+                    if (that.cropSize.x < 120 || that.cropSize.y < 70) {
+                        that.cropSize.x = 120;
+                        that.cropSize.y = 70;
+                    }
+
+                }else{ // Otherwise just update all touch positions
+                    var i, j;
+                    for (i = 0; i < updatedTouches.length; i++) {
+                        for (j = 0; j < that.touches.length; j++) {
+                            if (updatedTouches[i].identifier == that.touches[j].identifier) that.touches[j] = updatedTouches[i];
+                        }   
+                    }
+                }
+
+                // Constrain the crop to within the boundries of the image
+                if (that.cropStart.x < 0) that.cropStart.x = 0;
+                else if (that.cropStart.x > that.image.width - that.cropSize.x) that.cropStart.x = that.image.width - that.cropSize.x;
+                if (that.cropStart.y < 0) that.cropStart.y = 0;
+                else if (that.cropStart.y > that.image.height - that.cropSize.y) that.cropStart.y = that.image.height - that.cropSize.y;
+                
+                that.showAll(); // Redraw the image
+
+            }else that.touches = [];
         });
     },
     toggleCrop: function() { // Toggle the input canvas in and out of crop mode, change buttons to reflect options
@@ -398,15 +532,19 @@ var inputCanvas = {
             inputCanvas.$elem.css({ cursor: 'move' });
             inputCanvas.showAll();
         }
+        M.Tooltip.getInstance($('#image-crop')[0]).close();
     },
     setImage: function(image) { // Set the image to edit in the input canvas
-        this.image = image;
+        if (image.width < 240 || image.height < 140) M.toast({ html: 'Image too small, choose a larger image!' });
+        else {
+            this.image = image;
         this.autoCrop();
         this.showOutput();
         this.renderOutput();
         $('#image-reset').removeClass('scale-in');
         $('#image-crop i').text('crop');
         inputCanvas.crop = false;
+        }
     },
     autoCrop: function() { // Crop the image to the centre of the image, constrained to the aspect ratio, as large as it will fit.
         var imageAspect = this.image.height / this.image.width;

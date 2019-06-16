@@ -14,7 +14,7 @@ A breakdown of the UX process can be found [here](https://github.com/ASquirrelsT
 - The site has a homepage with featured recipes and a selection of recent and popular recipes.
 - Visitors can browse, filter and search recipes.
 - Registered users can add recipes amongst other activites listed bellow.
-- Users can crop and upload images to display with their recipes, with the option to use Amazon AWS S3 for data storage and retrieval.
+- Users can crop and upload images to display with their recipes, with the option to use Amazon AWS S3 for data storage and retrieval. The crop and resize feature works on desktop and touch screen devices.
 - An admin login allows a user to manage the site.
 - The site has custom error pages to direct users to log in, or help them find the page they're looking for.
 
@@ -43,7 +43,7 @@ A breakdown of the UX process can be found [here](https://github.com/ASquirrelsT
 
 ### Features Left to Implement
 
-- Image crop that works with touch screens
+- Passwords and password resets. These features fall outside the scope of the project, but can be implemented later.
 
 ## Technologies Used
 
@@ -67,6 +67,8 @@ A breakdown of the UX process can be found [here](https://github.com/ASquirrelsT
 	- Amazon AWS S3 storage was used to provide persistent storage for user images. The [Boto3 python API](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html) was used to interface with the S3 service.
 - [Pillow](https://pillow.readthedocs.io/en/stable/)
 	- The updated version of the Python Imaging Library is used to validate images uploaded by users for size and type.
+- [Unittest](https://docs.python.org/3/library/unittest.html)
+	- Unittest is a testing framework which was used with Flask's test client to run automated tests on the application.
 
 ### Tools
 
@@ -102,20 +104,25 @@ Example users were created to walk through the user stories established [here](h
 
 ## Deployment
 
+### Local Deployment
+
+
 
 ## Known Issues
 
-Deleting a recipe means any parent or child recipes that referenced it will now link to a page that doen't exist.
+Deleting a comment when another user has deleted a comment after you loaded the page will result in the wrong comment being deleted due to the way comments are referenced by index.
 
-Deleting a comment when another user has deleted a comment after you have loaded the page will result in the wrong comment being deleted due to the way comments are referenced by index.
-
-Due to the use of ES6 let keyword, and object function declarations the site only supports IE11 and later. This could be ammended, however Cash and Materialize also only supports IE10 and later anyway. 
+Cash and Materialize only supports IE11 and later, but this shouldn't affect too many users.
 
 ## Credits
 
-### Snippets
+### Code
 
 The snippet to create an unsigned url for an S3 resource was from the solution on [this thread](https://github.com/boto/boto3/issues/110).
+
+[This breakdown](https://css-tricks.com/custom-list-number-styling/) of adding custom numbers to lists was very helpful for the methods on recipe pages.
+
+Patrick Kennedy's [blog post](https://www.patricksoftwareblog.com/unit-testing-a-flask-application/) on using unittest with python was a great help for setting up my tests.
 
 ### Content
 
