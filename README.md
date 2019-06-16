@@ -104,13 +104,117 @@ Example users were created to walk through the user stories established [here](h
 
 ## Deployment
 
+Code snippets that accompany the following instructions are for Linux systems, but commands are similar on other operating systems.
+
+Before deploying the project the MongoDB database needs setting up, and, optionally, Amazon AWS S3.
+
+### Database Setup
+
+To store user data and recipes the project uses MongoDB, in order to run it you will need to set up a database. To do this you require the [Mongo Shell](https://www.mongodb.com/download-center/community?jmp=docs) installed, and either an installed version of MongoDB, or access to a cloud service such as MongoDB [Atlas](https://cloud.mongodb.com/).
+
+First create a new database, and generate a [connection string](https://docs.mongodb.com/manual/reference/connection-string/) or URI for that database.
+
+Next download the (init-mongo.js)[https://github.com/ASquirrelsTail/cookbook/blob/master/init-mongo.js] script, navigate to the directory containing it and run it using the Mongo Shell and your URI. Alternatively you can open the shell, connect to the database and run the script with the load() command.
+```
+$ mongo <MongoDB URI with your password and DB name> init-mongo.js
+```
+
+The script will create the required collections for the app to work, and add entries for an Admin user, and a selection of meal types and tags. The script also initialises a text index of the recipe title and ingredient fields to allow for text searches.
+
+With the database set up its URI can now be passed as an environment variable for the app to use.
+
+### AWS S3 Setup
+
+To safely store user uploads the project utilises the Amazon AWS S3 cloud storage service. The project will run without it, and simply not declaring the AWS_BUCKET environment variable means that uploads will be stored locally in the static directory. However, this is an additional load on the Flask server to serve numerous large images, and where the project is deployed to a service like Heroku uploaded files will be lost when the file systems are replaced due to its [ephemeral file system](https://devcenter.heroku.com/articles/dynos#ephemeral-filesystem).
+
+If you don't already have one, you can create a [free account on Amazon AWS](https://aws.amazon.com/). Log in to your AWS account, and select S3 from the list of services. If you don't already have S3 set up follow the instructions, you will be informed by email when the service is ready to go.
+
+Create a new bucket, give it a unique name, and select a region. Using the same region your server will speed things up slightly. The name of this bucket will be used later as an environment variable.
+
+You'll need to set permissions so anonymous users can have read access to your newly created bucket. Select your new bucket, click the permissions tab and select bucket policy. Set the following policy as per [Amazon's example](https://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html#example-bucket-policies-use-case-2). Granting public access will come with a warning, but as it's only read access and these are only pictures of recipes you don't need to worry.
+```
+{
+  "Version":"2019-06-16",
+  "Statement":[
+    {
+      "Sid":"AddPerm",
+      "Effect":"Allow",
+      "Principal": "*",
+      "Action":["s3:GetObject"],
+      "Resource":["arn:aws:s3:::examplebucket/*"]
+    }
+  ]
+}
+```
+
+You can test this by returning to the bucket's overview tab, uploading a file and selecting the file and following its Object URL. If everything has worked it should take you to the uploaded file. If not you will get permission denied notice.
+
+With the bucket set up all that is left is to set up a user for the app to access S3. Select IAM from the list of services in AWS and navigate to the users section and select + New User.
+
+Give the user a name, and select Programatic Access. On the next screen select create group, give the group a name, search the policy list for S3 and select AmazonS3FullAccess and click create group. Follow the remaining steps until the process is complete and you will be given an Access ID Key and a Secret Access Key, make a note of these as you will need them later to use as environment variables for setting up the app. If you lose your secret key you can create a new one at a later time by selecting the user in the IAM Service and clicking the Security Credentials tab.
+
+With all this set up you should be able to fill in the S£ environment variables and use S3 for image storage within the app.
+
 ### Local Deployment
 
+For local deplyoment you'll need [python3](https://www.python.org/downloads/), pip3 and the [Mongo Shell](https://www.mongodb.com/download-center/community) installed. You'll also need a MongoDB database, hosted either locally or on a cloud service such as [Atlas](https://cloud.mongodb.com/), follow the instructions in the Database Setup section to prepare this. Optionally you can use Amazon AWS S3 to host user images, follow the instructions in the AWS S3 Setup section to do so.
 
+First create a directory and download or clone the project's GitHub Repository.
+```
+$ git clone https://github.com/ASquirrelsTail/cookbook.git
+```
+
+Next install the required python modules from the requirements.txt file using pip3.
+```
+$ sudo pip3 install -r requirements.txt
+```
+
+Follow the instructions for setting up your MongoDB database, in the Database Setup section.
+
+Next set up environment variables, these can be saved to your .bashrc file, or simply input for the current session as follows.
+```
+$ export MONGO_URI="<MongoDB URI with your password and DB name>"
+$ export SECRET_KEY="<Random string to use as Flasks Secret Key>"
+```
+
+Optionally if you are using AWS S3 to host user images follow the instructions in the AWS S3 Setup section. You'll also need to set the following environment variables. Leaving these unset means the app will save user images to the static folder instead.
+```
+$ export AWS_ACCESS_KEY_ID="<AWS access key ID for the user with AmazonS3FullAccess permissions>"
+$ export AWS_SECRET_ACCESS_KEY="<AWS secret access key for the user with AmazonS3FullAccess permissions>"
+$ export AWS_BUCKET="<Name of the S3 bucket you will be using>"
+```
+
+Finally running the app.py file from python will launch the flask server, and the site will be accessible at http://localhost:5000.
+```
+$ python3 app.py
+```
+
+### Remote Deployment
+
+The site is deployed remotely on Heroku via GitHub. The repository already contains the necessary requirement.txt and Procfile files for Heroku deployment, the following steps were required to complete the process.
+
+The project was pushed to GitHub, you can fork this repository to connect your own copy to Heroku.
+
+Create a new app on Heroku, and connect it to the GitHub repo. Next go to settings and add the Python buildpack under the buildpacks options.
+
+Follow the instructions to set up the MongoDB database in the Database Setup section and optionally set up Amazon AWS S3 for storing user images by following the instructions in the AWS S3 Setup section. If you don't set up AWS S3 for your Heroku deployment then user uploads will not persist when the dyno is restarted (which happens approximately once a day), which will lead to missing image files on recipe pages.
+
+You will need to set the following config vars in the Heroku settings.
+-MONGO_URI: <MongoDB URI with your password and DB name>
+-SECRET_KEY: <Random string to use as Flasks Secret Key>
+-AWS_ACCESS_KEY_ID: <AWS access key ID for the user with AmazonS3FullAccess permissions>
+-AWS_SECRET_ACCESS_KEY: <AWS secret access key for the user with AmazonS3FullAccess permissions>
+-AWS_BUCKET: <Name of the S3 bucket you will be using>
+-IP: 0.0.0.0
+-PORT: 8080
+
+Finally on Heroku under the deploy tab either enable automatic deploys from the master branch, or select the master branch and deploy it manually. If all goes to plan you should be able to select Open App and launch the site.
 
 ## Known Issues
 
 Deleting a comment when another user has deleted a comment after you loaded the page will result in the wrong comment being deleted due to the way comments are referenced by index.
+
+Replacing the image for a parent recipe will also replace that of its children.
 
 Cash and Materialize only supports IE11 and later, but this shouldn't affect too many users.
 

@@ -13,7 +13,6 @@ s3 = boto3.client('s3')
 s3_bucket = os.getenv('AWS_BUCKET')
 
 app = Flask(__name__)
-app.config['MONGO_DBNAME'] = 'cookbook'
 app.config['MONGO_URI'] = os.getenv('MONGO_URI')
 app.secret_key = os.getenv('SECRET_KEY')
 
