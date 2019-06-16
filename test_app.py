@@ -1101,7 +1101,7 @@ class TestRecipes(TestClient):
         self.submit_recipe(parent=parent_urn)
         self.submit_recipe(parent=parent_urn)
         response = self.client.get('/recipes/{}'.format(parent_urn))
-        self.assertIn(b'3 forks', response.data)
+        self.assertIn(b'alt="Forks"> 3', response.data)
 
     def test_page_contains_prep_time_and_cook_time(self):
         '''

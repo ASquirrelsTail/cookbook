@@ -54,7 +54,7 @@
             <div class="col s12 m6 l5 center stats">
                 {% if recipe['forks'] %}
                 <a href="{{ url_for('recipes', forks=urn) }}" class="tooltipped" data-position="top" data-tooltip="Forks">
-                    <img src="{{ url_for('static', filename='images/fork-black.png') }}" alt="Forks" class="responsive-img"> {{ recipe['forks'] }}</a> 
+                    <img src="{{ url_for('static', filename='images/fork-black.png') }}" class="responsive-img" alt="Forks"> {{ recipe['forks'] }}</a> 
                 {% endif %}
                 {% if username and username != 'Admin' and username != recipe['username'] %}
                 <a href="{{ url_for('favourite_recipe', urn=recipe['urn']) }}" class="fav-link tooltipped" data-position="top" data-tooltip="Favourites">
