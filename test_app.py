@@ -144,6 +144,22 @@ class TestUsers(TestClient):
         self.create_user(username)
         self.assertEqual(self.mongo.db.logins.find_one({'username': username}), None)
 
+    def test_uername_too_long(self):
+        '''
+        Usernames should be limited to 20 characters
+        '''
+        username = 'abcdefghijklmnopqrstuvwxyz'
+        self.create_user(username)
+        self.assertEqual(self.mongo.db.logins.find_one({'username': username}), None)
+
+    def test_uername_too_short(self):
+        '''
+        Usernames should be limited to 20 characters
+        '''
+        username = 'ab'
+        self.create_user(username)
+        self.assertEqual(self.mongo.db.logins.find_one({'username': username}), None)
+
     def test_login_page(self):
         '''
         The login page should return 200 for users that are not logged in
