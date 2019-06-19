@@ -52,7 +52,7 @@
                 {% if recipe['image'] %}
                 <img src="{{ recipe['image'] }}" alt="{{ recipe['title'] }} by {{ recipe['username'] }}" class="responsive-img">
                 {% else %}
-                <img src="https://ci-cookbook.s3.amazonaws.com/vegetable-sushi.jpg" alt="{{ recipe['title'] }} by {{ recipe['username'] }}" class="responsive-img">
+                <img src="{{ url_for('static', filename='images/placeholder.jpg') }}" alt="{{ recipe['title'] }} by {{ recipe['username'] }}" class="responsive-img">
                 {% endif %}
                 <div class="recipe-stats">
                     {% if recipe['favourites'] %}

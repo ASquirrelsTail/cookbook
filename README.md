@@ -123,6 +123,8 @@ The script will create the required collections for the app to work, and add ent
 
 With the database set up its URI can now be passed as an environment variable for the app to use.
 
+For larger databases it would also make sense to also add further indexes for various other fields, such as 'urn', 'username' and other commonly queried fields.
+
 ### AWS S3 Setup
 
 To safely store user uploads the project utilises the Amazon AWS S3 cloud storage service. The project will run without it, and simply not declaring the AWS_BUCKET environment variable means that uploads will be stored locally in the static directory. However, this is an additional load on the Flask server to serve numerous large images, and where the project is deployed to a service like Heroku uploaded files will be lost when the file systems are replaced due to its [ephemeral file system](https://devcenter.heroku.com/articles/dynos#ephemeral-filesystem).
@@ -212,7 +214,7 @@ Finally on Heroku under the deploy tab either enable automatic deploys from the 
 
 ## Known Issues
 
-Deleting a comment when another user has deleted a comment after you loaded the page will result in the wrong comment being deleted due to the way comments are referenced by index.
+Text searches with multiple words ceases to utilise MongoDBs stemming and language features, as they must be wrapped in double quotes to ensure they are all included in the search to return relevant results. For instance the search string "apples" will return recipes containing the word apples, or apple, but the search "apples bannanas" will return only exact matches for "apples" and "bannanas", and will exclude recipes containing the words "apple" and "bannana".
 
 Replacing the image for a parent recipe will also replace that of its children.
 
