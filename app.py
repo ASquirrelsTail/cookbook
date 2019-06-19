@@ -740,10 +740,12 @@ def comments(urn):
     else:
         success = None
     if request.is_json:
-        for comment in recipe.get('comments', []):
-            comment['comment'] = escape(comment['comment'])
-            if username == 'Admin' or username == comment['username']:
-                comment['delete'] = True
+        for index, comment in enumerate(recipe.get('comments', [])):
+            if not comment.get('deleted', False):
+                comment['comment'] = escape(comment['comment'])
+                comment['index'] = index
+                if username == 'Admin' or username == comment['username']:
+                    comment['delete'] = True
         return jsonify(comments=recipe.get('comments', []), success=success, messages=get_flashed_messages())
     else:
         return render_template('comments.html', username=username, recipe=recipe, urn=urn)
@@ -765,26 +767,27 @@ def delete_comment(urn):
                 index = int(request.form.get('comment-index'))
         except ValueError:
             abort(403)
-        recipe = mongo.db.recipes.find_one({'urn': urn}, {'comments': {'$slice': [index, 1]}, 'deleted': 1})
+        recipe = mongo.db.recipes.find_one({'urn': urn}, {'comments': 1, 'deleted': 1})
         if recipe is None or recipe.get('deleted', False):
             abort(404)
-        comment = recipe.get('comments')  # Get the comment at the requested index
-        if len(comment) != 1:
-            abort(403)
         else:
-            comment = comment[0]
-        if username == 'Admin' or username == comment['username']:
-            mongo.db.recipes.update_one({'urn': urn}, {'$pull': {'comments': comment}, '$inc': {'comment-count': -1}})  # Delete that comment and reduce comment count
-            if username == 'Admin':
-                flash('Successfully deleted comment from {}.'.format(comment['username']))
+            if len(recipe.get('comments', [])) <= index:  # If the index is out of bounds return forbidden
+                abort(403)
             else:
-                flash('Successfully deleted your comment.')
-            if request.is_json:
-                return jsonify(success=True, index=index, messages=get_flashed_messages())
+                comment = recipe['comments'][index]
+            if username == 'Admin' or username == comment['username']:  # If the user is admin, or the comment author, delete the comment
+                mongo.db.recipes.update_one({'urn': urn}, {'$set': {'comments.{}'.format(index): {'deleted': True}},
+                                                           '$inc': {'comment-count': -1}})  # Mark comment as deleted and reduce comment count
+                if username == 'Admin':
+                    flash('Successfully deleted comment from {}.'.format(comment['username']))
+                else:
+                    flash('Successfully deleted your comment.')
+                if request.is_json:
+                    return jsonify(success=True, index=index, messages=get_flashed_messages())
+                else:
+                    return redirect(url_for('comments', urn=urn))
             else:
-                return redirect(url_for('comments', urn=urn))
-        else:
-            abort(403)
+                abort(403)
 
 
 ################

@@ -1576,7 +1576,7 @@ class TestDeleteComment(TestClient):
         self.client.post('/recipes/{}/delete-comment'.format(self.urn), data={'comment-index': '1'})
         comments = self.mongo.db.recipes.find_one({'urn': self.urn}, {'comments': 1}).get('comments', [])
         for comment in comments:
-            self.assertNotEqual(comment['comment'], 'Comment 2!')
+            self.assertNotEqual(comment.get('comment'), 'Comment 2!')
 
     def test_delete_comment_reduces_count(self):
         '''
@@ -1595,7 +1595,7 @@ class TestDeleteComment(TestClient):
         self.client.post('/recipes/{}/delete-comment'.format(self.urn), data={'comment-index': '1'})
         comments = self.mongo.db.recipes.find_one({'urn': self.urn}, {'comments': 1}).get('comments', [])
         for comment in comments:
-            self.assertNotEqual(comment['comment'], 'Comment 2!')
+            self.assertNotEqual(comment.get('comment'), 'Comment 2!')
 
     def test_delete_comment_doesnt_exist(self):
         '''

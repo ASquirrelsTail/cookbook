@@ -1,3 +1,4 @@
+{% import 'macros.html' as macro %}
 {% extends "base.html" %}
 {% block title %}
 {{ recipe['title'] }} - Fork.it
@@ -74,9 +75,9 @@
                 </a> 
                 <a href="#comments" class="tooltipped" data-position="top" data-tooltip="Jump to comments">
                 {% if recipe['comment-count'] %}
-                <i class="material-icons">comment</i> {{ recipe['comment-count'] }} 
+                <i class="material-icons">comment</i> <span class="comment-count">{{ recipe['comment-count'] }}</span> 
                 {% else %}
-                <i class="material-icons">comment</i> 0 
+                <i class="material-icons">comment</i> <span class="comment-count">0</span> 
                 {% endif %}
                 </a>
                 </div>
@@ -173,24 +174,7 @@
                 {% if recipe['comment-count'] %}
                 <p id="comment-count">{{ recipe['comment-count'] }} comments.</p>
                 <div id="comments-content">
-                {% for comment in recipe['comments'] %}
-                    <div class="divider"></div>
-                    <p>By {{ comment['username'] }} at {{ comment['time'] }}</p>
-                    <blockquote>
-                    {% set lines = comment['comment'].split('\n') %}
-                    {% for line in lines %}
-                        <p>{{ line }}</p>
-                    {% endfor %}
-                    </blockquote>
-                    {% if username == 'Admin' or username == comment['username'] %}
-                    <form action="{{ url_for('delete_comment', urn=urn) }}" method="POST" class="delete-comment">
-                        <input type="hidden" name="comment-index" value="{{ loop.index - 1 }}">
-                        <div class="delete-wrapper">
-                            <button class="btn waves-effect waves-light red small right" type="submit"><i class="material-icons left">delete</i>Delete Comment</button>
-                        </div>
-                    </form>
-                    {% endif %}
-                {% endfor %}
+                    {{ macro.comment_list(recipe, urn, username) }}
                     <div class="divider"></div>
                 </div>
                 {% else %}

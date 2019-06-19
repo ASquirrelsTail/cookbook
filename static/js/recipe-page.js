@@ -59,29 +59,32 @@ function reloadComments() {
 
 // Renders all comments again to reflect changes
 function renderComments(comments) {
-    var count = comments.length;
+    var count = comments.filter(function(comment) { return !comment.deleted }).length;
     $('#comment-count').text(count + ' comments.'); // Update comment count.
+    $('.comment-count').text(count);
     // Empty the comments list and repopulate with retrived comments.
     $('#comments-content').html('');
-    comments.forEach(function(comment, index) {
-        $('#comments-content').append('<div class="divider"></div>');
-        $('#comments-content').append('<p>By ' + comment.username + ' at ' + comment.time + '</p>');
-        var commentContent = '';
-        comment.comment.split('\n').forEach(function(line) { // Splits content on new line and renders as seperate paragraphs.
-            commentContent += '<p>' + line + '</p>';
-        });
-        $('#comments-content').append('<blockquote>' + commentContent + '</blockquote>');
-        // If there is the option to delete a comment add the delete button
-        if (comment.delete == true) {
-            var deleteForm = '<form action="';
-            deleteForm += deleteCommentUrl;
-            deleteForm += '" method="POST" class="delete-comment">';
-            deleteForm += '<input type="hidden" name="comment-index" value="' + index + '">';
-            deleteForm += '<div class="delete-wrapper">';
-            deleteForm += '<button class="btn waves-effect waves-light red small right" type="submit"><i class="material-icons left">delete</i>Delete Comment</button>';
-            deleteForm += '</div>';
-            deleteForm += '</form>';
-            $('#comments-content').append(deleteForm);
+    comments.forEach(function(comment) {
+        if (!comment.deleted) {
+            $('#comments-content').append('<div class="divider"></div>');
+            $('#comments-content').append('<p>By ' + comment.username + ' at ' + comment.time + '</p>');
+            var commentContent = '';
+            comment.comment.split('\n').forEach(function(line) { // Splits content on new line and renders as seperate paragraphs.
+                commentContent += '<p>' + line + '</p>';
+            });
+            $('#comments-content').append('<blockquote>' + commentContent + '</blockquote>');
+            // If there is the option to delete a comment add the delete button
+            if (comment.delete == true) {
+                var deleteForm = '<form action="';
+                deleteForm += deleteCommentUrl;
+                deleteForm += '" method="POST" class="delete-comment">';
+                deleteForm += '<input type="hidden" name="comment-index" value="' + comment.index + '">';
+                deleteForm += '<div class="delete-wrapper">';
+                deleteForm += '<button class="btn waves-effect waves-light red small right" type="submit"><i class="material-icons left">delete</i>Delete Comment</button>';
+                deleteForm += '</div>';
+                deleteForm += '</form>';
+                $('#comments-content').append(deleteForm);
+            }
         }
     });
     // Attach event handler to new delete buttons

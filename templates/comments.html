@@ -1,3 +1,4 @@
+{% import 'macros.html' as macro %}
 {% extends "base.html" %}
 {% block title %}Comments for {{ recipe['title'] }} - Fork.it{% endblock %}
 {% block content %}
@@ -6,24 +7,7 @@
 		<h1>Comments for {{ recipe['title'] }}</h1>
 		{% if recipe['comment-count'] %}
 		<p class="flow-text">{{ recipe['comment-count'] }} comments:</p>
-		{% for comment in recipe['comments'] %}
-		    <p>By {{ comment['username'] }} at {{ comment['time'] }}</p>
-		    <blockquote>
-		    {% set lines = comment['comment'].split('\n') %}
-		    {% for line in lines %}
-		        <p>{{ line }}</p>
-		    {% endfor %}
-		    </blockquote>
-		    {% if username == 'Admin' or username == comment['username'] %}
-		    <form action="{{ url_for('delete_comment', urn=urn) }}" method="POST">
-		    	<input type="hidden" name="comment-index" value="{{ loop.index - 1}}">
-		    	<div class="col s12">
-		        	<button class="btn waves-effect waves-ligh red" type="submit"><i class="material-icons left">delete</i>Delete Comment</button>
-		        </div>
-		    </form>
-			{% endif %}
-		{% endfor %}
-		
+		{{ macro.comment_list(recipe, urn, username) }}
 		{% else %}
 		<p class="flow-text">No comments!</p>
 		{% endif %}
