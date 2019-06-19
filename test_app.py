@@ -819,6 +819,18 @@ class TestEditRecipe(TestClient):
         response = self.client.get('/edit-recipe/not-a-recipe')
         self.assertEqual(response.status_code, 404)
 
+    def test_page_recipe_deleted(self):
+        '''
+        Attempting to edit a deleted recipe should return 404
+        '''
+        self.create_user('Tester')
+        self.login_user('Tester')
+        self.submit_recipe()
+        recipe = self.mongo.db.recipes.find_one({})
+        self.client.post('/delete-recipe/{}'.format(recipe.get('urn')), data={'confirm': recipe.get('title')})
+        response = self.client.get('/edit-recipe/{}'.format(recipe.get('urn')))
+        self.assertEqual(response.status_code, 404)
+
     def test_edit_recipe_page_contains_recipe(self):
         '''
         The edit-recipe page should contain the recipe details
@@ -964,14 +976,14 @@ class TestDeleteRecipe(TestClient):
 
     def test_delete_recipe(self):
         '''
-        Deleting a recipe should remove it from the database
+        Deleting a recipe should mark it as deleted
         '''
         self.create_user('Tester')
         self.login_user('Tester')
         self.submit_recipe('Test Recipe')
         urn = self.mongo.db.recipes.find_one({}).get('urn')
         self.client.post('/delete-recipe/{}'.format(urn), data={'confirm': 'Test Recipe'})
-        self.assertEqual(self.mongo.db.recipes.find_one({'urn': urn}), None)
+        self.assertEqual(self.mongo.db.recipes.find_one({'urn': urn}).get('deleted'), True)
 
     def test_delete_recipe_reduces_count(self):
         '''
@@ -1038,6 +1050,16 @@ class TestRecipes(TestClient):
         self.assertEqual(response.status_code, 200)
 
     def test_page_recipe_does_not_exist(self):
+        '''
+        Deleted recipes should return 404
+        '''
+        self.submit_recipe()
+        recipe = self.mongo.db.recipes.find_one({})
+        self.client.post('/delete-recipe/{}'.format(recipe.get('urn')), data={'confirm': recipe.get('title')})
+        response = self.client.get('/recipes/{}'.format(recipe.get('urn')))
+        self.assertEqual(response.status_code, 404)
+
+    def test_page_recipe_deleted(self):
         '''
         None existent recipes should return 404
         '''
@@ -1747,6 +1769,17 @@ class TestRecipesList(TestClient):
         '''
         Recipes page should show how many recipes match the query
         '''
+        response = self.client.get('/recipes')
+        self.assertIn(b'Found 60', response.data)
+
+    def test_deleted_recipes_excluded(self):
+        '''
+        Deleted recipes should be ignored
+        '''
+        self.login_user('Alice')
+        self.submit_recipe('Deleted')
+        self.client.post('/delete-recipe/deleted', data={'confirm': 'Deleted'})
+        self.logout_user()
         response = self.client.get('/recipes')
         self.assertIn(b'Found 60', response.data)
 

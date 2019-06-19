@@ -67,7 +67,7 @@ def find_recipes(page='1', tags=None, exclude=None, meals=None, username=None, f
     '''
     Search function to find recipes based on a set of queries.
     '''
-    query = {}
+    query = {'deleted': {'$ne': True}}
     user = session.get('username')
     if preferences == '-1':  # Ignore preferences if preferences set to -1
         user_preferences = None
@@ -523,7 +523,7 @@ def add_recipe():
         recipe_data = mongo.db.recipes.find_one({'urn': parent},
                                                 {'title': 1, 'ingredients': 1, 'methods': 1, 'tags': 1,
                                                 'meals': 1, 'prep-time': 1, 'cook-time': 1, 'image': 1})
-        if recipe_data is not None:
+        if recipe_data is not None and not recipe_data.get('deleted', False):
             recipe_data['parent'] = parent
             if recipe_data.get('image') is not None:
                 recipe_data['old-image'] = recipe_data['image']
@@ -541,10 +541,10 @@ def edit_recipe(urn):
     Edit recipe page. Post route updates recipe.
     '''
     recipe_data = mongo.db.recipes.find_one({'urn': urn}, {'_id': -1, 'title': 1, 'username': 1, 'ingredients': 1, 'methods': 1,
-                                                           'prep-time': 1, 'cook-time': 1, 'tags': 1, 'meals': 1, 'image': 1})
+                                                           'prep-time': 1, 'cook-time': 1, 'tags': 1, 'meals': 1, 'image': 1, 'deleted': 1})
     username = session.get('username')
     action = 'Edit'
-    if recipe_data is None:
+    if recipe_data is None or recipe_data.get('deleted', False):
         abort(404)
     elif username == recipe_data['username'] or username == 'Admin':  # Only the author and admins can edit a recipe
         if request.method == 'POST':
@@ -576,7 +576,7 @@ def delete_recipe(urn):
     elif username == recipe_data['username'] or username == 'Admin':  # Only the autor and admins can delete
         if request.method == 'POST':  # Delete recipe and update authors recipe count, and remove references from parents and children
             if request.form.get('confirm') == recipe_data['title']:
-                mongo.db.recipes.delete_one({'urn': urn})
+                mongo.db.recipes.replace_one({'urn': urn}, {'urn': urn, 'deleted': True})
                 mongo.db.users.update_one({'username': recipe_data['username']}, {'$inc': {'recipe-count': -1}})
                 if recipe_data.get('parent') is not None:
                     mongo.db.recipes.update_one({'urn': recipe_data['parent']},
@@ -638,7 +638,7 @@ def recipe(urn):
     '''
     recipe = mongo.db.recipes.find_one({'urn': urn})
     favourite = None
-    if recipe is None:
+    if recipe is None or recipe.get('deleted', False):
         abort(404)
     else:  # If recipe exists, prepare it for the template, and check if the user has favourited it.
         username = session.get('username')
@@ -662,7 +662,7 @@ def favourite_recipe(urn):
     Add or remove a recipe to a users favourites
     '''
     recipe = mongo.db.recipes.find_one({'urn': urn}, {'username': 1, 'favouriting-users': 1})
-    if recipe is None:
+    if recipe is None or recipe.get('deleted', False):
         abort(404)
     username = session.get('username')
     if username is None or username == recipe.get('username', username):
@@ -687,7 +687,9 @@ def feature_recipe(urn):
     '''
     if session.get('username') != 'Admin':
         abort(403)
-    recipe = mongo.db.recipes.find_one({'urn': urn}, {'featured': 1})
+    recipe = mongo.db.recipes.find_one({'urn': urn}, {'featured': 1, 'deleted': 1})
+    if recipe is None or recipe.get('deleted', False):
+        abort(404)
     if recipe.get('featured') is None:
         now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         mongo.db.recipes.update_one({'urn': urn}, {'$set': {'featured': now}})
@@ -708,7 +710,7 @@ def comments(urn):
     '''
     recipe = mongo.db.recipes.find_one({'urn': urn}, {'username': 1, 'title': 1, 'comment-count': 1, 'comments': 1})
     username = session.get('username')
-    if recipe is None:
+    if recipe is None or recipe.get('deleted', False):
         abort(404)
     if request.method == 'POST':
         if username is None:
@@ -763,7 +765,10 @@ def delete_comment(urn):
                 index = int(request.form.get('comment-index'))
         except ValueError:
             abort(403)
-        comment = mongo.db.recipes.find_one({'urn': urn}, {'comments': {'$slice': [index, 1]}}).get('comments')  # Get the comment at the requested index
+        recipe = mongo.db.recipes.find_one({'urn': urn}, {'comments': {'$slice': [index, 1]}, 'deleted': 1})
+        if recipe is None or recipe.get('deleted', False):
+            abort(404)
+        comment = recipe.get('comments')  # Get the comment at the requested index
         if len(comment) != 1:
             abort(403)
         else:
