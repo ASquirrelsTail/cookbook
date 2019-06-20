@@ -571,7 +571,7 @@ def delete_recipe(urn):
     '''
     recipe_data = mongo.db.recipes.find_one({'urn': urn}, {'title': 1, 'username': 1, 'parent': 1, 'children': 1})
     username = session.get('username')
-    if recipe_data is None:
+    if recipe_data is None or recipe_data.get('deleted', True):
         abort(404)
     elif username == recipe_data['username'] or username == 'Admin':  # Only the autor and admins can delete
         if request.method == 'POST':  # Delete recipe and update authors recipe count, and remove references from parents and children
