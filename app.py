@@ -226,11 +226,11 @@ def prepare_recipe_template(action, recipe_data=None, urn=None):
     if isinstance(recipe_data, dict):
         recipe_data['prep-time'] = recipe_data['prep-time'].split(':')
         recipe_data['cook-time'] = recipe_data['cook-time'].split(':')
-        if recipe_data.get('tags', '') != '':
+        if exists(recipe_data, 'tags'):
             recipe_data['tags'] = '/'.join(recipe_data['tags'])
-        if recipe_data.get('meals', ''):
+        if exists(recipe_data, 'meals'):
             recipe_data['meals'] = '/'.join(recipe_data['meals'])
-        if recipe_data.get('image') is not None:
+        if exists(recipe_data, 'image'):
             recipe_data['old-image'] = recipe_data['image']
     else:
         recipe_data = None
