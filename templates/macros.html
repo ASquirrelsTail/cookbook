@@ -77,29 +77,28 @@
 {% macro comment_list(recipe, urn, username) -%}
 {# Macro to create comment lists #}
     {% for comment in recipe['comments'] %}
-        {% if not comment['deleted'] %}
-            <p>By {{ comment['username'] }} at {{ comment['time'] }}</p>
-            <blockquote>
-            {% set lines = comment['comment'].split('\n') %}
-            {% for line in lines %}
-                <p>{{ line }}</p>
-            {% endfor %}
-            </blockquote>
-            {% if username == 'Admin' or username == comment['username'] %}
-            <form action="{{ url_for('delete_comment', urn=urn) }}" method="POST" class="delete-comment">
-                <input type="hidden" name="comment-index" value="{{ loop.index - 1 }}">
-                <div class="col s12">
-                    <button class="btn waves-effect waves-light red small right" type="submit"><i class="material-icons left">delete</i>Delete Comment</button>
-                </div>
-            </form>
-            {% endif %}
-        {% endif %}
+    {% if not comment['deleted'] %}
+    <p>By {{ comment['username'] }} at {{ comment['time'] }}</p>
+    <blockquote>
+    {% set lines = comment['comment'].split('\n') %}
+    {% for line in lines %}
+        <p>{{ line }}</p>
+    {% endfor %}
+    </blockquote>
+    {% if username == 'Admin' or username == comment['username'] %}
+    <form action="{{ url_for('delete_comment', urn=urn) }}" method="POST" class="delete-comment">
+        <input type="hidden" name="comment-index" value="{{ loop.index - 1 }}">
+        <div class="col s12">
+            <button class="btn waves-effect waves-light red small right" type="submit"><i class="material-icons left">delete</i>Delete Comment</button>
+        </div>
+    </form>
+    {% endif %}
+    {% endif %}
     {% endfor %}
 {%- endmacro %}
 
 {% macro about(path) -%}
 {# Macro to embed about page #}
-<article>
     {% if path == url_for('about') %}
     <h1>About Fork.it</h1>
     {% else %}
@@ -108,5 +107,4 @@
     <p class="flow-text">Fork.it is a recipe website for sharing recipes. Whether you're looking for something to cook, somewhere to share your recipes or just inspiration, you're in the right place. Using the recipe search and filters you can find exactly what you're looking for, and favourite the best of them to come back to later.</p>
     <p class="flow-text">If you're more of a creative type you can submit your own recipes, and on Fork.it you can even take other people's recipes and put your own spin on them by 'forking' the recipe.</p>
     <p class="flow-text">Fork.it was created as part of the Code Institute Full Stack Developer Course for the Data Centric Development Milestone Project. You can find the whole project and a full writeup on <a href="https://github.com/ASquirrelsTail/cookbook" target="_blank">Github</a>.</p>
-</article>
 {%- endmacro %}

@@ -1,8 +1,6 @@
 {% import 'macros.html' as macro %}
 {% extends "base.html" %}
-{% block title %}
-{{ recipe['title'] }} - Fork.it
-{% endblock %}
+{% block title %}{{ recipe['title'] }} - Fork.it{% endblock %}
 {% block content %}
 {% if username %}
 <div class="options right hide-on-small-and-down">
@@ -68,7 +66,7 @@
                     {% else %}
                     <i class="material-icons">favorite_border</i> 
                     {% endif %}
-                    <span class="fav-count">{{ recipe['favourites'] }}</span></a> 
+                    <span class="fav-count">{{ recipe['favourites'] }}</span>
                 {% else %}
                     <i class="material-icons">favorite_border</i> <span class="fav-count">0</span>
                 {% endif %}
@@ -80,7 +78,7 @@
                 <i class="material-icons">comment</i> <span class="comment-count">0</span> 
                 {% endif %}
                 </a>
-                </div>
+            </div>
             
             <div class="col s12 times center-on-small-only">
                 <span><i class="material-icons small">access_time</i> Prep-Time: {{ recipe['prep-time'] }} </span>

@@ -16,6 +16,9 @@ app = Flask(__name__)
 app.config['MONGO_URI'] = os.getenv('MONGO_URI')
 app.secret_key = os.getenv('SECRET_KEY')
 
+app.jinja_env.trim_blocks = True
+app.jinja_env.lstrip_blocks = True
+
 mongo = PyMongo(app)
 
 
@@ -27,7 +30,7 @@ def hours_mins_to_string(hours_mins):
     '''
     Helper function to convert stored times to strings
     '''
-    if hours_mins == '00:00' or not match("^[0-9]{2}:[0-5][0-9]$", hours_mins):
+    if hours_mins == '00:00' or not match('^[0-9]{2}:[0-5][0-9]$', hours_mins):
         return '0 minutes'
     hours, mins = hours_mins.split(':')
     hours = int(hours)
@@ -279,12 +282,12 @@ def new_user():
         # Regex snippet for allowed characters from
         # https://stackoverflow.com/questions/89909/how-do-i-verify-that-a-string-only-contains-letters-numbers-underscores-and-da
         if not exists(username) or not match("^[A-Za-z0-9_-]{3,20}$", username):  # If the username is mssing, not between 3 and 20 chars or already taken don't add it
-            flash("Please enter a valid username!")
+            flash('Please enter a valid username!')
         elif mongo.db.logins.find_one({'username': username}) is not None:
             flash('Username "{}" is already taken, please choose another.'.format(username))
         else:  # Otherwise add the usernamed to the logins collection, and create a document for the user in the users collection
             mongo.db.logins.insert_one({'username': username})
-            mongo.db.users.insert_one({'username': username, 'joined': datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")})
+            mongo.db.users.insert_one({'username': username, 'joined': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')})
             return redirect(url_for('login'), code=307)
     return render_template('new-user.html')
 
@@ -309,7 +312,7 @@ def login():
                 return redirect(request.form['target'])
             return redirect(url_for('index'))  # Otherwise send them home
         else:
-            flash("Failed to log in, invalid username.")  # Otherwise preserve the target page if it's there and keep them on the log in page
+            flash('Failed to log in, invalid username.')  # Otherwise preserve the target page if it's there and keep them on the log in page
             target = request.form.get('target')
 
     return render_template('login.html', target=target)
@@ -363,7 +366,7 @@ def logout():
         session['username'] = None
         session['preferences'] = None
         session['exclusions'] = None
-        flash("Successfully logged out.")
+        flash('Successfully logged out.')
         return redirect(url_for('index'))
     return abort(403)
 
@@ -410,7 +413,7 @@ def user_page(user):
     user_details = mongo.db.users.find_one({'username': user})
     if user_details is None:
         abort(404)
-    user_details['joined'] = datetime.strptime(user_details['joined'], "%Y-%m-%d %H:%M:%S").strftime('%b \'%y')
+    user_details['joined'] = datetime.strptime(user_details['joined'], '%Y-%m-%d %H:%M:%S').strftime('%b \'%y')
     user_recipes = find_recipes(username=user, preferences='-1')
     return render_template('user.html', username=session.get('username'), user_details=user_details, user_recipes=user_recipes)
 
@@ -492,7 +495,7 @@ def add_recipe():
             if count != 0:  # if one or more already exist, add the number onto the slug
                 recipe_data['urn'] += str(count)
             recipe_data['username'] = session.get('username')
-            recipe_data['date'] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            recipe_data['date'] = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
             recipe_data = create_recipe_data(recipe_data)
 
@@ -514,7 +517,7 @@ def add_recipe():
             mongo.db.recipes.insert_one(recipe_data)
             mongo.db.users.update_one({'username': recipe_data['username']}, {'$inc': {'recipe-count': 1}})
             flash('Recipe "{}" successfully created.'.format(recipe_data['title']))
-            return redirect(url_for('recipe', urn = recipe_data['urn']))
+            return redirect(url_for('recipe', urn=recipe_data['urn']))
         else:
             flash('Failed to add recipe!')
     elif request.args.get('fork') is not None:  # If this is a fork, find the parent and add its recipe data to the template
@@ -648,7 +651,7 @@ def recipe(urn):
                 favourite = username in recipe.get('favouriting-users', [])
         recipe['ingredients'] = recipe['ingredients'].split('\n')
         recipe['methods'] = recipe['methods'].split('\n')
-        recipe['date'] = datetime.strptime(recipe['date'], "%Y-%m-%d %H:%M:%S").strftime('%a %d %b \'%y')
+        recipe['date'] = datetime.strptime(recipe['date'], '%Y-%m-%d %H:%M:%S').strftime('%a %d %b \'%y')
         recipe['prep-time'] = hours_mins_to_string(recipe['prep-time'])
         recipe['cook-time'] = hours_mins_to_string(recipe['cook-time'])
         if recipe.get('children') is not None:
@@ -691,7 +694,7 @@ def feature_recipe(urn):
     if recipe is None or recipe.get('deleted', False):
         abort(404)
     if recipe.get('featured') is None:
-        now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
         mongo.db.recipes.update_one({'urn': urn}, {'$set': {'featured': now}})
         feature = True
     else:
@@ -721,7 +724,7 @@ def comments(urn):
             else:
                 comment = request.form.get('comment', '')
             if comment != '' and comment is not None:
-                now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
                 comment_doc = {'username': username, 'time': now, 'comment': comment}
                 mongo.db.recipes.update_one({'urn': urn}, {'$addToSet': {'comments': comment_doc},
                                                            '$inc': {'comment-count': 1}})
@@ -824,6 +827,6 @@ def server_error(e):
 
 
 if __name__ == '__main__':
-    app.run(host = os.environ.get('IP'),
-            port = os.environ.get('PORT'),
-            debug = True)
+    app.run(host=os.environ.get('IP'),
+            port=os.environ.get('PORT'),
+            debug=True)

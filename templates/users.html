@@ -1,19 +1,17 @@
 {% import 'macros.html' as macro %}
 {% extends "base.html" %}
-{% block title %}
-Users - Fork.it
-{% endblock %}
+{% block title %}Users - Fork.it{% endblock %}
 {% block content %}
 <section class="container">
     <div class="row no-b-margin">
         <div class="col s12 l3 filters">
-        	<form action="" method="GET" id="filters-form">
-	            <div class="col s12">
-	                <p class="flow-text no-b-margin">Found {{ no_users }} users.</p>
-	            </div>
+            <form method="GET" id="filters-form">
+                <div class="col s12">
+                    <p class="flow-text no-b-margin">Found {{ no_users }} users.</p>
+                </div>
                 <div class="input-field col s12 m6 l12">
                     <select name="sort" id="sort">
-                    	{% if not current_query['sort'] or current_query['sort'] == 'joined' %}
+                        {% if not current_query['sort'] or current_query['sort'] == 'joined' %}
                         <option value="joined" selected>Newest</option>
                         {% else %}
                         <option value="joined">Newest</option>
@@ -64,9 +62,9 @@ Users - Fork.it
         </div>
     </div>
     <div class="row">
-    	<div class="col s12 l9 offset-l3">
-    		{{ macro.pagination('recipes', page, no_users, **current_query)}}
-    	</div>
+        <div class="col s12 l9 offset-l3">
+            {{ macro.pagination('recipes', page, no_users, **current_query)}}
+        </div>
     </div>
 </section>
 {% endblock %}

@@ -3,31 +3,31 @@
 {% block title %}Comments for {{ recipe['title'] }} - Fork.it{% endblock %}
 {% block content %}
 <article class="container">
-	<div class="row">
-		<h1>Comments for {{ recipe['title'] }}</h1>
-		{% if recipe['comment-count'] %}
-		<p class="flow-text">{{ recipe['comment-count'] }} comments:</p>
-		{{ macro.comment_list(recipe, urn, username) }}
-		{% else %}
-		<p class="flow-text">No comments!</p>
-		{% endif %}
-	</div>
-	{% if username %}
-	<div class="row">
-		<form action="" method="POST">
-			<div class="col s12">
-				<p>Commenting as {{username}}</p>
-			</div>
-			<div class="input-field col s12">
-		          <textarea id="comment" name="comment" class="materialize-textarea validate" required></textarea>
+    <div class="row">
+        <h1>Comments for {{ recipe['title'] }}</h1>
+        {% if recipe['comment-count'] %}
+        <p class="flow-text">{{ recipe['comment-count'] }} comments:</p>
+        {{ macro.comment_list(recipe, urn, username) }}
+        {% else %}
+        <p class="flow-text">No comments!</p>
+        {% endif %}
+    </div>
+    {% if username %}
+    <div class="row">
+        <form method="POST">
+            <div class="col s12">
+                <p>Commenting as {{username}}</p>
+            </div>
+            <div class="input-field col s12">
+                  <textarea id="comment" name="comment" class="materialize-textarea validate" required></textarea>
                   <label for="comment">Comment</label>
                   <span class="helper-text" data-error="Please enter a comment."></span>
-	        </div>
-	        <div class="col s12">
-	        	<button class="btn waves-effect waves-light" type="submit">Post Comment</button>
-	        </div>
-		</form>
-	</div>
-	{% endif %}
+            </div>
+            <div class="col s12">
+                <button class="btn waves-effect waves-light" type="submit">Post Comment</button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
 </article>
 {% endblock %}

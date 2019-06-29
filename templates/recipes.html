@@ -1,23 +1,29 @@
 {% import 'macros.html' as macro %}
 {% extends "base.html" %}
-{% block title %}
-Recipes - Fork.it
-{% endblock %}
+{% block title %}Recipes - Fork.it{% endblock %}
 {% block content %}
 <section class="container">
     <div class="row no-b-margin">
         <div class="col s12 l3 filters">
-        	<form action="" method="GET" id="filters-form">
-	            <div class="col s12">
-	                <p class="flow-text no-b-margin">Found {{ no_recipes }} 
-	                {% if parent_title %} forks of {{ parent_title }}{% else %}{% if current_query['featured'] %}featured {% endif %}recipes{% endif %}{% if current_query['username'] %} by {{ current_query['username'] }}{% elif current_query['following'] %} from users you follow{% endif %}{% if current_query['favourites'] and username %} in your favourites{% endif %}.</p>
-	                {% if current_query['username'] %}<input type="hidden" name="username" value="{{ current_query['username'] }}">
-                    {% elif current_query['following'] %}<input type="hidden" name="following" value="1">{% endif %}
-                    {% if current_query['featured'] %}<input type="hidden" name="featured" value="1">{% endif %}
-                    {% if current_query['favourites'] and username  %}<input type="hidden" name="favourites" value="1">{% endif %}
-	                {% if parent_title %}<input type="hidden" name="forks" value="{{ current_query['forks'] }}">{% endif %}
+            <form method="GET" id="filters-form">
+                <div class="col s12">
+                    <h1 class="flow-text no-b-margin">Found {{ no_recipes }}{% if parent_title %} forks of {{ parent_title }}{% else %}{% if current_query['featured'] %}featured {% endif %} recipes{% endif %}{% if current_query['username'] %} by {{ current_query['username'] }}{% elif current_query['following'] %} from users you follow{% endif %}{% if current_query['favourites'] and username %} in your favourites{% endif %}.</h1>
+                    {% if current_query['username'] %}
+                    <input type="hidden" name="username" value="{{ current_query['username'] }}">
+                    {% elif current_query['following'] %}
+                    <input type="hidden" name="following" value="1">
+                    {% endif %}
+                    {% if current_query['featured'] %}
+                    <input type="hidden" name="featured" value="1">
+                    {% endif %}
+                    {% if current_query['favourites'] and username  %}
+                    <input type="hidden" name="favourites" value="1">
+                    {% endif %}
+                    {% if parent_title %}
+                    <input type="hidden" name="forks" value="{{ current_query['forks'] }}">
+                    {% endif %}
                     <input type="hidden" name="preferences" value="-1">
-	            </div>
+                </div>
                 <div class="col s12 hide-on-med-and-up">
                     {% if current_query['search'] or current_query['meals'] or current_query['tags'] or current_query['exclude'] %}
                     <a href="#!" id="filter-toggle">Hide filters <i class="material-icons">keyboard_arrow_up</i></a>
@@ -41,22 +47,22 @@ Recipes - Fork.it
                             {% endif %}
                             {% for meal in all_meals %}
                             {% if current_query['meals'] == meal['name'] %}
-    	                    <option value="{{ meal['name'] }}" selected>{{ meal['name'] }}</option>
-    	                    {% else %}
-    	                    <option value="{{ meal['name'] }}">{{ meal['name'] }}</option>
-    	                    {% endif %}
+                            <option value="{{ meal['name'] }}" selected>{{ meal['name'] }}</option>
+                            {% else %}
+                            <option value="{{ meal['name'] }}">{{ meal['name'] }}</option>
+                            {% endif %}
                             {% endfor %}
                         </select>
                         <label for="meals">Meal</label>
                     </div>
                     <div class="col s12">
-                    	<div>Tags <i class="material-icons small reset" data-target="include-chips">replay</i></div>
-                    	<div id="include-chips" class="wrap-chips">
-                    		{% for tag in all_tags %}
+                        <div>Tags <i class="material-icons small reset" data-target="include-chips">replay</i></div>
+                        <div id="include-chips" class="wrap-chips">
+                            {% for tag in all_tags %}
                             <div class="chip" data-tag="{{ tag['name'] }}"><a href="#!">{{ tag['name'] }}</a></div>
                             {% endfor %}
                             <input type="hidden" name="tags" id="tags">
-                    	</div>
+                        </div>
                     </div>
                     <div class="col s12">
                         <div>Exclude Tags <i class="material-icons small reset" data-target="exclude-chips">replay</i></div>
@@ -70,7 +76,7 @@ Recipes - Fork.it
                 </div>
                 <div class="input-field col s12 m6 l12">
                     <select name="sort" id="sort">
-                    	{% if not current_query['sort'] or current_query['sort'] == 'views' %}
+                        {% if not current_query['sort'] or current_query['sort'] == 'views' %}
                         <option value="views" selected>Most Viewed</option>
                         {% else %}
                         <option value="views">Most Viewed</option>
@@ -107,9 +113,9 @@ Recipes - Fork.it
         </div>
     </div>
     <div class="row">
-    	<div class="col s12 l9 offset-l3">
-    		{{ macro.pagination('recipes', page, no_recipes, **current_query)}}
-    	</div>
+        <div class="col s12 l9 offset-l3">
+            {{ macro.pagination('recipes', page, no_recipes, **current_query)}}
+        </div>
     </div>
 </section>
 {% endblock %}
@@ -117,7 +123,7 @@ Recipes - Fork.it
 <script src="{{ url_for('static', filename='js/recipes-list.js') }}"></script>
 <script>
     $(function() {
-    	{% if current_query['tags'] %}
+        {% if current_query['tags'] %}
         activateChips('#include-chips', '{{ current_query['tags'] }}');
         {% endif %}
         {% if current_query['exclude'] %}

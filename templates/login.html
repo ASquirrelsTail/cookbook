@@ -1,23 +1,21 @@
 {% extends "base.html" %}
-{% block title %}
-Log In - Fork.it
-{% endblock %}
+{% block title %}Log In - Fork.it{% endblock %}
 {% block content %}
 <section class="container">
-	<div class="row">
-	    <h1>Login</h1>
-	    <p>Don't have an account? Create one <a href="{{ url_for('new_user') }}">here</a>.</p>
-	    <form action="" method="POST">
-	    	<div class="input-field col s12">
-		        <input type="text" name="username" maxlength="20" placeholder="Enter Username"  class="validate" required>
-		        <label for="username">Username</label>
-		    </div>
-	        <input type="hidden" name="target" value="{{ target }}">
-	        <div class="input-field col s12">
-	        	<button class="btn waves-effect waves-light" type="submit">Log in</button>
-	        </div>
-	    </form>
-	    <p>By logging in you consent to our use of essential cookies. You can view our cookie policy <a href="{{ url_for('cookies') }}">here</a>.</p>
+    <div class="row">
+        <h1>Login</h1>
+        <p>Don't have an account? Create one <a href="{{ url_for('new_user') }}">here</a>.</p>
+        <form method="POST">
+            <div class="input-field col s12">
+                <input type="text" name="username" id="username" maxlength="20" placeholder="Enter Username"  class="validate" required>
+                <label for="username">Username</label>
+            </div>
+            <input type="hidden" name="target" value="{{ target }}">
+            <div class="input-field col s12">
+                <button class="btn waves-effect waves-light" type="submit">Log in</button>
+            </div>
+        </form>
+        <p>By logging in you consent to our use of essential cookies. You can view our cookie policy <a href="{{ url_for('cookies') }}">here</a>.</p>
     </div>
 </section>
 {% endblock %}

@@ -89,6 +89,13 @@ textarea.materialize-textarea {
 	}
 }
 
+.filters h1 {
+	margin-left: 0;
+	margin-right: 0;
+	font-family: $font-stack;
+	font-weight: normal;
+}
+
 .wrap-chips {
 	display: flex;
 	flex-wrap: wrap;

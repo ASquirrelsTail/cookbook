@@ -3,11 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css')}}" type="text/css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
-    <title>{% block title %}{% endblock %}</title>
+    <title>{% block title %}{% endblock %}
+</title>
 </head>
 
 <body>
@@ -20,15 +21,14 @@
                     <li>
                         <form action="{{ url_for('recipes') }}" method="GET">
                             <div class="input-field">
-                                <input id="search" name="search" type="search" class="no-b-margin" placeholder="Search" required>
-                                <label class="label-icon" for="search"><i class="material-icons">search</i></label>
+                                <input id="nav-search" name="search" type="search" class="no-b-margin" placeholder="Search" required>
+                                <label class="label-icon" for="nav-search"><i class="material-icons">search</i></label>
                                 <i class="material-icons">close</i>
                             </div>
                         </form>
                     </li>
                     {% if username %}
                     <li><a href="{{ url_for('logout')}}"><i class="material-icons left">account_circle</i>Log Out</a></li>
-                    <!-- <li><a href="{{ url_for('add_recipe') }}">Add New Recipe</a></li> -->
                     {% if username == 'Admin' %}
                     <li><a href="{{ url_for('admin')}}"><i class="material-icons left">settings</i>Admin Settings</a></li>
                     {% else %}
@@ -64,7 +64,7 @@
                     <form action="{{ url_for('recipes') }}" method="GET">
                         <div class="input-field">
                             <i class="material-icons prefix">search</i>
-                            <input id="mobile-search" name="search" type="search" placeholder="Ingredient Search"required>
+                            <input id="mobile-search" name="search" type="search" placeholder="Ingredient Search" required>
                             <!-- <label class="label-icon" for="mobile-search">Search</label> -->
                             <i class="material-icons">close</i>
                         </div>
@@ -78,8 +78,8 @@
             </ul>
         </div>
         <div class="col s12">
+            <div class="divider"></div>
             <ul>
-                <div class="divider"></div>
                 <li class="info">Logged in as {{ username }}</li>
                 {% if username == 'Admin' %}
                 <li><a href="{{ url_for('admin')}}"><i class="material-icons left">settings</i>Admin Settings</a></li>
@@ -91,8 +91,8 @@
             </ul>
         </div>
         <div class="col s12">
+            <div class="divider"></div>
             <ul>
-                <div class="divider"></div>
                 <li><a class="modal-trigger" href="#login-modal"><i class="material-icons left">account_circle</i>Log In</a></li>
                 <li><a href="{{ url_for('new_user') }}">Sign Up</a></li>
                 {% endif %}
@@ -105,7 +105,7 @@
         <div class="container">
             <div class="row">
                 {% if username %}
-                    <p>Logged in as {{ username }} - <a href="{{ url_for('logout')}}">Log Out</a></p>
+                <p>Logged in as {{ username }} - <a href="{{ url_for('logout')}}">Log Out</a></p>
                 {% endif %}
                 <ul>
                     <li><h6>Links:</h6></li>
@@ -134,7 +134,8 @@
             <h4>Log In</h4>
             <p>Don't have an account? Create one <a href="{{ url_for('new_user') }}">here</a>.</p>
             <form action="{{ url_for('login') }}" method="POST">
-                <label for="username">Username</label><input type="text" name="username" maxlength="20" placeholder="Enter Username">
+                <label for="login-username">Username</label>
+                <input type="text" name="username" id="login-username" maxlength="20" placeholder="Enter Username" required>
                 <input type="hidden" name="target" value="{{ request.path }}">
                 <button class="btn waves-effect waves-light" type="submit" name="action">Log in</button>
             </form>
@@ -147,18 +148,18 @@
     <script src="{{ url_for('static', filename='js/libs/materialize.min.js')}}"></script>
     {% block javascript %}
     {% endblock %}
-	<script>
+    <script>
         {% if not username %}
         M.Modal.init(cash('.modal'));
         {% endif %}
         {% with messages = get_flashed_messages() %}
-	    {% if messages %}
+        {% if messages %}
         {% for message in messages %}
-    	M.toast({ html: '{{ message }}' });
-	    {% endfor %}
+        M.toast({ html: '{{ message }}' });
+        {% endfor %}
         {% endif %}
         {% endwith %}
         M.Sidenav.init(cash('#mobile-nav')[0]);
-	</script>
+    </script>
 </body>
 </html>

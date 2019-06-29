@@ -1,7 +1,5 @@
 {% extends "base.html" %}
-{% block title %}
-Preferences - Fork.it
-{% endblock %}
+{% block title %}Preferences - Fork.it{% endblock %}
 {% block content %}
 <section class="container">
     <div class="row">
@@ -10,7 +8,7 @@ Preferences - Fork.it
             <p class="flow-text">Select tags from the list below, such as dietary preferences, to show only recipes containing those tags on the front page and during searches. Select tags you wish to exclude, such as allergies, to ignore results that contain them.</p>
         </div>
     </div>
-    <form action="" method="POST" id="preferences-form">
+    <form method="POST" id="preferences-form">
     <div class="col s12">
         <h2>Include Tags</h2>
         <div id="include-chips" class="wrap-chips">
@@ -30,7 +28,7 @@ Preferences - Fork.it
         </div>
     </div>
     <div class="input-field col s12">
-        <button class="btn waves-effect waves-light" type="submit" name="action">Update Preferences</button>
+        <button class="btn waves-effect waves-light" type="submit">Update Preferences</button>
     </div>
     </form>
 </section>
@@ -39,8 +37,8 @@ Preferences - Fork.it
 <script src="{{ url_for('static', filename='js/preferences.js') }}"></script>
 <script>
     $(function() {
-    	{% if preferences %}
-    	activateChips('#include-chips', '{{ preferences }}')
+        {% if preferences %}
+        activateChips('#include-chips', '{{ preferences }}')
         {% endif %}
         {% if exclusions %}
         activateChips('#exclude-chips', '{{ exclusions }}')

@@ -1,8 +1,6 @@
 {% import 'macros.html' as macro %}
 {% extends "base.html" %}
-{% block title %}
-Fork.it
-{% endblock %}
+{% block title %}Fork.it{% endblock %}
 {% block content %}
 <section class="container-m">
     <div class="row no-b-margin">
@@ -97,7 +95,9 @@ Fork.it
             </div>
         </div>
         <div id="about" class="col s12">
-            {{ macro.about(request.path) }}
+            <article>
+                {{ macro.about(request.path) }}
+            </article>
         </div>
     </div>
 </section>

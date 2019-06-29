@@ -1,22 +1,20 @@
 {% extends "base.html" %}
-{% block title %}
-Create New User - Fork.it
-{% endblock %}
+{% block title %}Create New User - Fork.it{% endblock %}
 {% block content %}
 <section class="container">
-	<div class="row">
-	    <h1>Sign Up</h1>
-	    <form action="" method="POST">
-	    	<div class="input-field col s12">
-	    		<label for="username">Username</label>
-		    	<input type="text" name="username" minlength="3" maxlength="20" placeholder="Enter Username" pattern="[A-Za-z0-9_-]{3,20}" class="validate" required>
-		    	<span class="helper-text" data-error="Username must be between 3 and 20 characters and contain only letters, numbers, hyphens and underscores."></span>
-	    	</div>
-	    	<div class="input-field col s12">
-	    		<button class="btn waves-effect waves-light" type="submit">Create New User</button>
-	    	</div>
-	    </form>
-	    <p>By creating an account you consent to our use of essential cookies. You can view our cookie policy <a href="{{ url_for('cookies') }}">here</a>.</p>
+    <div class="row">
+        <h1>Sign Up</h1>
+        <form method="POST">
+            <div class="input-field col s12">
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username" minlength="3" maxlength="20" placeholder="Enter Username" pattern="[A-Za-z0-9_-]{3,20}" class="validate" required>
+                <span class="helper-text" data-error="Username must be between 3 and 20 characters and contain only letters, numbers, hyphens and underscores."></span>
+            </div>
+            <div class="input-field col s12">
+                <button class="btn waves-effect waves-light" type="submit">Create New User</button>
+            </div>
+        </form>
+        <p>By creating an account you consent to our use of essential cookies. You can view our cookie policy <a href="{{ url_for('cookies') }}">here</a>.</p>
     </div>
 </section>
 {% endblock %}

@@ -5,8 +5,8 @@ var $ = cash; // Get cash functions from materialize.js
 function jsonGet(url, callback) {
     var xhr = new XMLHttpRequest();
 
-    xhr.open("GET", url, true);
-    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.open('GET', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
 
     xhr.onreadystatechange = callback;
 
@@ -18,8 +18,8 @@ function jsonGet(url, callback) {
 function jsonPost(url, data, callback) {
     var xhr = new XMLHttpRequest();
 
-    xhr.open("POST", url, true); //Filter by postcodes, lat and lng as these are the only things we need
-    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.open('POST', url, true); //Filter by postcodes, lat and lng as these are the only things we need
+    xhr.setRequestHeader('Content-Type', 'application/json');
 
     xhr.onreadystatechange = callback;
 

@@ -1,26 +1,24 @@
 {% extends "base.html" %}
-{% block title %}
-Add Recipe - Fork.it
-{% endblock %}
+{% block title %}Add Recipe - Fork.it{% endblock %}
 {% block content %}
 <section class="container">
 <h1>{{ action }} Recipe</h1>
-<form action="" method="POST" id="create-recipe">
+<form method="POST" id="create-recipe">
     <div class="input-field col s12 no-b-margin">
         <label for="title"><i class="material-icons left">title</i>Title</label>
-        <input type="text" name="title" maxlength="100" value="{{ recipe['title'] }}">
+        <input type="text" name="title" id="title" maxlength="100" value="{{ recipe['title'] }}">
         <span class="helper-text" data-error="The recipe must include a title.">* required.</span>
     </div>
     {% if recipe['old-image'] %}
-        <div class="col s12 overlay-container" id="old-image-container">
-            <img src="{{ recipe['old-image'] }}" alt="{{ recipe['title'] }}" class="responsive-img resize-height" id="old-imag-img">
-            <div id="old-image-overlay" class="overlay" style="">
-                <a class="btn-floating btn-large waves-effect waves-light red scale-transition tooltipped" data-position="left" data-tooltip="Delete image" id="old-image-delete">
-                    <i class="material-icons">delete</i>
-                </a>
-            </div>
+    <div class="col s12 overlay-container" id="old-image-container">
+        <img src="{{ recipe['old-image'] }}" alt="{{ recipe['title'] }}" class="responsive-img resize-height" id="old-imag-img">
+        <div id="old-image-overlay" class="overlay" style="">
+            <a class="btn-floating btn-large waves-effect waves-light red scale-transition tooltipped" data-position="left" data-tooltip="Delete image" id="old-image-delete">
+                <i class="material-icons">delete</i>
+            </a>
         </div>
-        <input type="hidden" name="old-image" id="old-image" value="{{ recipe['old-image'] }}">
+    </div>
+    <input type="hidden" name="old-image" id="old-image" value="{{ recipe['old-image'] }}">
     {% endif %}
     <div class="col s12 overlay-container">
         <canvas id="input-canvas" class="resize-height"></canvas>
@@ -58,11 +56,9 @@ Add Recipe - Fork.it
             <li><textarea class="materialize-textarea"></textarea></li>
             {% endif %}
         </ul>
-        
         <span class="helper-text" data-error="The recipe must include at least one ingredient.">* required.</span>
         <input type="hidden" name="ingredients" id="ingredients">
     </div>
-    
     <div class="input-field col s12">
         <label class="method-label"><i class="material-icons left">mode_edit</i>Method</label>
         <ol class="method">
@@ -132,44 +128,45 @@ Add Recipe - Fork.it
             <input type="hidden" name="cook-time" id="cook-time-input" value="00:00">
             {% endif %}
         </div>
+    </div>
     <div class="row">
-    {% if recipe['parent'] %}
-    <input type="hidden" name="parent" value="{{ recipe['parent'] }}">
-    {% endif %}
-
-    <div class="col s12">
-        <p><i class="material-icons left">label_outline</i> Tags:</p>
-    </div>
-    <div class="col s12">
-        <div id="tag-chips" class="chips" data-add-target="add-tag-button"></div>
-        <a class="dropdown-trigger btn-small" href="#" data-target="add-tag" id="add-tag-button"><i class="material-icons left">add</i>Add Tag</a>
-        <ul id="add-tag" class="dropdown-content" data-target="tag-chips">
-            {% for tag in tags %}
-                <li><a href="#!" data-chip-name="{{ tag['name'] }}">{{ tag['name'] }}</a></li>
-            {% endfor %}
-        </ul>
-    </div>
-    <input type="hidden" name="tags" id="tag-input" value="">
-    <div class="col s12">
-        <p><i class="material-icons left">restaurant_menu</i> Meals:</p>
-    </div>
-    <div class="col s12">
-        <div id="meal-chips" class="chips" data-add-target="add-meal-button"></div>
-        <a class="dropdown-trigger btn-small" href="#" data-target="add-meal" id="add-meal-button"><i class="material-icons left">add</i>Add Meal</a>
-        <ul id="add-meal" class="dropdown-content" data-target="meal-chips">
-            {% for meal in meals %}
-                <li><a href="#!" data-chip-name="{{ meal['name'] }}">{{ meal['name'] }}</a></li>
-            {% endfor %}
-        </ul>
-    </div>
-    <input type="hidden" name="meals" id="meal-input" value="">
-    <div class="input-field col s12">
-        {% if action == 'Edit' %}
-        <button class="btn waves-effect waves-light" type="submit">Update Recipe</button> 
-        <a href="{{ url_for('delete_recipe', urn=urn) }}" class="btn waves-effect waves-light red">Delete Recipe</a>
-        {% else %}
-        <button class="btn waves-effect waves-light" type="submit">Submit Recipe</button>
+        {% if recipe['parent'] %}
+        <input type="hidden" name="parent" value="{{ recipe['parent'] }}">
         {% endif %}
+        <div class="col s12">
+            <p><i class="material-icons left">label_outline</i> Tags:</p>
+        </div>
+        <div class="col s12">
+            <div id="tag-chips" class="chips" data-add-target="add-tag-button"></div>
+            <a class="dropdown-trigger btn-small" href="#" data-target="add-tag" id="add-tag-button"><i class="material-icons left">add</i>Add Tag</a>
+            <ul id="add-tag" class="dropdown-content" data-target="tag-chips">
+                {% for tag in tags %}
+                <li><a href="#!" data-chip-name="{{ tag['name'] }}">{{ tag['name'] }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        <input type="hidden" name="tags" id="tag-input" value="">
+        <div class="col s12">
+            <p><i class="material-icons left">restaurant_menu</i> Meals:</p>
+        </div>
+        <div class="col s12">
+            <div id="meal-chips" class="chips" data-add-target="add-meal-button"></div>
+            <a class="dropdown-trigger btn-small" href="#" data-target="add-meal" id="add-meal-button"><i class="material-icons left">add</i>Add Meal</a>
+            <ul id="add-meal" class="dropdown-content" data-target="meal-chips">
+                {% for meal in meals %}
+                <li><a href="#!" data-chip-name="{{ meal['name'] }}">{{ meal['name'] }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        <input type="hidden" name="meals" id="meal-input" value="">
+        <div class="input-field col s12">
+            {% if action == 'Edit' %}
+            <button class="btn waves-effect waves-light" type="submit">Update Recipe</button> 
+            <a href="{{ url_for('delete_recipe', urn=urn) }}" class="btn waves-effect waves-light red">Delete Recipe</a>
+            {% else %}
+            <button class="btn waves-effect waves-light" type="submit">Submit Recipe</button>
+            {% endif %}
+        </div>
     </div>
 </form>
 </section>

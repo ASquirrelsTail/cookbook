@@ -1,25 +1,23 @@
 {% extends "base.html" %}
-{% block title %}
-Forbidden - Fork.it
-{% endblock %}
+{% block title %}Forbidden - Fork.it{% endblock %}
 {% block content %}
 <section class="container">
-	<div class="row">
-		<div class="col s12 center">
-			<h1>You're not allowed back here!</h1>
-		</div>
-		<div class="col s6 offset-s3 center">
-			<img src="{{url_for('static', filename='images/403.png') }}" alt="403 Forbidden" class="responsive-img">
-		</div>
-		<div class="col s12">
-			<p class="flow-text">
-				The page you are trying to access is forbidden.
-				{% if not username %}
-				Try <a class="modal-trigger" href="#login-modal">logging in</a>, or if you haven't already got an account sign up <a href="{{ url_for('new_user') }}">here</a>.
-				{% endif %}
-			</p> 
-			<p class="flow-text center"><a href="{{ url_for('index') }} ">Take me home</a>.</p>
-		</div>
-	</div>
+    <div class="row">
+        <div class="col s12 center">
+            <h1>You're not allowed back here!</h1>
+        </div>
+        <div class="col s6 offset-s3 center">
+            <img src="{{url_for('static', filename='images/403.png') }}" alt="403 Forbidden" class="responsive-img">
+        </div>
+        <div class="col s12">
+            <p class="flow-text">
+                The page you are trying to access is forbidden.
+                {% if not username %}
+                Try <a class="modal-trigger" href="#login-modal">logging in</a>, or if you haven't already got an account sign up <a href="{{ url_for('new_user') }}">here</a>.
+                {% endif %}
+            </p> 
+            <p class="flow-text center"><a href="{{ url_for('index') }} ">Take me home</a>.</p>
+        </div>
+    </div>
 </section>
 {% endblock %}

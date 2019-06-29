@@ -1,20 +1,18 @@
 {% extends "base.html" %}
-{% block title %}
-Delete Recipe - {{ title }} - Fork.it
-{% endblock %}
+{% block title %}Delete Recipe - {{ title }} - Fork.it{% endblock %}
 {% block content %}
 <section class="container">
     <div class="row">
         <h1>Delete Recipe - {{ title }}</h1>
-        <form action="" method="POST">
-        	<div class="input-field col s12">
-                <input type="text" name="confirm" maxlength="100" placeholder="{{ title }}" class="validate" required pattern="^{{ title_pattern }}$">
+        <form method="POST">
+            <div class="input-field col s12">
+                <input type="text" name="confirm" id="confirm" maxlength="100" placeholder="{{ title }}" class="validate" required pattern="^{{ title_pattern }}$">
                 <label for="confirm">Enter recipe title to confirm</label>
                 <span class="helper-text" data-error="Retype the title exactly"></span>
             </div>
             <div class="input-field col s12">
                 <button class="btn waves-effect waves-light red" type="submit"><i class="material-icons left">delete</i>Delete Recipe</button>
-                <a href="{{url_for('recipe', urn=urn) }}" class="btn waves-effect waves-light red" name="action"><i class="material-icons left">cancel</i>Cancel</a>
+                <a href="{{url_for('recipe', urn=urn) }}" class="btn waves-effect waves-light red"><i class="material-icons left">cancel</i>Cancel</a>
             </div>
         </form>
     </div>

@@ -1,23 +1,21 @@
 {% extends "base.html" %}
-{% block title %}
-Admin Settings - Fork.it
-{% endblock %}
+{% block title %}Admin Settings - Fork.it{% endblock %}
 {% block content %}
 <section class="container">
 <h1>Admin</h1>
 <div class="row">
     <div class="col s12 m6">
-        <form action="" method="POST">
+        <form method="POST">
             <div class="input-field col s12 no-b-margin">
                 <input type="text" name="add-tag" id="add-tag" maxlength="100" class="validate" pattern="[A-Za-z-]+" required>
                 <label for="add-tag"><i class="material-icons left">label_outline</i>Add New Tag</label>
                 <span class="helper-text" data-error="Tags must contain only letters and hyphens."></span>
             </div>
             <div class="input-field col s12">
-		        <button class="btn waves-effect waves-light" type="submit"><i class="material-icons left">add</i>Add Tag</button>
-		    </div>
+                <button class="btn waves-effect waves-light" type="submit"><i class="material-icons left">add</i>Add Tag</button>
+            </div>
         </form>
-        <form action="" method="POST">
+        <form method="POST">
             <div class="input-field col s12 no-b-margin">
                 <select name="remove-tag" id="remove-tag">
                     <option value="" disabled selected>Choose a tag to delete</option>
@@ -28,22 +26,22 @@ Admin Settings - Fork.it
                 <label for="remove-tag"><i class="material-icons left">delete</i>Remove Tag</label>
             </div>
             <div class="input-field col s12">
-		        <button class="btn waves-effect waves-light red" type="submit"><i class="material-icons left">remove</i>Remove Tag</button>
-		    </div>
+                <button class="btn waves-effect waves-light red" type="submit"><i class="material-icons left">remove</i>Remove Tag</button>
+            </div>
         </form>
     </div>
     <div class="col s12 m6">
-        <form action="" method="POST">
+        <form method="POST">
             <div class="input-field col s12 no-b-margin">
                 <input type="text" name="add-meal" id="add-meal" maxlength="100" class="validate" pattern="[A-Za-z-]+" required>
                 <label for="add-meal"><i class="material-icons left">restaurant_menu</i>Add New Meal</label>
                 <span class="helper-text" data-error="Meals must contain only letters and hyphens."></span>
             </div>
             <div class="input-field col s12">
-		        <button class="btn waves-effect waves-light" type="submit"><i class="material-icons left">add</i>Add Meal</button>
-		    </div>
+                <button class="btn waves-effect waves-light" type="submit"><i class="material-icons left">add</i>Add Meal</button>
+            </div>
         </form>
-        <form action="" method="POST">
+        <form method="POST">
             <div class="input-field col s12 no-b-margin">
                 <select name="remove-meal" id="remove-meal">
                     <option value="" disabled selected>Choose a meal to delete</option>
@@ -54,8 +52,8 @@ Admin Settings - Fork.it
                 <label for="remove-meal"><i class="material-icons left">delete</i>Remove Meal</label>
             </div>
             <div class="input-field col s12">
-		        <button class="btn waves-effect waves-light red" type="submit"><i class="material-icons left">remove</i>Remove Meal</button>
-		    </div>
+                <button class="btn waves-effect waves-light red" type="submit"><i class="material-icons left">remove</i>Remove Meal</button>
+            </div>
         </form>
     </div>
 </div>
@@ -63,8 +61,8 @@ Admin Settings - Fork.it
 {% endblock %}
 {% block javascript %}
 <script>
-	cash(function() {
-	    M.FormSelect.init(cash('select'));
-	});
+    cash(function() {
+        M.FormSelect.init(cash('select'));
+    });
 </script>
 {% endblock %}

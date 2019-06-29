@@ -121,8 +121,8 @@ function addRemoveInputLine(e) {
     if (e.which == 13) {
         e.preventDefault();
         if ($(this).val() != null) {
-            var textBefore = $(this).val().slice(0, $(this).prop("selectionStart"));
-            var textAfter = $(this).val().slice($(this).prop("selectionEnd"));
+            var textBefore = $(this).val().slice(0, $(this).prop('selectionStart'));
+            var textAfter = $(this).val().slice($(this).prop('selectionEnd'));
             $(this).val(textBefore)
             $(this).parent().after('<li><textarea class="materialize-textarea"></textarea></li>');
             var newTextarea = $(this).parent().next().find('textarea');
@@ -132,17 +132,17 @@ function addRemoveInputLine(e) {
             newTextarea.on('keydown', addRemoveInputLine); // Add event listener for this function
         }
         // Backspace, and caret is at start of input, and this isn't the only textarea
-    } else if (e.which == 8 && $(this).prop("selectionStart") == 0 && $(this).parent().parent().find('textarea').length > 1) {
+    } else if (e.which == 8 && $(this).prop('selectionStart') == 0 && $(this).parent().parent().find('textarea').length > 1) {
         e.preventDefault();
         var textContent = $(this).val();
         var prevTextarea = $(this).parent().prev().find('textarea');
         console.log(prevTextarea);
         if (textContent != null) { // If there is content and another textarea before this one move it the previous textarea and delete this one
-            textContent = textContent.slice($(this).prop("selectionEnd"))
+            textContent = textContent.slice($(this).prop('selectionEnd'))
             if (prevTextarea && prevTextarea.length > 0) {
                 caretPosition = prevTextarea.val().length;
                 prevTextarea.val(prevTextarea.val() + textContent);
-                prevTextarea.prop("selectionStart", caretPosition).prop("selectionEnd", caretPosition);
+                prevTextarea.prop('selectionStart', caretPosition).prop('selectionEnd', caretPosition);
                 prevTextarea[0].focus();
                 $(this).parent().remove();
             }
@@ -192,7 +192,7 @@ $(function() {
     M.Tooltip.init($('.tooltipped'));
 
     // Fix materialize label focus bug
-    $("label").on('click', function() {
+    $('label').on('click', function() {
         var target = $(this).attr('for');
         if (target) $('[name="' + target + '"]')[0].focus();
     });
@@ -439,7 +439,6 @@ var inputCanvas = {
         this.$elem.on('touchmove', function(e) {
             if (that.crop) {
                 e.preventDefault();
-                console.log("touchmove.");
                 var updatedTouches = e.changedTouches
                 if (that.touches.length == 1 && updatedTouches.length == 1 && that.touches[0].identifier == updatedTouches[0].identifier) { // If one finger touch, it's a move
                     var touchStartPos = {

@@ -7430,6 +7430,13 @@ textarea.materialize-textarea {
   background-color: initial;
 }
 
+.filters h1 {
+  margin-left: 0;
+  margin-right: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  font-weight: normal;
+}
+
 .wrap-chips {
   display: flex;
   flex-wrap: wrap;
