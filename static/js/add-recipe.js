@@ -10,9 +10,9 @@ M.Dropdown.init($('.dropdown-trigger'));
 
 // Whenever a chip is added hide its option in the dropdown
 function addChip($el, renderedChip) {
-    tagName = this.chipsData[this.chipsData.length - 1].tag;
-    $addDropdownButton = $('#' + $el.attr('data-add-target'));
-    addDropdown = '#' + $addDropdownButton.attr('data-target');
+    var tagName = this.chipsData[this.chipsData.length - 1].tag;
+    var $addDropdownButton = $('#' + $el.attr('data-add-target'));
+    var addDropdown = '#' + $addDropdownButton.attr('data-target');
     $(addDropdown + ' a[data-chip-name="' + tagName + '"]').parent().addClass('hide');
     $(renderedChip).attr('data-chip-name', tagName);
     if ($(addDropdown + ' li').not('.hide').length == 0) $addDropdownButton.addClass('disabled');
@@ -21,9 +21,9 @@ function addChip($el, renderedChip) {
 
 // Whenever a chip is deleted show its option in the dropdown menu
 function removeChip($el, chip) {
-    tagName = $(chip).attr('data-chip-name')
-    $addDropdownButton = $('#' + $el.attr('data-add-target'));
-    addDropdown = '#' + $addDropdownButton.attr('data-target');
+    var tagName = $(chip).attr('data-chip-name')
+    var $addDropdownButton = $('#' + $el.attr('data-add-target'));
+    var addDropdown = '#' + $addDropdownButton.attr('data-target');
     $(addDropdown + ' a[data-chip-name="' + tagName + '"]').parent().removeClass('hide');
     $addDropdownButton.removeClass('disabled');
 }
@@ -140,7 +140,7 @@ function addRemoveInputLine(e) {
         if (textContent != null) { // If there is content and another textarea before this one move it the previous textarea and delete this one
             textContent = textContent.slice($(this).prop('selectionEnd'))
             if (prevTextarea && prevTextarea.length > 0) {
-                caretPosition = prevTextarea.val().length;
+                var caretPosition = prevTextarea.val().length;
                 prevTextarea.val(prevTextarea.val() + textContent);
                 prevTextarea.prop('selectionStart', caretPosition).prop('selectionEnd', caretPosition);
                 prevTextarea[0].focus();
@@ -324,13 +324,14 @@ var inputCanvas = {
                 if (that.mouse) {
                     // If there is a previous mouse position logged, calculate the change
                     var mouseChange = { x: newMouse.x - that.mouse.x, y: newMouse.y - that.mouse.y }
+                    var change;
                     if (that.crop == 'move') {
                         // If we are repositioning the image, move the image by the amount the mouse moved
                         that.cropStart.x += mouseChange.x;
                         that.cropStart.y += mouseChange.y;
                     } else if (that.crop == 'nw-resize') {
                         // If we are resizing, move that corner by the amount the mouse moved, constrain the aspect, and limit scaling the crop to within the image boundries
-                        var change = mouseChange.x;
+                        change = mouseChange.x;
                         if (that.cropStart.x < -change) change = -that.cropStart.x;
                         if (that.cropStart.y < -change * that.aspect) change = -that.cropStart.y / that.aspect;
                         that.cropStart.x += change;
@@ -338,20 +339,20 @@ var inputCanvas = {
                         that.cropSize.x -= change;
                         that.cropSize.y -= change * that.aspect;
                     } else if (that.crop == 'se-resize') {
-                        var change = mouseChange.x;
+                        change = mouseChange.x;
                         if (that.image.width - (that.cropStart.x + that.cropSize.x) < change) change = that.image.width - (that.cropStart.x + that.cropSize.x);
                         if (that.image.height - (that.cropStart.y + that.cropSize.y) < change * that.aspect) change = (that.image.height - (that.cropStart.y + that.cropSize.y)) / that.aspect;
                         that.cropSize.x += change;
                         that.cropSize.y += change * that.aspect;
                     } else if (that.crop == 'ne-resize') {
-                        var change = mouseChange.x;
+                        change = mouseChange.x;
                         if (that.image.width - (that.cropStart.x + that.cropSize.x) < change) change = that.image.width - (that.cropStart.x + that.cropSize.x);
                         if (that.cropStart.y < change * that.aspect) change = -that.cropStart.y / that.aspect;
                         that.cropStart.y -= change * that.aspect;
                         that.cropSize.x += change;
                         that.cropSize.y += change * that.aspect;
                     } else if (that.crop == 'sw-resize') {
-                        var change = mouseChange.x;
+                        change = mouseChange.x;
                         if (that.cropStart.x < -change) change = -that.cropStart.x;
                         if (that.image.height - (that.cropStart.y + that.cropSize.y) < -change * that.aspect) change = (that.image.height - (that.cropStart.y + that.cropSize.y)) / that.aspect;
                         that.cropStart.x += change;
@@ -496,10 +497,10 @@ var inputCanvas = {
                     }
 
                 }else{ // Otherwise just update all touch positions
-                    var i, j;
-                    for (i = 0; i < updatedTouches.length; i++) {
-                        for (j = 0; j < that.touches.length; j++) {
-                            if (updatedTouches[i].identifier == that.touches[j].identifier) that.touches[j] = updatedTouches[i];
+                    var k, l;
+                    for (k = 0; k < updatedTouches.length; k++) {
+                        for (l = 0; l < that.touches.length; l++) {
+                            if (updatedTouches[k].identifier == that.touches[l].identifier) that.touches[l] = updatedTouches[k];
                         }   
                     }
                 }
@@ -601,11 +602,11 @@ var inputCanvas = {
     renderOutput: function() { // Redraw the cropped image to the apropriately sized output canvas, then convert that image to a string to submit.
         var target = $('#output-canvas')[0];
         var width = target.width;
-        var height = target.height;
+
         var ctx = target.getContext('2d');
         ctx.resetTransform();
 
-        scale = width / this.cropSize.x;
+        var scale = width / this.cropSize.x;
         ctx.scale(scale, scale);
 
         ctx.drawImage(this.image, -this.cropStart.x, -this.cropStart.y);

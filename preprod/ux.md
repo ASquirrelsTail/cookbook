@@ -48,7 +48,7 @@ Contributing users will be repeat visitors to the site, and will submit their ow
 - Jeremy comes up with his own recipes, and wants feedback from other cooks.
 - Theresa wants to share some of her traditional recipes with the world.
 - Ryan wants to keep up to date with recipes from cooks whos food he enjoys.
-- Mark likes to put his own spin on recipes, and once he's found something that works like to come back and make it again.
+- Mark likes to put his own spin on recipes, and once he's found something that works likes to come back and make it again.
 - Lauren enjoys veganising traditional recipes to share with her vegan friends.
 
 ## Features

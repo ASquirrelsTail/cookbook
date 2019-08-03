@@ -4,7 +4,7 @@
 
 The project employs automated testing for the python back end using the unittest framework and Flask's test client. The python back end was developed using a test driven development process, with an evolving test spec informing the development of new features. As more features are added or code is refactored the tests can be rerun to check all features still work.
 
-The test script runs tests on routes in the application to ensure they respond as expected. It uses a live MongoDB database to make sure the correct changes are made to the database, and runs tests on rendered templates to check they contain information they are meant to. Testing the entire site and its output as opposed to specific functions has the advantage that even if the underlying logic changes drastically, the site should still respond in the correct way.
+The test script runs tests on routes in the application to ensure they respond as expected. It uses a live MongoDB database to make sure the correct changes are made to the database, and runs tests on rendered templates to check they contain information they are meant to. Testing the output of the app has the advantage that even if the underlying logic changes drastically, the site should still respond in the correct way.
 
 ### Testing Locally
 
@@ -78,7 +78,7 @@ Ran 5 tests in 4.781s
 FAILED (errors=2)
 ```
 
-The process continued as the recipes list route was expanded, with new tests being added, followed by code to make them pass. The tests and adjustments for the recipes list are documented in the git commits between commits 9bac94a and 93cf4b3 [here](https://github.com/ASquirrelsTail/cookbook/commits/master?before=26e619cee08b762460e46f66b2cd076fe79c8311+141). As development continued and other parts of the project were added and changed the entire test suite was rerun to make sure all functionality still works.
+The process continued as the recipes list route was expanded, with new tests being added, followed by code to make them pass. The tests and adjustments for the recipes list are documented in the git commits between commits 9bac94a and 93cf4b3 [here](https://github.com/ASquirrelsTail/cookbook/commits/master?before=26e619cee08b762460e46f66b2cd076fe79c8311+141). As development continued and other parts of the project were added and changed the entire test suite was rerun to make sure all functionality continued to work.
 
 ## Manual Testing
 
@@ -93,3 +93,35 @@ The image upload and edit functionality on the add-recipe page was tested manual
 ## User Testing
 
 As well as testing the usability of the site myself, I also had friends and family test the site once it was feature complete to make sure it was easy to understand and use.
+
+Feedback was positive, and nothing broke. Interestingly the vast majority of users browed the site on their mobile phones.
+
+A few minor UI changes were made to better accomodate mobile users based on their feedback, in particular adding words to buttons on the recipe pages which previously only featured icons, as these were not obvious to most users, and didn't convey a clear enough meaning to others.
+
+Users often failed to find more advanced features, such as user pages and preferences, and didn't immediately understand the meaning of "forking" a recipe. However making these features more obvious would often detract from more important core features of the site.
+
+## Testing Against User Stories
+
+To ensure the site met requirements set out in the [user experience process](https://github.com/ASquirrelsTail/cookbook/blob/master/preprod/ux.md) the stories were acted out as follows:
+
+- Sarah is searching for a quick meal to make for dinner.
+  - On the recipes list page Sarah can sort recipes by "Quickest" to find herself a quick recipe.
+- Ashley has a load of sweet potatoes and wants an interesting recipe to make the most of them.
+  - Ashley can simply enter "sweet potatoes" into the seach box, and will be shown a variety of recipes containing sweet potato.
+- Jessica is lactose intolerant, and doesn't want to be shown delicious looking recipes she can't have.
+  - On the recipes page, Jessica can filter recipes by "Dairy Free", if she signs up and sets her preferences to include "Dairy Free" she will only see dairy free recipes when browsing the site (except where she's viewing a particular user's recipes, or has deselected "Dairy Free" in search results).
+  - You can log in as Jessica to see this feature in action.
+- Jeremy comes up with his own recipes, and wants feedback from other cooks.
+  - Once he's signed up Jeremy is able to post recipes, and other users are able to favourite and comment to leave him feedback.
+- Theresa wants to share some of her traditional recipes with the world.
+  - After signing up Theresa is able to post her own recipes for people to enjoy.
+- Ryan wants to keep up to date with recipes from cooks whos food he enjoys.
+  - Ryan can sign up for an account and when he finds a cook he likes can select the follow button on their user page. Then his feed would be populated by recipes from these cooks.
+  - You can log in as Ryan to see this feature in action.
+- Mark likes to put his own spin on recipes, and once he's found something that works likes to come back and make it again.
+  - After creating an account Mark can "fork" recipes from other users and put his unique spin on them.
+  - He can favourite recipes he wants to come back to, and then filter by his favourites.
+- Lauren enjoys veganising traditional recipes to share with her vegan friends.
+  - Like Mark, Lauren can create an account and "fork" recipes, veganise them and add the "Vegan" tag to help others find them.
+
+  

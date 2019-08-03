@@ -44,8 +44,17 @@ textarea.materialize-textarea {
 	font-family: $secondary-font-stack;
 }
 
+.btn {
+	margin-bottom: 10px;
+}
+
 .btn-floating.btn-large img {
 	height: 2.1rem;
+	vertical-align: middle;
+}
+
+.btn:not(.btn-floating) img {
+	width: 1.5em;
 	vertical-align: middle;
 }
 
