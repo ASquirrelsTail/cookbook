@@ -116,7 +116,7 @@ To ensure the site met requirements set out in the [user experience process](htt
 - Theresa wants to share some of her traditional recipes with the world.
   - After signing up Theresa is able to post her own recipes for people to enjoy.
 - Ryan wants to keep up to date with recipes from cooks whos food he enjoys.
-  - Ryan can sign up for an account and when he finds a cook he likes can select the follow button on their user page. Then his feed would be populated by recipes from these cooks.
+  - Ryan can sign up for an account and when he finds a cook he likes can select the follow button on their user page. Then his feed on the home page would be populated by recipes from these cooks.
   - You can log in as Ryan to see this feature in action.
 - Mark likes to put his own spin on recipes, and once he's found something that works likes to come back and make it again.
   - After creating an account Mark can "fork" recipes from other users and put his unique spin on them.
@@ -124,4 +124,3 @@ To ensure the site met requirements set out in the [user experience process](htt
 - Lauren enjoys veganising traditional recipes to share with her vegan friends.
   - Like Mark, Lauren can create an account and "fork" recipes, veganise them and add the "Vegan" tag to help others find them.
 
-  
