@@ -465,13 +465,15 @@ def follow(user):
             mongo.db.users.update_one({'username': user}, {'$inc': {'follower-count': 1}, '$addToSet': {'followers': follower}})
             mongo.db.users.update_one({'username': follower}, {'$inc': {'following-count': 1}, '$addToSet': {'following': user}})
             following = True
+            flash('Following {}'.format(user))
         else:
             mongo.db.users.update_one({'username': user}, {'$inc': {'follower-count': -1}, '$pull': {'followers': follower}})
             mongo.db.users.update_one({'username': follower}, {'$inc': {'following-count': -1}, '$pull': {'following': user}})
             following = False
+            flash('No longer following {}'.format(user))
         if request.is_json:
             return jsonify(following=following)
-        return redirect(url_for('recipes', username=user))
+        return redirect(url_for('user_page', user=user))
 
 
 ##################
@@ -829,4 +831,4 @@ def server_error(e):
 if __name__ == '__main__':
     app.run(host=os.environ.get('IP'),
             port=os.environ.get('PORT'),
-            debug=True)
+            debug=False)

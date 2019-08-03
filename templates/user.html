@@ -7,6 +7,13 @@
         <div class="col s12">
             <h1 class="no-b-margin">{{ user_details['username'] }}</h1>
         </div>
+        {% if username %}
+        {% if username in user_details['followers'] %}
+        <div class="col s12"><a href="{{ url_for('follow', user=user_details['username']) }}" class="btn">Un-Follow {{user_details['username']}}</a></div>
+        {% else %}
+        <div class="col s12"><a href="{{ url_for('follow', user=user_details['username']) }}" class="btn">Follow {{user_details['username']}}</a></div>
+        {% endif %}
+        {% endif  %}
         <div class="col s12 l3">
             Member since {{ user_details['joined'] }}
         </div>
@@ -38,8 +45,10 @@
                 <p class="flow-text">{{ user_details['username'] }}'s most recent recipes:</p>
             </div>
         </div>
-         {{ macro.recipe_list(user_recipes['recipes']) }}
-        {{ macro.pagination('recipes', 1, user_recipes['no_recipes'], username=user_details['username'], preferences='-1')}}
+        {{ macro.recipe_list(user_recipes['recipes']) }}
+        <div class="row center">
+            <a href="{{ url_for('recipes', username=user_details['username'], preferences='-1')}}" class="waves-effect waves-light btn see-all">See all {{user_details['username']}}'s recipes</a>
+        </div>
         {% else %}
         <div class="row">
             <div class="col s12">

@@ -2411,9 +2411,9 @@ class TestFollowUser(TestClient):
         response = self.client.get('/follow/Follower')
         self.assertEqual(response.status_code, 403)
 
-    def test_page_redirects_user_recipes(self):
+    def test_page_redirects_user_page(self):
         '''
-        The follow route should redirect to recipes by that user
+        The follow route should redirect to the user page
         '''
         self.login_user('Follower')
         response = self.client.get('/follow/Followee')
