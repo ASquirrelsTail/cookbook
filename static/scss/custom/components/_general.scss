@@ -1,4 +1,4 @@
-// General changes to styles, and helper styles
+// General changes to materialize styles, and helper styles
 
 h1, h2, h3, h4, h5, h6, .btn, .pagination {
 	font-family: $secondary-font-stack;
@@ -29,6 +29,9 @@ textarea.materialize-textarea {
 	border-bottom: 2px dotted $input-border-color;
 }
 
+// Helpers
+
+// Container that becomes full width below medium breakpoint
 .container-m {
 	@extend .container;
 	@media #{$medium-and-down} {
@@ -44,10 +47,17 @@ textarea.materialize-textarea {
 	font-family: $secondary-font-stack;
 }
 
+// Additional button styles
+
 .btn {
 	margin-bottom: 10px;
 }
 
+.btn.see-all {
+	margin-top: 15px;
+}
+
+// Size and position custom image icons in buttons
 .btn-floating.btn-large img {
 	height: 2.1rem;
 	vertical-align: middle;
@@ -57,6 +67,8 @@ textarea.materialize-textarea {
 	width: 1.5em;
 	vertical-align: middle;
 }
+
+// Tabs
 
 .tabs {
 	.tab {
@@ -76,28 +88,7 @@ textarea.materialize-textarea {
 	}
 }
 
-.sidenav {
-	li.info {
-		padding: 0 32px;
-	}
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	align-content: space-between;
-
-	ul {
-		margin-top: 5px;
-	}
-
-	.brand-logo {
-		padding: 10px 20px;
-		display: block;
-		&:hover {
-			background-color: initial;
-		}
-	}
-}
-
+// Current search filters
 .filters h1 {
 	margin-left: 0;
 	margin-right: 0;
@@ -105,10 +96,7 @@ textarea.materialize-textarea {
 	font-weight: normal;
 }
 
-.wrap-chips {
-	display: flex;
-	flex-wrap: wrap;
-}
+// Chips
 
 .chip {
 	font-family: $secondary-font-stack;
@@ -139,9 +127,12 @@ textarea.materialize-textarea {
 	}
 }
 
-.see-all {
-	margin-top: 15px;
+.wrap-chips {
+	display: flex;
+	flex-wrap: wrap;
 }
+
+// Footer styles
 
 footer {
 	ul {

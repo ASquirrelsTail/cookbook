@@ -1,3 +1,5 @@
+// Updates to Materialize nav-bar styles
+
 nav {
 	background-color: $bg-color;
 	.nav-wrapper {
@@ -5,7 +7,7 @@ nav {
 		background-color: $primary-color;
 
 		.input-field input[type=search] {
-			// Fix materialize bug that makes the searchbar dissapear off screen.
+			// Fix materialize bug that makes the searchbar disappear off screen.
 			height: auto;
 			
 			&:hover:not(:focus) {
@@ -50,6 +52,29 @@ nav {
 					line-height: 46px;
 				}
 			}
+		}
+	}
+}
+
+// Side Nav
+.sidenav {
+	li.info {
+		padding: 0 32px;
+	}
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-content: space-between;
+
+	ul {
+		margin-top: 5px;
+	}
+
+	.brand-logo {
+		padding: 10px 20px;
+		display: block;
+		&:hover {
+			background-color: initial;
 		}
 	}
 }

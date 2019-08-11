@@ -36,11 +36,17 @@
 @import "materialize/components/pulse";
 @import "materialize/components/sidenav";
 
-// Custom Components
+// Custom/updated Components
 @import "custom/components/general";
 @import "custom/components/navbar";
-@import "custom/components/recipe";
-@import "custom/components/add-recipe";
-@import "custom/components/recipe-cards";
-@import "custom/components/user-cards";
 @import "custom/components/carousel";
+
+// Recipe Page
+@import "custom/components/recipe";
+// Add Recipe Page
+@import "custom/components/add-recipe";
+// Recipe Cards
+@import "custom/components/recipe-cards";
+// User Cards
+@import "custom/components/user-cards";
+

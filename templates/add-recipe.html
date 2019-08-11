@@ -21,6 +21,7 @@
     <input type="hidden" name="old-image" id="old-image" value="{{ recipe['old-image'] }}">
     {% endif %}
     <div class="col s12 overlay-container">
+        {# Canvas for displaying and editing uploaded image#}
         <canvas id="input-canvas" class="resize-height"></canvas>
         <div id="canvas-overlay" class="overlay">
             <a class="btn-floating btn-large waves-effect waves-light red scale-transition scale-out tooltipped" data-position="left" data-tooltip="Delete image" id="image-delete">    <i class="material-icons">delete</i>
@@ -43,6 +44,7 @@
             <input class="file-path" type="text">
         </div>
     </div>
+    {# Hidden canvas for exporting final image, and hidden input for submitting it as part of the form #}
     <canvas id="output-canvas" width="1200" height="700" class="hide"></canvas>
     <input type="hidden" name="image" id="image-data" value="">
     <div class="input-field col s12">
@@ -176,14 +178,15 @@
 {% if recipe['tags'] or recipe['meals']%}
 <script>
 $(function() {
+    {# Adds tag and meal chips if forking or editing an existing recipe #}
     {% if recipe['tags'] %}
-    let tags = '{{ recipe['tags'] }}'.split('/');
+    let tags = {{ recipe['tags']|tojson }};
     tags.forEach(function(tagName) {
         tagChips.addChip({ tag: tagName });
     });
     {% endif %}
     {% if recipe['meals'] %}
-    let meals = '{{ recipe['meals'] }}'.split('/');
+    let meals = {{ recipe['meals']|tojson }};
     meals.forEach(function(mealName) {
         mealChips.addChip({ tag: mealName });
     });

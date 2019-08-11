@@ -16,7 +16,9 @@
         <nav class="nav-extended">
             <div class="nav-wrapper">
                 <a href="{{ url_for('index') }}" class="brand-logo"><img src="{{ url_for('static', filename='images/forkit-white.png') }}" alt="Fork.it"></a>
+                {# Mobile nav trigger #}
                 <a href="#!" data-target="mobile-nav" class="sidenav-trigger right"><i class="material-icons">menu</i></a>
+                {# Desktop nav #}
                 <ul id="nav-desktop" class="right hide-on-med-and-down">
                     <li>
                         <form action="{{ url_for('recipes') }}" method="GET">
@@ -40,6 +42,7 @@
                     {% endif %}
                 </ul>
             </div>
+            {# Hide main navigation on homepage, as it's displayed below the hero image on the homepage #}
             {% if request.path != url_for('index') %}
             <div class="nav-content container hide-on-med-and-down">
                 <ul class="tabs">
@@ -56,6 +59,7 @@
             {% endif %}
         </nav>
     </header>
+    {# Mobile Nav #}
     <div id="mobile-nav" class="sidenav">
         <div class="col s12">
             <a href="{{ url_for('index') }}" class="brand-logo"><img src="{{ url_for('static', filename='images/forkit-black.png') }}" alt="Fork.it" class="responsive-img"></a>
@@ -128,6 +132,7 @@
             </div>
         </div>
     </footer>
+    {# Login modal #}
     {% if not username %}
     <div id="login-modal" class="modal">
         <div class="modal-content">
@@ -149,9 +154,11 @@
     {% block javascript %}
     {% endblock %}
     <script>
+        {# Initialise the login modal if the user is not logged in #}
         {% if not username %}
         M.Modal.init(cash('.modal'));
         {% endif %}
+        {# Display any messages as toasts #}
         {% with messages = get_flashed_messages() %}
         {% if messages %}
         {% for message in messages %}
