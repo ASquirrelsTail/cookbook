@@ -1,4 +1,8 @@
 # Cookbook
+
+Data Centric Development Milestone Project - Code Institute
+
+Fork.it is a recipe website where users can find and share recipes. Users can search and filter recipes to find what they're looking for, and registered users can submit their own recipes and upload images to go with them, as well as 'forking' existing recipes to put their own spin on them.
  
 ## UX
 
@@ -221,7 +225,7 @@ An in depth breakdown and examples of the testing approach can be found [here](h
 
 Text searches with multiple words ceases to utilise MongoDBs stemming and language features, as they must be wrapped in double quotes to ensure they are all included in the search to return relevant results. For instance the search string "apples" will return recipes containing the word apples, or apple, but the search "apples bannanas" will return only exact matches for "apples" and "bannanas", and will exclude recipes containing the words "apple" and "bannana".
 
-Some mobile browsers fail to detect backspaces on the add recipe page, meaing ingredient and method lines aren't deleted. Blank lines are ignored once the recipe is submitted however, so it's a minor issue.
+Some mobile browsers fail to detect backspaces on the add recipe page, meaning ingredient and method lines aren't deleted. Blank lines are ignored once the recipe is submitted however, so it's a minor issue.
 
 Replacing the image for a parent recipe will also replace that of its children.
 
@@ -241,6 +245,8 @@ Patrick Kennedy's [blog post](https://www.patricksoftwareblog.com/unit-testing-a
 
 Cookie policy wording and information used was from the [ICC Cookie Guide](https://www.cookielaw.org/media/1096/icc_uk_cookiesguide_revnov.pdf)
 
-### Media
-
 ### Acknowledgements
+
+Many thanks to family and friends for contributing and helping to test the site. Especially my mother who took it all a bit too seriously and made lots of delicious food.
+
+Thanks also to my Code Institute mentor Jim for his insights and advice on the project.
