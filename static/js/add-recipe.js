@@ -119,20 +119,25 @@ function resetFileInput() {
 // Text before/after the caret is passed to the next textarea
 function addRemoveInputLine(e) {
     if (e.which == 13) {
+        // Return key pressed, and this textarea isn't empty
         e.preventDefault();
         if ($(this).val() != null) {
             var textBefore = $(this).val().slice(0, $(this).prop('selectionStart'));
             var textAfter = $(this).val().slice($(this).prop('selectionEnd'));
             $(this).val(textBefore)
             $(this).parent().after('<li><textarea class="materialize-textarea"></textarea></li>');
-            var newTextarea = $(this).parent().next().find('textarea');
+            var newLi = $(this).parent().next();
+            newLi.on('click', function() { // Attach click listener for entire li (to include numbers)
+                $(this).find('textarea')[0].focus();
+            });
+            var newTextarea = newLi.find('textarea');
             newTextarea.val(textAfter); // Set contents to text after newline
             newTextarea[0].setSelectionRange(0, 0); // Move the caret to the start
             newTextarea[0].focus(); // Focus the textarea
             newTextarea.on('keydown', addRemoveInputLine); // Add event listener for this function
         }
-        // Backspace, and caret is at start of input, and this isn't the only textarea
     } else if (e.which == 8 && $(this).prop('selectionStart') == 0 && $(this).parent().parent().find('textarea').length > 1) {
+        // Backspace pressed, and caret is at start of input, and this isn't the only textarea
         e.preventDefault();
         var textContent = $(this).val();
         var prevTextarea = $(this).parent().prev().find('textarea');
@@ -195,6 +200,11 @@ $(function() {
     $('label').on('click', function() {
         var target = $(this).attr('for');
         if (target) $('[name="' + target + '"]')[0].focus();
+    });
+
+    // Focus method inputs on number click
+    $('.method li').on('click', function() {
+        $(this).find('textarea')[0].focus();
     });
 
     //Initialise the canvas for editing images

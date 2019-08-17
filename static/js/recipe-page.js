@@ -103,11 +103,13 @@ function updateFavourite() {
         if (this.status == 200) {
             var response = JSON.parse(this.responseText);
             if (response.favourite === true) {
-                $('.fav-count').text(parseInt($('.fav-count').text()) + 1)
                 $('.fav-link i').text('favorite');
+                $('.fav-text').text('Un-Favourite');
+                $('.fav-count').text(parseInt($('.fav-count').text()) + 1)
                 M.toast({ html: '<i class="material-icons left">favorite</i> Recipe added to favorites!' });
             } else if (response.favourite === false) {
                 $('.fav-link i').text('favorite_border');
+                $('.fav-text').text('Favourite');
                 $('.fav-count').text(parseInt($('.fav-count').text()) - 1)
                 M.toast({ html: 'Recipe removed from favourites.' });
             }

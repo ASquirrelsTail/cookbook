@@ -156,9 +156,9 @@
                 </a>
                 <a href="{{ url_for('favourite_recipe', urn=recipe['urn']) }}" class="btn waves-effect waves-light fav-link">
                     {% if favourite %}
-                    <i class="material-icons left">favorite</i> Favourite
+                    <i class="material-icons left">favorite</i> <span class="fav-text">Un-Favourite</span>
                     {% else %}
-                    <i class="material-icons left">favorite_border</i> Un-Favourite
+                    <i class="material-icons left">favorite_border</i> <span class="fav-text">Favourite</span>
                     {% endif %}
                 </a>
                 {% endif %}

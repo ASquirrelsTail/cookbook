@@ -96,7 +96,7 @@ As well as testing the usability of the site myself, I also had friends and fami
 
 Feedback was positive, and nothing broke. Interestingly the vast majority of users browed the site on their mobile phones.
 
-A few minor UI changes were made to better accomodate mobile users based on their feedback, in particular adding words to buttons on the recipe pages which previously only featured icons, as these were not obvious to most users, and didn't convey a clear enough meaning to others.
+A few minor UI changes were made to better accomodate mobile users based on their feedback, in particular adding words to buttons on the recipe pages which previously only featured icons, as these were not obvious to most users, and didn't convey a clear enough meaning to others. Users expected that clicking on the method numbers on the add recipe page would focus the input, so this was also added.
 
 Users often failed to find more advanced features, such as user pages and preferences, and didn't immediately understand the meaning of "forking" a recipe. However making these features more obvious would often detract from more important core features of the site.
 
