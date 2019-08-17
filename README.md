@@ -1,8 +1,4 @@
 # Cookbook
-
-Data Centric Development Milestone Project - Code Institute
-
-Fork.it is a recipe website where users can find and share recipes. Users can search and filter recipes to find what they're looking for, and registered users can submit their own recipes and upload images to go with them, as well as 'forking' existing recipes to put their own spin on them.
  
 ## UX
 
