@@ -98,7 +98,7 @@ Feedback was positive, and nothing broke. Interestingly the vast majority of use
 
 A few minor UI changes were made to better accomodate mobile users based on their feedback, in particular adding words to buttons on the recipe pages which previously only featured icons, as these were not obvious to most users, and didn't convey a clear enough meaning to others. Users expected that clicking on the method numbers on the add recipe page would focus the input, so this was also added.
 
-Users often failed to find more advanced features, such as user pages and preferences, and didn't immediately understand the meaning of "forking" a recipe. However making these features more obvious would often detract from more important core features of the site.
+Users often failed to find more advanced features, such as user pages and preferences, and didn't immediately understand the meaning of "forking" a recipe. However I'm unsire how to make these features more obvious without detracting from more important core features of the site.
 
 ## Testing Against User Stories
 
@@ -107,7 +107,7 @@ To ensure the site met requirements set out in the [user experience process](htt
 - Sarah is searching for a quick meal to make for dinner.
   - On the recipes list page Sarah can sort recipes by "Quickest" to find herself a quick recipe.
 - Ashley has a load of sweet potatoes and wants an interesting recipe to make the most of them.
-  - Ashley can simply enter "sweet potatoes" into the seach box, and will be shown a variety of recipes containing sweet potato.
+  - Ashley can simply enter "sweet potato" into the seach box, and will be shown a variety of recipes containing sweet potato. (This is a bad example as searching for the plural ignores results that only refer to the singular and visa versa. See [known issues](https://github.com/ASquirrelsTail/cookbook#known-issues))
 - Jessica is lactose intolerant, and doesn't want to be shown delicious looking recipes she can't have.
   - On the recipes page, Jessica can filter recipes by "Dairy Free", if she signs up and sets her preferences to include "Dairy Free" she will only see dairy free recipes when browsing the site (except where she's viewing a particular user's recipes, or has deselected "Dairy Free" in search results).
   - You can log in as Jessica to see this feature in action.
