@@ -71,6 +71,8 @@ A breakdown of the UX process can be found [here](https://github.com/ASquirrelsT
 	- Amazon AWS S3 storage was used to provide persistent storage for user images. The [Boto3 python API](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html) was used to interface with the S3 service.
 - [Pillow](https://pillow.readthedocs.io/en/stable/)
 	- The updated version of the Python Imaging Library is used to validate images uploaded by users for size and type.
+- [Gunicorn](https://gunicorn.org/)
+	- Gunicorn is a WSGI Server that serves the app over HTTP and is used for the deployment to Heroku.
 - [Unittest](https://docs.python.org/3/library/unittest.html)
 	- Unittest is a testing framework which was used with Flask's test client to run automated tests on the application.
 
