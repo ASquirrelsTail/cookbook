@@ -101,7 +101,7 @@ To store user data and recipes the project uses MongoDB, in order to run it you 
 
 First create a new database, and generate a [connection string](https://docs.mongodb.com/manual/reference/connection-string/) or URI for that database.
 
-Next download the (init-mongo.js)[https://github.com/ASquirrelsTail/cookbook/blob/master/init-mongo.js] script, navigate to the directory containing it and run it using the Mongo Shell and your URI. Alternatively you can open the shell, connect to the database and run the script with the load() command.
+Next download the [init-mongo.js](https://github.com/ASquirrelsTail/cookbook/blob/master/init-mongo.js) script, navigate to the directory containing it and run it using the Mongo Shell and your URI. Alternatively you can open the shell, connect to the database and run the script with the load() command.
 ```
 $ mongo <MongoDB URI with your password and DB name> init-mongo.js
 ```
