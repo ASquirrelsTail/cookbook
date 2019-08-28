@@ -61,6 +61,10 @@
         a {
             color: black;
         }
+
+        a[href="#!"] {
+            cursor: default;
+        }
     }
 
     .times {

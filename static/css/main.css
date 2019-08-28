@@ -7396,6 +7396,10 @@ textarea.materialize-textarea {
   margin-bottom: 10px;
 }
 
+.btn.see-all, .see-all.btn-large, .see-all.btn-small {
+  margin-top: 15px;
+}
+
 .btn-floating.btn-large img {
   height: 2.1rem;
   vertical-align: middle;
@@ -7419,36 +7423,11 @@ textarea.materialize-textarea {
   line-height: 48px;
 }
 
-.sidenav {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-content: space-between;
-}
-.sidenav li.info {
-  padding: 0 32px;
-}
-.sidenav ul {
-  margin-top: 5px;
-}
-.sidenav .brand-logo {
-  padding: 10px 20px;
-  display: block;
-}
-.sidenav .brand-logo:hover {
-  background-color: initial;
-}
-
 .filters h1 {
   margin-left: 0;
   margin-right: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
   font-weight: normal;
-}
-
-.wrap-chips {
-  display: flex;
-  flex-wrap: wrap;
 }
 
 .chip {
@@ -7476,8 +7455,9 @@ textarea.materialize-textarea {
   color: #fff;
 }
 
-.see-all {
-  margin-top: 15px;
+.wrap-chips {
+  display: flex;
+  flex-wrap: wrap;
 }
 
 footer ul {
@@ -7544,6 +7524,53 @@ nav.nav-extended .nav-content .tabs i {
   line-height: 46px;
 }
 
+.sidenav {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: space-between;
+}
+.sidenav li.info {
+  padding: 0 32px;
+}
+.sidenav ul {
+  margin-top: 5px;
+}
+.sidenav .brand-logo {
+  padding: 10px 20px;
+  display: block;
+}
+.sidenav .brand-logo:hover {
+  background-color: initial;
+}
+
+.carousel .controls-wrapper {
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+}
+@media only screen and (min-width : 601px) {
+  .carousel .controls-wrapper {
+    top: 0;
+    height: 100%;
+  }
+}
+.carousel .controls-wrapper .controls {
+  width: 100%;
+  padding: 3%;
+}
+.carousel .controls-wrapper .controls .a {
+  z-index: 100;
+}
+.carousel .carousel-item .responsive-img {
+  width: 100%;
+}
+@media only screen and (min-width : 601px) {
+  .carousel .carousel-item .recipe-details {
+    font-size: 1.6em;
+  }
+}
+
 .options {
   display: flex;
   flex-direction: column;
@@ -7598,6 +7625,9 @@ nav.nav-extended .nav-content .tabs i {
 }
 .recipe-info .stats a {
   color: black;
+}
+.recipe-info .stats a[href="#!"] {
+  cursor: default;
 }
 .recipe-info .times {
   font-size: 1.3rem;
@@ -7797,33 +7827,6 @@ ol.invalid ~ .helper-text:after, #prep-time.invalid .helper-text:after {
 .user-card .followers {
   padding: 0 0.5rem 0.5rem;
   text-align: right;
-}
-
-.carousel .controls-wrapper {
-  position: absolute;
-  bottom: 0px;
-  width: 100%;
-}
-@media only screen and (min-width : 601px) {
-  .carousel .controls-wrapper {
-    top: 0;
-    height: 100%;
-  }
-}
-.carousel .controls-wrapper .controls {
-  width: 100%;
-  padding: 3%;
-}
-.carousel .controls-wrapper .controls .a {
-  z-index: 100;
-}
-.carousel .carousel-item .responsive-img {
-  width: 100%;
-}
-@media only screen and (min-width : 601px) {
-  .carousel .carousel-item .recipe-details {
-    font-size: 1.6em;
-  }
 }
 
 /*# sourceMappingURL=main.css.map */

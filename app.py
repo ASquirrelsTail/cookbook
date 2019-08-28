@@ -454,7 +454,7 @@ def follow(user):
     if followee is None:
         return abort(404)
     follower = session.get('username')
-    if follower is None:
+    if follower is None or follower == followee:
         return abort(403)
     else:
         if follower not in followee.get('followers', []):
@@ -606,20 +606,21 @@ def recipes():
     if query_args.get('following') is not None:  # Following overrides username as it uses the same field
         query_args.pop('username', '')
     query_args.pop('page', '')  # Remove the page from the query, as it will be replaced in the template
-    if exists(preferences):  # Add preferences and exclusions to query string
-        tags = query_args.pop('tags', '')
-        if tags != '':
-            tags += ' ' + preferences
-        else:
-            tags = preferences
-        query_args['tags'] = tags
-    if exists(exclusions):
-        exclude = query_args.pop('exclude', '')
-        if exclude != '':
-            exclude += ' ' + exclusions
-        else:
-            exclude = exclusions
-        query_args['exclude'] = exclude
+    if not query_args.get('preferences'):
+        if exists(preferences):  # Add preferences and exclusions to query string
+            tags = query_args.pop('tags', '')
+            if tags != '':
+                tags += ' ' + preferences
+            else:
+                tags = preferences
+            query_args['tags'] = tags
+        if exists(exclusions):
+            exclude = query_args.pop('exclude', '')
+            if exclude != '':
+                exclude += ' ' + exclusions
+            else:
+                exclude = exclusions
+            query_args['exclude'] = exclude
     if query_args.get('forks', '') != '':  # If searching for forks, get parent title to pass to template
         parent_title = mongo.db.recipes.find_one({'urn': query_args['forks']}, {'title': 1}).get('title')
     else:

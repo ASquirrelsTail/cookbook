@@ -7,7 +7,7 @@
         <div class="col s12">
             <h1 class="no-b-margin">{{ user_details['username'] }}</h1>
         </div>
-        {% if username %}
+        {% if username and username != user_details['username'] %}
         {% if username in user_details['followers'] %}
         <div class="col s12"><a href="{{ url_for('follow', user=user_details['username']) }}" class="btn">Un-Follow {{user_details['username']}}</a></div>
         {% else %}

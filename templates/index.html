@@ -31,7 +31,7 @@
             <div class="carousel-item">
                 <div class="recipe-card">
                     <a href="{{ url_for('recipes', featured='1') }}"  title="See all featured recipes">
-                        <img src="https://ci-cookbook.s3.amazonaws.com/vegetable-sushi.jpg" alt="See all featured recipes" class="responsive-img">
+                        <img src="{{ url_for('static', filename='images/placeholder.jpg') }}" alt="See all featured recipes" class="responsive-img">
                     </a>
                     <div class="recipe-details center">
                         <div class="recipe-title">
