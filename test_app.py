@@ -2407,7 +2407,7 @@ class TestFollowUser(TestClient):
         '''
         Users can't follow themselves
         '''
-        self.login_user()
+        self.login_user('Follower')
         response = self.client.get('/follow/Follower')
         self.assertEqual(response.status_code, 403)
 

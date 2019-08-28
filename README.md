@@ -201,6 +201,8 @@ Finally on Heroku under the deploy tab either enable automatic deploys from the 
 
 ## Testing
 
+An in depth breakdown and examples of the testing approach can be found [here](https://github.com/ASquirrelsTail/cookbook/blob/master/tests/testing.md).
+
 The site has been tested on a variety of devices, using different browsers and resolutions to ensure compatability and responsiveness.
 
 HTML code was validated by the [WC3 Markup Validator](https://validator.w3.org/), as Jinja templates tend to cause confusion, the rendered templates of a each page were fed into the validator instead. No errors or warnings were raised.
@@ -218,8 +220,6 @@ A test driven development process was followed for the backend, adding a test fo
 Example users were created to walk through the user stories established [here](https://github.com/ASquirrelsTail/cookbook/blob/master/preprod/ux.md).
 
 User testing was employed once the site was feature complete to make sure it was easy to understand and use.
-
-An in depth breakdown and examples of the testing approach can be found [here](https://github.com/ASquirrelsTail/cookbook/blob/master/tests/testing.md).
 
 ## Known Issues
 
