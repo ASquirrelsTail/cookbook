@@ -454,7 +454,7 @@ def follow(user):
     if followee is None:
         return abort(404)
     follower = session.get('username')
-    if follower is None or follower == followee:
+    if follower is None or follower == user:
         return abort(403)
     else:
         if follower not in followee.get('followers', []):
